@@ -1,11 +1,13 @@
 # Track Plan: Live Manifest Integration & Full Workflow Orchestration
 
-## Phase 1: Live Manifest & URL Resolver
-- [ ] Task: Implement Feature: `ManifestFetcher` class to retrieve manifest from configurable URLs.
-- [ ] Task: Write Tests: `ManifestFetcher` handles network errors, timeouts, and malformed responses.
-- [ ] Task: Implement Feature: Dynamic URL resolver to process download URLs from manifest (e.g., handle MediaFire redirects).
-- [ ] Task: Write Tests: URL resolver correctly extracts direct download links.
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Live Manifest & URL Resolver' (Protocol in workflow.md)
+## Phase 1: Live Manifest & URL Resolver [checkpoint: e37b573]
+- [x] Task: Implement Feature: `ManifestFetcher` class to retrieve manifest from configurable URLs. (674119c)
+- [x] Task: Write Tests: `ManifestFetcher` handles network errors, timeouts, and malformed responses. (0b31644)
+- [x] Task: Implement Feature: Dynamic URL resolver to process download URLs from manifest (e.g., handle MediaFire redirects). (141ffcd)
+- [x] Task: Write Tests: URL resolver correctly extracts direct download links. (2459384)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Live Manifest & URL Resolver' (Protocol in workflow.md) (e37b573)
+
+
 
 ## Phase 2: End-to-End Workflow & Error Handling
 - [ ] Task: Integrate `ManifestFetcher` and URL resolver into `UpdateManager`.
