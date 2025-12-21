@@ -109,3 +109,37 @@ class UpdateManager:
                 return False, f"Patching failed for {rel_path}: {message}"
 
         return True, "All operations completed successfully"
+
+class DLCManager:
+    def __init__(self, game_dir, manifest_json):
+        self.game_dir = game_dir
+        self.data = json.loads(manifest_json)
+
+    def get_dlc_status(self):
+        """
+        Returns a list of DLCs and their status.
+        Status: 'Installed', 'Missing', 'Update Available'
+        """
+        # Original manifest has a 'links' section or similar for DLCs
+        # Let's assume a 'dlcs' key for clarity in our new implementation
+        available_dlcs = self.data.get("dlcs", [])
+        status_list = []
+
+        for dlc in available_dlcs:
+            folder_name = dlc.get("folder")
+            dlc_name = dlc.get("name")
+            full_path = os.path.join(self.game_dir, folder_name) if folder_name else None
+            
+            if not full_path or not os.path.exists(full_path):
+                status = "Missing"
+            else:
+                # Basic check for now, can be improved with version checking
+                status = "Installed"
+            
+            status_list.append({
+                "name": dlc_name,
+                "folder": folder_name,
+                "status": status
+            })
+            
+        return status_list
