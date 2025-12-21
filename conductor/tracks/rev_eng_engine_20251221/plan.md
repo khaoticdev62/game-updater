@@ -8,12 +8,12 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Reverse Engineering & Discovery' (Protocol in workflow.md) (ac14d4b)
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Reverse Engineering & Discovery' (Protocol in workflow.md)
 
-## Phase 2: Core Engine Development
-- [ ] Task: Write Tests: Verification engine multi-threading and hash accuracy.
-- [ ] Task: Implement Feature: Multi-threaded file verification engine.
-- [ ] Task: Write Tests: Manifest parsing logic for various edge cases.
-- [ ] Task: Implement Feature: Manifest parser and version comparison logic.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Core Engine Development' (Protocol in workflow.md)
+## Phase 2: Core Engine Development [checkpoint: 47e40c1]
+- [x] Task: Write Tests: Verification engine multi-threading and hash accuracy. (49cdc75)
+- [x] Task: Implement Feature: Multi-threaded file verification engine. (a9ceb9d)
+- [x] Task: Write Tests: Manifest parsing logic for various edge cases. (2f7d290)
+- [x] Task: Implement Feature: Manifest parser and version comparison logic. (12b248c)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Core Engine Development' (Protocol in workflow.md) (47e40c1)
 
 ## Phase 3: Integration & IPC
 - [ ] Task: Initialize Electron boilerplate with React and TypeScript.
