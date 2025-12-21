@@ -1,4 +1,5 @@
 import os
+import json
 from engine import ManifestParser, VerificationEngine, Version
 from download import DownloadQueue
 from patch import Patcher
