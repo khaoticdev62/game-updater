@@ -56,3 +56,31 @@ class Aria2Manager:
         
         process.wait()
         return process.returncode == 0
+
+class DownloadQueue:
+    def __init__(self, manager):
+        self.manager = manager
+        self.tasks = []
+
+    def add_task(self, url, output_dir, filename=None):
+        self.tasks.append({
+            'url': url,
+            'output_dir': output_dir,
+            'filename': filename
+        })
+
+    def clear(self):
+        self.tasks = []
+
+    def process_all(self, callback=None):
+        """Processes all tasks in the queue."""
+        results = []
+        for task in self.tasks:
+            success = self.manager.download(
+                task['url'],
+                task['output_dir'],
+                filename=task['filename'],
+                callback=callback
+            )
+            results.append(success)
+        return all(results)
