@@ -90,6 +90,30 @@ const App = () => {
         }
       };
   
+      const handleStartUpdate = async () => {
+        const mockManifestUrl = "http://test.com/live_manifest.json"; // This will be fetched by Python
+
+        const id = Math.random().toString(36).substring(7);
+        const removeListener = window.electron.onPythonProgress(id, (data) => {
+          setProgress(data);
+        });
+
+        try {
+          setResponse("Starting full update workflow...");
+          const res = await window.electron.requestPython({
+            command: 'start_update',
+            game_dir: '.', 
+            manifest_url: mockManifestUrl,
+            id
+          });
+          setResponse(JSON.stringify(res, null, 2));
+        } catch (e) {
+          setResponse(`Error: ${e}`);
+        } finally {
+          removeListener();
+        }
+      };
+  
 
     return (
 
@@ -109,15 +133,31 @@ const App = () => {
 
   
 
-        <section style={{ marginBottom: '20px' }}>
+              <section style={{ marginBottom: '20px' }}>
 
-          <button onClick={handlePing}>Ping Python</button>
+  
 
-          <button onClick={handleVerify} style={{ marginLeft: '10px' }}>Verify All (Mock)</button>
+                <button onClick={handlePing}>Ping Python</button>
 
-          <button onClick={handleUpdate} style={{ marginLeft: '10px', fontWeight: 'bold' }}>Start Update (Mock)</button>
+  
 
-        </section>
+                <button onClick={handleVerify} style={{ marginLeft: '10px' }}>Verify All (Mock)</button>
+
+  
+
+                <button onClick={handleUpdate} style={{ marginLeft: '10px' }}>Start Mock Update</button>
+
+  
+
+                <button onClick={handleStartUpdate} style={{ marginLeft: '10px', fontWeight: 'bold' }}>Update Game</button>
+
+  
+
+              </section>
+
+  
+
+        
 
   
 

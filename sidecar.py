@@ -3,7 +3,9 @@ import json
 import os
 from engine import VerificationEngine, ManifestParser
 from download import Aria2Manager
+from patch import Patcher
 from update_logic import UpdateManager
+from manifest import ManifestFetcher, URLResolver
 
 def main():
     aria2 = Aria2Manager()
@@ -25,7 +27,7 @@ def main():
                 print(json.dumps(response), flush=True)
             elif command == "verify_all":
                 game_dir = request.get("game_dir")
-                manifest_url = request.get("manifest_url") # Expect URL now
+                manifest_url = request.get("manifest_url")
                 
                 manager = UpdateManager(game_dir, manifest_url, aria2)
                 
@@ -35,17 +37,28 @@ def main():
                 ops = manager.get_operations(progress_callback=on_progress)
                 response = {"id": req_id, "result": ops}
                 print(json.dumps(response), flush=True)
-            elif command == "apply_update":
+            elif command == "start_update": # New command for orchestrated update
                 game_dir = request.get("game_dir")
-                manifest_url = request.get("manifest_url") # Expect URL now
-                operations = request.get("operations")
+                manifest_url = request.get("manifest_url")
                 
                 manager = UpdateManager(game_dir, manifest_url, aria2)
                 
                 def on_progress(p):
                     print(json.dumps({"id": req_id, "type": "progress", "data": p}), flush=True)
 
+                # First, get operations
+                on_progress({'status': 'fetching_manifest', 'message': 'Fetching manifest...'})
+                operations = manager.get_operations(progress_callback=on_progress)
+                
+                if not operations:
+                    response = {"id": req_id, "result": {"success": False, "message": "No operations found or manifest error."}}
+                    print(json.dumps(response), flush=True)
+                    continue
+
+                # Then, apply operations
+                on_progress({'status': 'applying_updates', 'message': 'Applying updates...'})
                 success, message = manager.apply_operations(operations, progress_callback=on_progress)
+                
                 response = {"id": req_id, "result": {"success": success, "message": message}}
                 print(json.dumps(response), flush=True)
             else:
@@ -55,6 +68,3 @@ def main():
         except Exception as e:
             error_response = {"error": str(e)}
             print(json.dumps(error_response), flush=True)
-
-if __name__ == "__main__":
-    main()

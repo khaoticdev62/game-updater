@@ -19,18 +19,37 @@ const startSidecar = () => {
   const pythonPath = 'python'; // or full path if needed
   const scriptPath = path.join(__dirname, '..', '..', 'sidecar.py');
   
-  sidecarProcess = spawn(pythonPath, [scriptPath]);
+  sidecarProcess = spawn(pythonPath, [scriptPath], { stdio: ['pipe', 'pipe', 'pipe'] }); // Keep pipes open
 
   sidecarProcess.stdout.on('data', (data) => {
-    console.log(`Python: ${data}`);
+    // Process data line by line
+    data.toString().split('\n').forEach((line: string) => {
+      if (line) {
+        try {
+          const message = JSON.parse(line);
+          // If it's a progress message, emit it to the correct renderer window
+          if (message.id && message.type === 'progress') {
+            BrowserWindow.getAllWindows().forEach(win => {
+              win.webContents.send(`python-progress-${message.id}`, message.data);
+            });
+          }
+        } catch (e) {
+          console.log(`Python: ${line}`); // Log non-JSON output
+        }
+      }
+    });
   });
 
   sidecarProcess.stderr.on('data', (data) => {
     console.error(`Python Error: ${data}`);
   });
 
-  sidecarProcess.on('close', (code) => {
-    console.log(`Python process exited with code ${code}`);
+  sidecarProcess.on('error', (err) => {
+    console.error(`Failed to start Python process: ${err}`);
+  });
+
+  sidecarProcess.on('exit', (code, signal) => {
+    console.log(`Python process exited with code ${code}, signal ${signal}`);
   });
 };
 
