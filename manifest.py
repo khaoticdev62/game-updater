@@ -66,9 +66,15 @@ class URLResolver:
         
         # Look for direct download link in the HTML
         # This regex is a placeholder and would need to be refined based on actual MediaFire page structure
-        match = re.search(r'href="(https?://.*?mediafire.com/file/.+?)"', response.text)
+        match = re.search(r'href="(https?://download\d+\.mediafire\.com/.*?)"', response.text)
         if match:
             return match.group(1)
         
+        # Fallback if specific direct link is not found
+        # Try to find a download link with an onclick attribute or a data-url attribute
+        match_onclick = re.search(r"onclick=\"window\.open\('(https?://(?:www\.)?mediafire\.com/download/.*?)'\)\"", response.text)
+        if match_onclick:
+            return match_onclick.group(1)
+        
         # If no direct link found, return the original URL or raise an error
-        return url 
+        return url
