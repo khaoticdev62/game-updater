@@ -64,3 +64,48 @@ class UpdateManager:
                     operations.append({'type': 'download_full', 'file': rel_path, 'reason': 'Source hash mismatch for delta'})
                     
         return operations
+
+    def apply_operations(self, operations, progress_callback=None):
+        """
+        Executes the provided operations.
+        """
+        # 1. Handle full downloads
+        download_tasks = [op for op in operations if op['type'] == 'download_full']
+        if download_tasks:
+            self.queue.clear()
+            for task in download_tasks:
+                # In a real scenario, we'd get the URL from the manifest
+                # For now, we'll assume the URL logic is handled elsewhere or mock it
+                # Let's mock a URL for now
+                url = f"http://mock-server/{task['file']}" 
+                self.queue.add_task(url, self.game_dir, filename=task['file'])
+            
+            def dl_callback(p):
+                if progress_callback:
+                    progress_callback({'status': 'downloading', **p})
+
+            success = self.queue.process_all(callback=dl_callback)
+            if not success:
+                return False, "Some downloads failed"
+
+        # 2. Handle patches
+        patch_tasks = [op for op in operations if op['type'] == 'patch_delta']
+        for i, task in enumerate(patch_tasks):
+            rel_path = task['file']
+            full_path = os.path.join(self.game_dir, rel_path)
+            # In a real scenario, patch_file would be downloaded to a temp dir
+            patch_file = os.path.join(self.game_dir, rel_path + ".delta") 
+            
+            if progress_callback:
+                progress_callback({
+                    'status': 'patching',
+                    'current': i + 1,
+                    'total': len(patch_tasks),
+                    'file': rel_path
+                })
+
+            success, message = self.patcher.apply_patch_safe(full_path, patch_file, task['target_md5'])
+            if not success:
+                return False, f"Patching failed for {rel_path}: {message}"
+
+        return True, "All operations completed successfully"
