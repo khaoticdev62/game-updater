@@ -35,6 +35,19 @@ def main():
                 ops = manager.get_operations(progress_callback=on_progress)
                 response = {"id": req_id, "result": ops}
                 print(json.dumps(response), flush=True)
+            elif command == "apply_update":
+                game_dir = request.get("game_dir")
+                manifest_json = request.get("manifest")
+                operations = request.get("operations")
+                
+                manager = UpdateManager(game_dir, manifest_json, aria2)
+                
+                def on_progress(p):
+                    print(json.dumps({"id": req_id, "type": "progress", "data": p}), flush=True)
+
+                success, message = manager.apply_operations(operations, progress_callback=on_progress)
+                response = {"id": req_id, "result": {"success": success, "message": message}}
+                print(json.dumps(response), flush=True)
             else:
                 response = {"id": req_id, "error": f"Unknown command: {command}"}
                 print(json.dumps(response), flush=True)
