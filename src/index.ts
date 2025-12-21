@@ -43,8 +43,12 @@ ipcMain.handle('python-request', async (event, request) => {
       try {
         const response = JSON.parse(data.toString());
         if (response.id === id) {
-          sidecarProcess.stdout.removeListener('data', onData);
-          resolve(response);
+          if (response.type === 'progress') {
+            event.sender.send(`python-progress-${id}`, response.data);
+          } else {
+            sidecarProcess.stdout.removeListener('data', onData);
+            resolve(response);
+          }
         }
       } catch (e) {
         // Not JSON or other error

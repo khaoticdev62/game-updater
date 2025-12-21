@@ -11,7 +11,7 @@ class UpdateManager:
         self.queue = DownloadQueue(aria2_manager)
         self.patcher = Patcher()
 
-    def get_operations(self):
+    def get_operations(self, progress_callback=None):
         """
         Analyzes local files against manifest and returns list of operations.
         Operations: {'type': 'download'|'patch'|'nothing', 'file': ..., 'reason': ...}
@@ -23,9 +23,22 @@ class UpdateManager:
         file_paths = [os.path.join(self.game_dir, p['name']) for p in target_patches]
         
         # 2. Hash existing files
-        # Only check files that actually exist
         existing_files = [p for p in file_paths if os.path.exists(p)]
-        local_hashes = self.engine.verify_files(existing_files)
+        
+        # Update VerificationEngine to support callbacks if needed, 
+        # but for now we'll do a simple loop if callback is provided
+        if progress_callback:
+            local_hashes = {}
+            for i, p in enumerate(existing_files):
+                local_hashes[p] = self.engine.hash_file(p)
+                progress_callback({
+                    'status': 'hashing',
+                    'current': i + 1,
+                    'total': len(existing_files),
+                    'file': os.path.basename(p)
+                })
+        else:
+            local_hashes = self.engine.verify_files(existing_files)
         
         for patch_info in target_patches:
             rel_path = patch_info['name']

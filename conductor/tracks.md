@@ -8,6 +8,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 
 
-## [ ] Track: Download & Patching Implementation
+## [~] Track: Download & Patching Implementation
 
 *Link: [./conductor/tracks/download_patching_20251221/](./conductor/tracks/download_patching_20251221/)*
