@@ -39,7 +39,7 @@ class Aria2Manager:
             args.extend(["--out", filename])
         
         # Additional recommended flags
-        args.extend(["--console-log-level=info", "--summary-interval=1"])
+        args.extend(["--console-log-level=info", "--summary-interval=1", "--check-certificate=false"])
 
         process = subprocess.Popen(
             args,
