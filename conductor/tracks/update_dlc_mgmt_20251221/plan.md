@@ -5,10 +5,10 @@
 - [x] Task: Write Tests: Sequential operation execution and failure recovery. (8e83d4d)
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Execution Loop' (Protocol in workflow.md) (15d73dd)
 
-## Phase 2: DLC Management Logic
-- [ ] Task: Implement Feature: DLC detection logic based on manifest and directory structure.
-- [ ] Task: Write Tests: Verify correct identification of missing vs. installed DLCs.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: DLC Management Logic' (Protocol in workflow.md)
+## Phase 2: DLC Management Logic [checkpoint: 46cfc16]
+- [x] Task: Implement Feature: DLC detection logic based on manifest and directory structure. (2738084)
+- [x] Task: Write Tests: Verify correct identification of missing vs. installed DLCs. (2d319d7)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: DLC Management Logic' (Protocol in workflow.md) (46cfc16)
 
 ## Phase 3: UI - DLC Dashboard & Controls
 - [ ] Task: Update UI: Create a clean DLC selection list component in React.
