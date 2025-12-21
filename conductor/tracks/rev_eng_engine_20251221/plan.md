@@ -15,8 +15,8 @@
 - [x] Task: Implement Feature: Manifest parser and version comparison logic. (12b248c)
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Core Engine Development' (Protocol in workflow.md) (47e40c1)
 
-## Phase 3: Integration & IPC
+## Phase 3: Integration & IPC [checkpoint: 942c0c2]
 - [x] Task: Initialize Electron boilerplate with React and TypeScript. (6c9bcb2)
-- [~] Task: Set up Python sidecar process for Electron.
-- [ ] Task: Implement Feature: Basic IPC bridge between Electron and Python.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Integration & IPC' (Protocol in workflow.md)
+- [x] Task: Set up Python sidecar process for Electron. (c83ad6e)
+- [x] Task: Implement Feature: Basic IPC bridge between Electron and Python. (c83ad6e)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Integration & IPC' (Protocol in workflow.md) (942c0c2)
