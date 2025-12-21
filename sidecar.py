@@ -25,9 +25,9 @@ def main():
                 print(json.dumps(response), flush=True)
             elif command == "verify_all":
                 game_dir = request.get("game_dir")
-                manifest_json = request.get("manifest")
+                manifest_url = request.get("manifest_url") # Expect URL now
                 
-                manager = UpdateManager(game_dir, manifest_json, aria2)
+                manager = UpdateManager(game_dir, manifest_url, aria2)
                 
                 def on_progress(p):
                     print(json.dumps({"id": req_id, "type": "progress", "data": p}), flush=True)
@@ -37,10 +37,10 @@ def main():
                 print(json.dumps(response), flush=True)
             elif command == "apply_update":
                 game_dir = request.get("game_dir")
-                manifest_json = request.get("manifest")
+                manifest_url = request.get("manifest_url") # Expect URL now
                 operations = request.get("operations")
                 
-                manager = UpdateManager(game_dir, manifest_json, aria2)
+                manager = UpdateManager(game_dir, manifest_url, aria2)
                 
                 def on_progress(p):
                     print(json.dumps({"id": req_id, "type": "progress", "data": p}), flush=True)

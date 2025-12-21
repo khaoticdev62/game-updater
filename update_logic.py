@@ -3,11 +3,14 @@ import json
 from engine import ManifestParser, VerificationEngine, Version
 from download import DownloadQueue
 from patch import Patcher
+from manifest import ManifestFetcher, URLResolver # Import new classes
 
 class UpdateManager:
-    def __init__(self, game_dir, manifest_json, aria2_manager):
+    def __init__(self, game_dir, manifest_url, aria2_manager, fetcher=None, resolver=None):
         self.game_dir = game_dir
-        self.parser = ManifestParser(manifest_json)
+        self.fetcher = fetcher or ManifestFetcher(manifest_url)
+        self.resolver = resolver or URLResolver()
+        self.parser = None # Will be initialized after fetching manifest
         self.engine = VerificationEngine()
         self.queue = DownloadQueue(aria2_manager)
         self.patcher = Patcher()
@@ -17,6 +20,15 @@ class UpdateManager:
         Analyzes local files against manifest and returns list of operations.
         Operations: {'type': 'download'|'patch'|'nothing', 'file': ..., 'reason': ...}
         """
+        # Fetch manifest first
+        try:
+            manifest_json = self.fetcher.fetch_manifest_json()
+            self.parser = ManifestParser(json.dumps(manifest_json)) # ManifestParser expects string
+        except Exception as e:
+            if progress_callback:
+                progress_callback({'status': 'error', 'message': f"Failed to fetch or parse manifest: {e}"})
+            return [] # Return empty ops on error
+        
         target_patches = self.parser.get_patches()
         operations = []
         
@@ -54,15 +66,19 @@ class UpdateManager:
                 continue
                 
             if patch_type == 'full':
-                operations.append({'type': 'download_full', 'file': rel_path, 'target_md5': target_md5})
+                # Resolve URL for full downloads
+                download_url = self.resolver.resolve_url(patch_info['url']) # Assuming 'url' in manifest
+                operations.append({'type': 'download_full', 'file': rel_path, 'target_md5': target_md5, 'url': download_url})
             elif patch_type == 'delta':
                 # Check if we can apply delta
                 source_md5 = patch_info.get('MD5_from')
                 if current_hash == source_md5:
-                    operations.append({'type': 'patch_delta', 'file': rel_path, 'source_md5': source_md5, 'target_md5': target_md5})
+                    patch_url = self.resolver.resolve_url(patch_info['patch_url']) # Assuming 'patch_url' in manifest
+                    operations.append({'type': 'patch_delta', 'file': rel_path, 'source_md5': source_md5, 'target_md5': target_md5, 'patch_url': patch_url})
                 else:
                     # Fallback to full download if source MD5 doesn't match
-                    operations.append({'type': 'download_full', 'file': rel_path, 'reason': 'Source hash mismatch for delta'})
+                    download_url = self.resolver.resolve_url(patch_info['url'])
+                    operations.append({'type': 'download_full', 'file': rel_path, 'reason': 'Source hash mismatch for delta', 'url': download_url})
                     
         return operations
 
@@ -75,10 +91,7 @@ class UpdateManager:
         if download_tasks:
             self.queue.clear()
             for task in download_tasks:
-                # In a real scenario, we'd get the URL from the manifest
-                # For now, we'll assume the URL logic is handled elsewhere or mock it
-                # Let's mock a URL for now
-                url = f"http://mock-server/{task['file']}" 
+                url = task['url']
                 self.queue.add_task(url, self.game_dir, filename=task['file'])
             
             def dl_callback(p):

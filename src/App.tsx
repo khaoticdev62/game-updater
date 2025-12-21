@@ -23,158 +23,72 @@ const App = () => {
     setDlcs(prev => prev.map(d => d.folder === folder ? { ...d, selected: !d.selected } : d));
   };
 
-    const handleVerify = async () => {
-
-      const manifest = {
-
-        version: '1.0',
-
-        dlcs: dlcs.map(d => ({ name: d.name, folder: d.folder })),
-
-        patch: {
-
-          files: [
-
-            { name: 'updater_readme.txt', MD5_to: 'SOMEHASH', type: 'full' }
-
-          ]
-
-        }
-
-      };
-
-  
-
-      const id = Math.random().toString(36).substring(7);
-
-      const removeListener = window.electron.onPythonProgress(id, (data) => {
-
-        setProgress(data);
-
-      });
-
-  
-
-      try {
-
-        const res = await window.electron.requestPython({ 
-
-          command: 'verify_all', 
-
-          game_dir: '.', 
-
-          manifest: JSON.stringify(manifest),
-
-          id 
-
-        });
-
-        setResponse(JSON.stringify(res, null, 2));
-
-      } catch (e) {
-
-        setResponse(`Error: ${e}`);
-
-      } finally {
-
-        removeListener();
-
-      }
-
-    };
-
-  
-
-      const handleUpdate = async () => {
-
-  
-
-        // In a real app, we'd use the operations from handleVerify
-
-  
-
-        const mockOps = [
-
-  
-
-          { type: 'download_full', file: 'test_download.txt', target_md5: 'NONE' }
-
-  
-
-        ];
-
-  
-
+      const handleVerify = async () => {
+        // This manifest URL would be configured by the user or dynamically obtained
+        const mockManifestUrl = "http://test.com/live_manifest.json"; 
         
-
-  
-
-        // We need to pass the real URL if we want it to actually download
-
-  
-
-        // Since our update_logic.py currently mocks the URL, let's just test that the loop works.
-
-  
-
-        // If we want a real download, we'd need to update update_logic.py to accept URLs.
-
-  
-
+        // Example manifest content for the mock API to serve
+        const mockManifestContent = {
+          version: '1.0',
+          dlcs: dlcs.map(d => ({ name: d.name, folder: d.folder })),
+          patch: {
+            files: [
+              { name: 'updater_readme.txt', MD5_to: 'SOMEHASH', type: 'full', url: 'http://test.com/mock_file_full.zip' }
+            ]
+          }
+        };
         
-
-  
-
-        const manifest = { version: '1.0', patch: { files: [] as any[] } };
-
-  
-
+        // Mock the ManifestFetcher and URLResolver calls in the backend
+        // For this frontend test, we just pass the URL
+        // The actual HTTP requests will be mocked by pytest-httpx in backend tests.
     
-
-      const id = Math.random().toString(36).substring(7);
-
-      
-
-      const removeListener = window.electron.onPythonProgress(id, (data) => {
-
-        setProgress(data);
-
-      });
-
-  
-
-      try {
-
-        setResponse("Starting update...");
-
-        const res = await window.electron.requestPython({ 
-
-          command: 'apply_update', 
-
-          game_dir: '.', 
-
-          manifest: JSON.stringify(manifest),
-
-          operations: mockOps,
-
-          id 
-
+        const id = Math.random().toString(36).substring(7);
+        const removeListener = window.electron.onPythonProgress(id, (data) => {
+          setProgress(data);
         });
-
-        setResponse(JSON.stringify(res, null, 2));
-
-      } catch (e) {
-
-        setResponse(`Error: ${e}`);
-
-      } finally {
-
-        removeListener();
-
-      }
-
-    };
-
+    
+        try {
+          const res = await window.electron.requestPython({ 
+            command: 'verify_all', 
+            game_dir: '.', 
+            manifest_url: mockManifestUrl, // Pass URL
+            id 
+          });
+          setResponse(JSON.stringify(res, null, 2));
+        } catch (e) {
+          setResponse(`Error: ${e}`);
+        } finally {
+          removeListener();
+        }
+      };
+    
+      const handleUpdate = async () => {
+        const mockManifestUrl = "http://test.com/live_manifest.json";
+        const mockOperations = [
+          { type: 'download_full', file: 'test_download.txt', target_md5: 'NONE', url: 'http://test.com/test_download.txt' }
+        ];
+        
+        const id = Math.random().toString(36).substring(7);
+        const removeListener = window.electron.onPythonProgress(id, (data) => {
+          setProgress(data);
+        });
+    
+        try {
+          setResponse("Starting update...");
+          const res = await window.electron.requestPython({ 
+            command: 'apply_update', 
+            game_dir: '.', 
+            manifest_url: mockManifestUrl, // Pass URL
+            operations: mockOperations,
+            id 
+          });
+          setResponse(JSON.stringify(res, null, 2));
+        } catch (e) {
+          setResponse(`Error: ${e}`);
+        } finally {
+          removeListener();
+        }
+      };
   
 
     return (
