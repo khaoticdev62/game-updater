@@ -50,3 +50,36 @@ class Patcher:
             return False, e.stderr
         except Exception as e:
             return False, str(e)
+
+    def apply_patch_safe(self, source_file, patch_file, target_md5):
+        """
+        Applies a patch safely:
+        1. Patch to a temporary file.
+        2. Verify temporary file MD5.
+        3. Replace original file with temporary file.
+        """
+        temp_file = source_file + ".tmp"
+        
+        # Apply patch
+        success, message = self.apply_xdelta(source_file, patch_file, temp_file)
+        if not success:
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
+            return False, f"Patch failed: {message}"
+        
+        # Verify MD5
+        if not self.verify_md5(temp_file, target_md5):
+            os.remove(temp_file)
+            return False, "MD5 verification failed after patching"
+        
+        # Swap
+        try:
+            # On Windows, we might need to remove the source first
+            if os.path.exists(source_file):
+                os.remove(source_file)
+            os.rename(temp_file, source_file)
+            return True, "Success"
+        except Exception as e:
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
+            return False, f"Failed to replace original file: {str(e)}"
