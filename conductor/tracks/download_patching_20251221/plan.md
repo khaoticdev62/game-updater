@@ -12,8 +12,8 @@
 - [x] Task: Implement Feature: Atomic patching workflow (patch to temp, verify, then swap). (8703539)
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Patching Engine' (Protocol in workflow.md) (78da55c)
 
-## Phase 3: Manifest to Operation Bridge
+## Phase 3: Manifest to Operation Bridge [checkpoint: e85c1b0]
 - [x] Task: Implement Feature: Operation generator (converts manifest + local state into a list of download/patch tasks). (bfac32b)
-- [~] Task: Implement Feature: Progress reporting stream over IPC.
-- [ ] Task: Update UI: Basic progress dashboard in React to display backend status.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Manifest to Operation Bridge' (Protocol in workflow.md)
+- [x] Task: Implement Feature: Progress reporting stream over IPC. (5dccf4c)
+- [x] Task: Update UI: Basic progress dashboard in React to display backend status. (5dccf4c)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Manifest to Operation Bridge' (Protocol in workflow.md) (e85c1b0)
