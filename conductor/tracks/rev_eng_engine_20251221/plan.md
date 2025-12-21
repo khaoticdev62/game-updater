@@ -16,7 +16,7 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Core Engine Development' (Protocol in workflow.md) (47e40c1)
 
 ## Phase 3: Integration & IPC
-- [ ] Task: Initialize Electron boilerplate with React and TypeScript.
+- [~] Task: Initialize Electron boilerplate with React and TypeScript.
 - [ ] Task: Set up Python sidecar process for Electron.
 - [ ] Task: Implement Feature: Basic IPC bridge between Electron and Python.
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Integration & IPC' (Protocol in workflow.md)
