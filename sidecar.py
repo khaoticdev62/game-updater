@@ -16,15 +16,16 @@ def main():
             command = request.get("command")
             req_id = request.get("id")
             
+            # --- Command Handlers ---
             if command == "ping":
                 response = {"id": req_id, "result": "pong"}
-                print(json.dumps(response), flush=True)
+                
             elif command == "hash_file":
                 path = request.get("path")
                 engine = VerificationEngine()
                 file_hash = engine.hash_file(path)
                 response = {"id": req_id, "result": file_hash}
-                print(json.dumps(response), flush=True)
+                
             elif command == "verify_all":
                 game_dir = request.get("game_dir")
                 manifest_url = request.get("manifest_url")
@@ -36,7 +37,7 @@ def main():
 
                 ops = manager.get_operations(progress_callback=on_progress)
                 response = {"id": req_id, "result": ops}
-                print(json.dumps(response), flush=True)
+                
             elif command == "start_update": # New command for orchestrated update
                 game_dir = request.get("game_dir")
                 manifest_url = request.get("manifest_url")
@@ -60,11 +61,21 @@ def main():
                 success, message = manager.apply_operations(operations, progress_callback=on_progress)
                 
                 response = {"id": req_id, "result": {"success": success, "message": message}}
-                print(json.dumps(response), flush=True)
+                
             else:
                 response = {"id": req_id, "error": f"Unknown command: {command}"}
-                print(json.dumps(response), flush=True)
+                
+            print(json.dumps(response), flush=True)
                 
         except Exception as e:
-            error_response = {"error": str(e)}
+            error_response = {
+                "id": request.get("id", "unknown"), # Use request ID if available
+                "error": True,
+                "message": str(e),
+                "type": e.__class__.__name__
+            }
             print(json.dumps(error_response), flush=True)
+
+if __name__ == "__main__":
+    main()
+
