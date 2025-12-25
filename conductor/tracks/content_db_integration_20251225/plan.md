@@ -12,7 +12,7 @@
 - [x] Task: Enhance `get_dlc_status` IPC command to include rich metadata (descriptions, release dates). cfdbfb6
 - [x] Task: Conductor - User Manual Verification 'Discovery Integration' (Protocol in workflow.md) cfdbfb6
 
-## Phase 3: UI Enrichment
+## Phase 3: UI Enrichment [checkpoint: 9bcfec0]
 - [x] Task: Update `DLC` interface in `types.d.ts` and `DLCList.tsx` to include metadata fields. d6202bb
 - [x] Task: Redesign `DLCGrid` item to show a tooltip or expanded view with the pack description. f314649
 - [x] Task: Add a "Show Historical Versions" toggle to view old patches in the UI. fe11ce1
