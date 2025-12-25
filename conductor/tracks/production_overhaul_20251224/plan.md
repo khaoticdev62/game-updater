@@ -6,11 +6,11 @@
 - [x] Task: Optimize Hashing Engine (Multi-threading & 128KB I/O buffer) [cab08e8]
 - [x] Task: Conductor - User Manual Verification 'Backend Resilience' (Protocol in workflow.md) (2aa686f)
 
-## Phase 2: Discovery Engine & Scraping Overhaul
+## Phase 2: Discovery Engine & Scraping Overhaul [checkpoint: 1752c79]
 - [x] Task: Implement Parallel Nitro-Discovery (Concurrent probing of weighted mirrors) (5c1eb1e)
 - [x] Task: Integrate Dynamic Resolution (FitGirl, ElAmigos, CS.RIN.RU redirector handlers) (3333115)
 - [x] Task: Build Manual Mirror Selection API (Interactive override for Intelligence Hub) (6acad97)
-- [ ] Task: Conductor - User Manual Verification 'Discovery Engine' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Discovery Engine' (Protocol in workflow.md) (1752c79)
 
 ## Phase 3: UI/UX IPC & Integration Wiring
 - [ ] Task: Implement Hybrid Event Bus (Continuous 60fps streaming for progress, polling for health)
