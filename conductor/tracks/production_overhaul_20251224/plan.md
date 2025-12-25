@@ -13,7 +13,7 @@
 - [x] Task: Conductor - User Manual Verification 'Discovery Engine' (Protocol in workflow.md) (1752c79)
 
 ## Phase 3: UI/UX IPC & Integration Wiring
-- [ ] Task: Implement Hybrid Event Bus (Continuous 60fps streaming for progress, polling for health)
+- [x] Task: Implement Hybrid Event Bus (Continuous 60fps streaming for progress, polling for health)
 - [ ] Task: Wire Intelligence Viewfinder (Real-time scraping visualization)
 - [ ] Task: Connect Diagnostic Console (Real-time structured log streaming)
 - [ ] Task: Finalize Theme & Cursor Engine (CSS Variable injection & state-aware cursor morphing)

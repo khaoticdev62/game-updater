@@ -1,14 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DLCList, { DLC } from './components/DLCList';
 
 const App = () => {
   const [response, setResponse] = useState<string>('');
   const [progress, setProgress] = useState<any>(null);
+  const [isHealthy, setIsHealthy] = useState<boolean>(true);
   const [dlcs, setDlcs] = useState<DLC[]>([
     { name: 'Get to Work', folder: 'EP01', status: 'Installed', selected: true },
     { name: 'Get Together', folder: 'EP02', status: 'Missing', selected: false },
     { name: 'City Living', folder: 'EP03', status: 'Missing', selected: false },
   ]);
+
+  // Health Polling Logic
+  useEffect(() => {
+    const poll = async () => {
+      try {
+        const start = Date.now();
+        await window.electron.requestPython({ command: 'ping' });
+        const latency = Date.now() - start;
+        setIsHealthy(latency < 1000);
+      } catch (e) {
+        setIsHealthy(false);
+      }
+    };
+
+    const interval = setInterval(poll, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   const mockManifestUrl = "https://jsonplaceholder.typicode.com/todos/1"; // Public static JSON endpoint
 
@@ -97,6 +115,16 @@ const App = () => {
   return (
     <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
       <h1>Sims 4 Updater</h1>
+      <div style={{ marginBottom: '10px' }}>
+        Backend Status: 
+        <span style={{ 
+          color: isHealthy ? '#2ecc71' : '#e74c3c', 
+          fontWeight: 'bold',
+          marginLeft: '5px'
+        }}>
+          {isHealthy ? '● Healthy' : '● Disconnected'}
+        </span>
+      </div>
       
       <section style={{ marginBottom: '20px' }}>
         <h3>Available Content</h3>
