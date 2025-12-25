@@ -11,6 +11,7 @@
 - [x] Task: Add a Version Selector dropdown in `App.tsx`.
 - [x] Task: Wire the Version Selector to the manifest fetching logic.
 - [ ] Task: Conductor - User Manual Verification 'Version UI' (Protocol in workflow.md)
+- [ ] Task: Conductor - User Manual Verification 'Version UI' (Protocol in workflow.md)
 
 ## Phase 3: Legacy Patching Support
 - [x] Task: Update `UpdateManager` to handle "downgrade" or "specific version" scenarios (ensuring it doesn't just check if local is 'less than' target).
