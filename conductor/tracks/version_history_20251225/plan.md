@@ -17,3 +17,4 @@
 - [x] Task: Update `UpdateManager` to handle "downgrade" or "specific version" scenarios (ensuring it doesn't just check if local is 'less than' target).
 - [x] Task: Verify end-to-end flow of selecting an old version and generating operations.
 - [ ] Task: Conductor - User Manual Verification 'Legacy Patching' (Protocol in workflow.md)
+- [ ] Task: Conductor - User Manual Verification 'Legacy Patching' (Protocol in workflow.md)
