@@ -2,7 +2,7 @@
 
 ## Phase 1: IPC Resilience
 - [x] Task: Implement request timeouts in `HybridEventBus.request` in `src/index.ts`. 54cb7eb
-- [ ] Task: Add global error handling for timeout rejections in the frontend.
+- [x] Task: Add global error handling for timeout rejections in the frontend. cf2d403
 - [ ] Task: Write tests to verify IPC timeout behavior.
 - [ ] Task: Conductor - User Manual Verification 'IPC Resilience'
 
