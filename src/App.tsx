@@ -1,21 +1,17 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import DLCGrid from './components/DLCGrid';
-import { DLC, ProgressData, MirrorResult } from './types';
-import ScraperViewfinder from './components/ScraperViewfinder';
+import { DLC } from './types';
+import ScraperViewfinder, { MirrorResult } from './components/ScraperViewfinder';
 import DiagnosticConsole, { LogEntry } from './components/DiagnosticConsole';
 import CustomCursor from './components/CustomCursor';
-import Layout from './components/Layout';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Settings, 
-  Download, 
-  ShieldCheck, 
-  Activity, 
-  Info,
-  CheckCircle2,
-  RefreshCw
-} from 'lucide-react';
 
+interface ProgressData {
+  status: string;
+  current?: number;
+  total?: number;
+  file?: string;
+  message?: string;
+}
 
 const App = () => {
   const [response, setResponse] = useState<string>('');
@@ -29,14 +25,13 @@ const App = () => {
   const [selectedVersion, setSelectedVersion] = useState<string>('');
   const [showHistorical, setShowHistorical] = useState<boolean>(false);
   const [selectedLanguage, setSelectedLanguage] = useState<string>('en_US');
-  const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [dlcs, setDlcs] = useState<DLC[]>([
-    { name: 'Get to Work', folder: 'EP01', status: 'Installed', selected: true, category: 'Expansion Packs', description: 'Rule the workplace with The Sims 4 Get to Work.' },
-    { name: 'Get Together', folder: 'EP02', status: 'Missing', selected: false, category: 'Expansion Packs', description: 'Create Clubs for Sims where you set the rules.' },
-    { name: 'City Living', folder: 'EP03', status: 'Missing', selected: false, category: 'Expansion Packs', description: 'Take your Sims to the city.' },
-    { name: 'Vampires', folder: 'GP04', status: 'Missing', selected: false, category: 'Game Packs', description: 'Transform your Sims into powerful vampires.' },
-    { name: 'Laundry Day', folder: 'SP13', status: 'Missing', selected: false, category: 'Stuff Packs', description: 'Surround your Sims in clean clothes.' },
-    { name: 'Desert Luxe', folder: 'SP34', status: 'Missing', selected: false, category: 'Kits', description: 'Soak up the sun with indoor/outdoor pieces.' },
+    { name: 'Get to Work', folder: 'EP01', status: 'Installed', selected: true, category: 'Expansion Packs' },
+    { name: 'Get Together', folder: 'EP02', status: 'Missing', selected: false, category: 'Expansion Packs' },
+    { name: 'City Living', folder: 'EP03', status: 'Missing', selected: false, category: 'Expansion Packs' },
+    { name: 'Vampires', folder: 'GP04', status: 'Missing', selected: false, category: 'Game Packs' },
+    { name: 'Laundry Day', folder: 'SP13', status: 'Missing', selected: false, category: 'Stuff Packs' },
+    { name: 'Desert Luxe', folder: 'SP34', status: 'Missing', selected: false, category: 'Kits' },
   ]);
 
   const languages = [
@@ -134,6 +129,32 @@ const App = () => {
     setDlcs(prev => prev.map(d => d.folder === folder ? { ...d, selected: !d.selected } : d));
   };
 
+  const handleRefreshDLCs = async () => {
+    try {
+      setResponse("Scanning for installed and missing content...");
+      const res = await window.electron.requestPython({
+        command: 'get_dlc_status',
+        game_dir: '.',
+        manifest_url: manifestUrl
+      }) as { result: DLC[] };
+      
+      if (res.result) {
+        // Preserve selection state if the DLC was already in the list
+        const updatedDlcs = res.result.map(newDlc => {
+          const existing = dlcs.find(d => d.folder === newDlc.folder);
+          return {
+            ...newDlc,
+            selected: existing ? existing.selected : false
+          };
+        });
+        setDlcs(updatedDlcs);
+        setResponse(`Discovered ${updatedDlcs.length} total packs.`);
+      }
+    } catch (e) {
+      handleIpcError(e);
+    }
+  };
+
   const handleVerify = async () => {
     const id = Math.random().toString(36).substring(7);
     const removeListener = window.electron.onPythonProgress(id, (data) => {
@@ -144,6 +165,34 @@ const App = () => {
       setResponse("Starting verification...");
       const res = await window.electron.requestPython({ 
         command: 'verify_all', 
+        game_dir: '.', 
+        manifest_url: manifestUrl,
+        version: selectedVersion || undefined,
+        selected_packs: dlcs.filter(d => d.selected).map(d => d.folder),
+        language: selectedLanguage,
+        id 
+      });
+      setResponse(JSON.stringify(res, null, 2));
+    } catch (e) {
+      handleIpcError(e);
+    } finally {
+      removeListener();
+    }
+  };
+
+  const handleUpdate = async () => {
+    // This button will now trigger the full orchestrated update workflow, similar to handleStartUpdate
+    // but without needing to fetch the manifest again, as it's already done in handleVerify.
+    // For now, we'll make it call start_update for consistency with the new sidecar logic.
+    const id = Math.random().toString(36).substring(7);
+    const removeListener = window.electron.onPythonProgress(id, (data) => {
+      setProgress(data);
+    });
+
+    try {
+      setResponse("Starting mock update...");
+      const res = await window.electron.requestPython({ 
+        command: 'start_update', 
         game_dir: '.', 
         manifest_url: manifestUrl,
         version: selectedVersion || undefined,
@@ -235,246 +284,94 @@ const App = () => {
   };
 
   return (
-    <Layout 
-      activeTab={activeTab} 
-      setActiveTab={setActiveTab} 
-      isHealthy={isHealthy}
-      onRefresh={handlePing}
-    >
+    <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
       <CustomCursor isHealthy={isHealthy} isProbing={isProbing} />
+      <h1>Sims 4 Updater</h1>
+      <div style={{ marginBottom: '10px' }}>
+        Backend Status: 
+        <span style={{ 
+          color: isHealthy ? '#2ecc71' : '#e74c3c', 
+          fontWeight: 'bold',
+          marginLeft: '5px'
+        }}>
+          {isHealthy ? '● Healthy' : '● Disconnected'}
+        </span>
+      </div>
       
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={activeTab}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.2 }}
-          className="h-full"
-        >
-          {activeTab === 'dashboard' && (
-            <div className="space-y-8">
-              <section className="bg-white/[0.03] border border-white/10 rounded-2xl p-8 shadow-xl backdrop-blur-2xl relative overflow-hidden group">
-                {/* Background Accent Gradient */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-brand-accent/5 blur-[100px] -mr-32 -mt-32 rounded-full" />
-                
-                <h3 className="text-xl font-bold text-white mb-8 flex items-center gap-3">
-                  <div className="w-8 h-8 bg-brand-accent/10 rounded-lg flex items-center justify-center">
-                    <Settings className="text-brand-accent" size={18} />
-                  </div>
-                  Core Configuration
-                </h3>
-                
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 relative z-10">
-                  <div className="space-y-4">
-                    <label className="text-[11px] font-bold text-gray-500 uppercase tracking-[0.2em] ml-1">Manifest Update Source</label>
-                    <div className="flex gap-2 p-1.5 bg-black/40 border border-gray-700/50 rounded-xl focus-within:border-brand-accent transition-all duration-300">
-                      <input 
-                        type="text" 
-                        value={manifestUrl} 
-                        onChange={(e) => setManifestUrl(e.target.value)}
-                        placeholder="https://example.com/manifest.json"
-                        className="flex-1 bg-transparent px-4 py-2 text-sm text-gray-200 focus:outline-none placeholder:text-gray-700"
-                      />
-                                        <button 
-                                          onClick={handleDiscoverVersions}
-                                          aria-label="Scan manifest for available versions"
-                                          className="bg-brand-accent hover:bg-blue-600 text-white px-6 py-2 rounded-lg text-xs font-bold transition-all shadow-lg shadow-brand-accent/20 outline-none focus-visible:ring-2 focus-visible:ring-white active:scale-95 flex items-center gap-2"
-                                        >
-                                          <RefreshCw size={14} />
-                                          Sync
-                                        </button>
-                      
-                    </div>
-                    <p className="text-[10px] text-gray-600 ml-1 italic">Point to a valid Sims 4 manifest to begin scanning for updates.</p>
-                  </div>
+      <section style={{ marginBottom: '20px' }}>
+        <h3>Configuration</h3>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <input 
+            type="text" 
+            value={manifestUrl} 
+            onChange={(e) => setManifestUrl(e.target.value)}
+            placeholder="Enter Manifest URL"
+            style={{ width: '300px', padding: '5px' }}
+          />
+          <button onClick={handleDiscoverVersions}>Discover Versions</button>
+        </div>
+        {availableVersions.length > 0 && (
+          <div style={{ marginTop: '10px' }}>
+            <label>Target Version: </label>
+            <select value={selectedVersion} onChange={(e) => setSelectedVersion(e.target.value)} style={{ padding: '5px', marginRight: '20px' }}>
+              {filteredVersions.map(v => <option key={v} value={v}>{v}</option>)}
+            </select>
 
-                  {availableVersions.length > 0 && (
-                    <div className="space-y-6">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <label className="text-[11px] font-bold text-gray-500 uppercase tracking-[0.2em] ml-1">Target Version</label>
-                          <select 
-                            value={selectedVersion} 
-                            onChange={(e) => setSelectedVersion(e.target.value)}
-                            className="w-full bg-black/40 border border-gray-700/50 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-accent transition-all appearance-none cursor-pointer hover:bg-black/60"
-                          >
-                            {filteredVersions.map(v => <option key={v} value={v}>{v}</option>)}
-                          </select>
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-[11px] font-bold text-gray-500 uppercase tracking-[0.2em] ml-1">Language Sector</label>
-                          <select 
-                            value={selectedLanguage} 
-                            onChange={(e) => setSelectedLanguage(e.target.value)}
-                            className="w-full bg-black/40 border border-gray-700/50 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-accent transition-all appearance-none cursor-pointer hover:bg-black/60"
-                          >
-                            {languages.map(l => <option key={l.code} value={l.code}>{l.name}</option>)}
-                          </select>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center justify-between">
-                        <label className="flex items-center gap-3 group cursor-pointer">
-                          <div className={`w-5 h-5 rounded-md border border-gray-700 flex items-center justify-center transition-all duration-300 ${showHistorical ? 'bg-brand-accent border-brand-accent shadow-lg shadow-brand-accent/20' : 'bg-black/40 group-hover:border-gray-500'}`}>
-                            {showHistorical && <CheckCircle2 size={12} className="text-white" />}
-                          </div>
-                          <input 
-                            type="checkbox" 
-                            checked={showHistorical} 
-                            onChange={(e) => setShowHistorical(e.target.checked)} 
-                            className="hidden"
-                          />
-                          <span className="text-xs font-medium text-gray-500 group-hover:text-gray-300 transition-colors">Show Legacy Patches</span>
-                        </label>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="mt-10 p-6 bg-gradient-to-r from-brand-accent/[0.03] to-transparent border border-brand-accent/10 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-6 transition-all duration-500 group-hover:border-brand-accent/20">
-                  <div className="flex items-center gap-6">
-                    <div className="flex -space-x-2">
-                      {[1, 2, 3].map(i => (
-                        <div key={i} className="w-8 h-8 rounded-full border-2 border-brand-dark bg-gray-800 flex items-center justify-center">
-                          <div className="w-1.5 h-1.5 rounded-full bg-brand-accent/40" />
-                        </div>
-                      ))}
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-gray-200 tracking-tight">{selectionSummary.count} Units Selected for Deployment</p>
-                      <p className="text-[11px] text-gray-500 mt-0.5 font-mono">Estimated allocation: {selectionSummary.size} GB</p>
-                    </div>
-                  </div>
-                                <div className="flex items-center gap-3 w-full sm:w-auto">
-                                  <button 
-                                    onClick={handleVerify}
-                                    aria-label="Analyze local game files against manifest"
-                                    className="flex-1 sm:flex-none bg-white/5 hover:bg-white/10 text-gray-300 px-8 py-2.5 rounded-xl text-xs font-bold transition-all border border-white/5 outline-none focus-visible:ring-2 focus-visible:ring-gray-400 active:scale-95"
-                                  >
-                                    Analyze Files
-                                  </button>
-                                  <button 
-                                    onClick={handleStartUpdate}
-                                    aria-label="Initiate the game update and patching process"
-                                    className="flex-1 sm:flex-none bg-brand-accent hover:bg-blue-600 text-white px-10 py-2.5 rounded-xl text-xs font-black transition-all shadow-xl shadow-brand-accent/20 outline-none focus-visible:ring-2 focus-visible:ring-white active:scale-95 uppercase tracking-widest"
-                                  >
-                                    Initiate Sync
-                                  </button>
-                                </div>
-                  
-                </div>
-              </section>
-
-              <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-white/5 border border-gray-800 rounded-2xl p-4 flex items-center gap-4 hover:bg-white/[0.07] transition-colors">
-                  <div className="w-10 h-10 bg-brand-accent/10 rounded-full flex items-center justify-center text-brand-accent">
-                    <Download size={20} />
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500 uppercase tracking-widest font-bold">Status</p>
-                    <p className="text-sm font-semibold">{progress ? progress.status : 'Ready'}</p>
-                  </div>
-                </div>
-                <div className="bg-white/5 border border-gray-800 rounded-2xl p-4 flex items-center gap-4 hover:bg-white/[0.07] transition-colors">
-                  <div className="w-10 h-10 bg-brand-success/10 rounded-full flex items-center justify-center text-brand-success">
-                    <ShieldCheck size={20} />
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500 uppercase tracking-widest font-bold">Security</p>
-                    <p className="text-sm font-semibold">Guardian Active</p>
-                  </div>
-                </div>
-                <div className="bg-white/5 border border-gray-800 rounded-2xl p-4 flex items-center gap-4 hover:bg-white/[0.07] transition-colors">
-                  <div className="w-10 h-10 bg-brand-warning/10 rounded-full flex items-center justify-center text-brand-warning">
-                    <Info size={20} />
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500 uppercase tracking-widest font-bold">Latency</p>
-                    <p className="text-sm font-semibold">Optimized</p>
-                  </div>
-                </div>
-              </section>
-
-              {progress && (
-                <section className="bg-black/40 border border-gray-800 rounded-2xl p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-sm font-bold text-gray-300 uppercase tracking-widest flex items-center gap-2">
-                      <Activity size={14} className="text-brand-success" />
-                      Active Operation: {progress.status}
-                    </h4>
-                    {progress.current && (
-                      <span className="text-xs font-mono text-brand-accent">{progress.current} / {progress.total}</span>
-                    )}
-                  </div>
-                  <div className="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
-                    <div 
-                      className="bg-brand-accent h-full transition-all duration-300 ease-out" 
-                      style={{ width: `${progress.current && progress.total ? (progress.current / progress.total) * 100 : 100}%` }}
-                    />
-                  </div>
-                  <p className="text-xs text-gray-500 mt-3 italic">{progress.file || progress.message}</p>
-                </section>
-              )}
-
-              {response && (
-                <section className="bg-black/60 rounded-2xl p-6 border border-gray-800">
-                  <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4 flex items-center justify-between">
-                    Server Response
-                    <button onClick={() => setResponse('')} className="text-[10px] hover:text-white transition-colors">Clear</button>
-                  </h4>
-                  <pre className="text-[11px] font-mono text-brand-success overflow-x-auto whitespace-pre-wrap leading-relaxed max-h-40 custom-scrollbar">
-                    {response}
-                  </pre>
-                </section>
-              )}
-            </div>
-          )}
-
-          {activeTab === 'dlcs' && (
-            <div className="h-full">
-              <DLCGrid dlcs={dlcs} onToggle={toggleDLC} />
-            </div>
-          )}
-
-          {activeTab === 'discovery' && (
-            <div className="h-full">
-              <ScraperViewfinder 
-                mirrors={discoveredMirrors} 
-                isProbing={isProbing} 
-                onScan={handleDiscoverMirrors} 
+            <label style={{ marginRight: '20px' }}>
+              <input 
+                type="checkbox" 
+                checked={showHistorical} 
+                onChange={(e) => setShowHistorical(e.target.checked)} 
               />
-            </div>
-          )}
+              Show Historical Versions
+            </label>
 
-          {activeTab === 'diagnostics' && (
-            <div className="h-[70vh] flex flex-col">
-              <DiagnosticConsole logs={logs} onClear={() => setLogs([])} />
-            </div>
-          )}
+            <label>Language: </label>
+            <select value={selectedLanguage} onChange={(e) => setSelectedLanguage(e.target.value)} style={{ padding: '5px' }}>
+              {languages.map(l => <option key={l.code} value={l.code}>{l.name}</option>)}
+            </select>
+          </div>
+        )}
+        <div style={{ marginTop: '15px', padding: '10px', background: '#2c3e50', borderRadius: '4px', border: '1px solid #3498db' }}>
+          <strong>Selection Summary:</strong> {selectionSummary.count} packs selected. 
+          Estimated space required: <span style={{ color: '#2ecc71' }}>{selectionSummary.size} GB</span>
+        </div>
+      </section>
 
-          {activeTab === 'mods' && (
-            <div className="flex flex-col items-center justify-center h-[60vh] text-center space-y-4">
-              <div className="w-20 h-20 bg-brand-warning/10 rounded-full flex items-center justify-center animate-bounce text-brand-warning">
-                <ShieldCheck size={40} />
-              </div>
-              <h3 className="text-xl font-bold">Mod Guardian</h3>
-              <p className="text-gray-500 max-w-sm text-sm">This feature is currently protecting your game in the background. Full management UI coming soon.</p>
-            </div>
-          )}
+      <section style={{ marginBottom: '20px' }}>
+        <h3>Available Content</h3>
+        <DLCGrid dlcs={dlcs} onToggle={toggleDLC} />
+      </section>
 
-          {activeTab === 'settings' && (
-            <div className="flex flex-col items-center justify-center h-[60vh] text-center space-y-4 text-brand-accent">
-              <div className="w-20 h-20 bg-brand-accent/10 rounded-full flex items-center justify-center animate-[spin_10s_linear_infinite]">
-                <Settings size={40} />
-              </div>
-              <h3 className="text-xl font-bold text-white">Application Settings</h3>
-              <p className="text-gray-500 max-w-sm text-sm">Advanced configuration and updater preferences will be available here in the final release.</p>
-            </div>
-          )}
-        </motion.div>
-      </AnimatePresence>
-    </Layout>
+      <section style={{ marginBottom: '20px' }}>
+        <button onClick={handlePing}>Ping Python</button>
+        <button onClick={handleRefreshDLCs} style={{ marginLeft: '10px' }}>Refresh Content List</button>
+        <button onClick={handleVerify} style={{ marginLeft: '10px' }}>Verify All (Live Mock)</button>
+        <button onClick={handleUpdate} style={{ marginLeft: '10px' }}>Start Mock Update (Live Mock)</button>
+        <button onClick={handleStartUpdate} style={{ marginLeft: '10px', fontWeight: 'bold' }}>Update Game (Live Mock)</button>
+        <button onClick={handleDiscoverMirrors} style={{ marginLeft: '10px', background: '#2980b9', color: 'white' }}>Scan for Mirrors</button>
+      </section>
+
+      <section style={{ marginBottom: '20px' }}>
+        <h3>Intelligence Hub</h3>
+        <ScraperViewfinder mirrors={discoveredMirrors} isProbing={isProbing} />
+      </section>
+
+      <section style={{ marginBottom: '20px' }}>
+        <h3>Diagnostic Console</h3>
+        <DiagnosticConsole logs={logs} />
+      </section>
+
+      {progress && (
+        <div style={{ padding: '10px', background: '#f0f0f0', marginBottom: '10px' }}>
+          Progress: {progress.status} {progress.current ? `${progress.current} / ${progress.total}` : ''} - {progress.file || progress.message}
+        </div>
+      )}
+      
+      <pre style={{ background: '#eee', padding: '10px', overflowX: 'auto' }}>
+        {response}
+      </pre>
+    </div>
   );
 };
 

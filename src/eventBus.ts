@@ -1,5 +1,6 @@
 import { spawn, ChildProcess } from 'child_process';
 import path from 'path';
+import fs from 'fs';
 import { EventEmitter } from 'events';
 import { PythonRequest } from './types';
 import { app } from 'electron';
@@ -11,7 +12,11 @@ export class HybridEventBus extends EventEmitter {
 
   start() {
     let pythonPath = 'python';
+    // Robust path resolution: try both levels of depth (for .webpack/main/ and tests/)
     let scriptPath = path.join(__dirname, '..', 'sidecar.py');
+    if (!fs.existsSync(scriptPath)) {
+      scriptPath = path.join(__dirname, '..', '..', 'sidecar.py');
+    }
 
     if (app && app.isPackaged) {
       // In production, we spawn the bundled executable

@@ -17,14 +17,6 @@ export interface ProgressData {
   message?: string;
 }
 
-export interface MirrorResult {
-  url: string;
-  weight: number;
-  available?: boolean;
-  latency?: number;
-  error?: string;
-}
-
 export interface PythonRequest {
   command: string;
   [key: string]: unknown;
