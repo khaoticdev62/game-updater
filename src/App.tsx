@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import DLCList, { DLC } from './components/DLCList';
 import ScraperViewfinder, { MirrorResult } from './components/ScraperViewfinder';
 import DiagnosticConsole, { LogEntry } from './components/DiagnosticConsole';
+import CustomCursor from './components/CustomCursor';
 
 const App = () => {
   const [response, setResponse] = useState<string>('');
@@ -154,6 +155,7 @@ const App = () => {
 
   return (
     <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
+      <CustomCursor isHealthy={isHealthy} isProbing={isProbing} />
       <h1>Sims 4 Updater</h1>
       <div style={{ marginBottom: '10px' }}>
         Backend Status: 
