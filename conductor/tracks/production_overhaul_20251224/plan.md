@@ -8,7 +8,7 @@
 
 ## Phase 2: Discovery Engine & Scraping Overhaul
 - [x] Task: Implement Parallel Nitro-Discovery (Concurrent probing of weighted mirrors) (5c1eb1e)
-- [ ] Task: Integrate Dynamic Resolution (FitGirl, ElAmigos, CS.RIN.RU redirector handlers)
+- [x] Task: Integrate Dynamic Resolution (FitGirl, ElAmigos, CS.RIN.RU redirector handlers) (3333115)
 - [ ] Task: Build Manual Mirror Selection API (Interactive override for Intelligence Hub)
 - [ ] Task: Conductor - User Manual Verification 'Discovery Engine' (Protocol in workflow.md)
 
