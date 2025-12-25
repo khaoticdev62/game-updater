@@ -31,7 +31,7 @@ const ScraperViewfinder: React.FC<ScraperViewfinderProps> = ({ mirrors, isProbin
       </div>
       {mirrors.map((m, i) => (
         <div key={i} style={{ marginBottom: '4px', display: 'flex', justifyContent: 'space-between' }}>
-          <span>> {m.url} (w:{m.weight})</span>
+          <span>{'>'} {m.url} (w:{m.weight})</span>
           <span style={{ 
             color: m.available === true ? '#2ecc71' : m.available === false ? '#e74c3c' : '#f1c40f' 
           }}>
