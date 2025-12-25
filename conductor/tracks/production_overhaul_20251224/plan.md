@@ -7,7 +7,7 @@
 - [x] Task: Conductor - User Manual Verification 'Backend Resilience' (Protocol in workflow.md) (2aa686f)
 
 ## Phase 2: Discovery Engine & Scraping Overhaul
-- [ ] Task: Implement Parallel Nitro-Discovery (Concurrent probing of weighted mirrors)
+- [x] Task: Implement Parallel Nitro-Discovery (Concurrent probing of weighted mirrors) (5c1eb1e)
 - [ ] Task: Integrate Dynamic Resolution (FitGirl, ElAmigos, CS.RIN.RU redirector handlers)
 - [ ] Task: Build Manual Mirror Selection API (Interactive override for Intelligence Hub)
 - [ ] Task: Conductor - User Manual Verification 'Discovery Engine' (Protocol in workflow.md)
