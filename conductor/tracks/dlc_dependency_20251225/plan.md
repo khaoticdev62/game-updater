@@ -1,10 +1,10 @@
 # Plan: Intelligent Dependency-Aware DLC Management
 
-## Phase 1: Dependency & Mapping Engine
+## Phase 1: Dependency & Mapping Engine [checkpoint: 60bea56]
 - [x] Task: Implement `DLCGraph` in `engine.py` to map pack relationships and core dependencies.
 - [x] Task: Enhance `ManifestParser` to tag files by category (Base, EP, GP, SP, Kit, Language).
 - [x] Task: Write unit tests for dependency resolution (ensuring child packs flag their parents).
-- [ ] Task: Conductor - User Manual Verification 'Dependency Engine' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Dependency Engine' (Protocol in workflow.md) (60bea56)
 
 ## Phase 2: Targeted Operation Filtering
 - [ ] Task: Update `UpdateManager.get_operations` to accept a `selection` list.
