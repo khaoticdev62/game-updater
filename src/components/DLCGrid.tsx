@@ -31,6 +31,7 @@ const DLCGrid: React.FC<DLCGridProps> = ({ dlcs, onToggle }) => {
               <div 
                 key={dlc.folder} 
                 onClick={() => onToggle(dlc.folder)}
+                title={dlc.description}
                 style={{
                   background: dlc.selected ? '#2c3e50' : '#1a1a1a',
                   border: `1px solid ${dlc.selected ? '#3498db' : '#333'}`,
@@ -42,7 +43,7 @@ const DLCGrid: React.FC<DLCGridProps> = ({ dlcs, onToggle }) => {
                 }}
               >
                 <div style={{ fontWeight: 'bold', fontSize: '13px' }}>{dlc.name}</div>
-                <div style={{ fontSize: '11px', color: '#888' }}>{dlc.folder}</div>
+                <div style={{ fontSize: '11px', color: '#888' }}>{dlc.folder} {dlc.release_date ? `| ${dlc.release_date}` : ''}</div>
                 <div style={{ 
                   fontSize: '11px', 
                   marginTop: '5px',
