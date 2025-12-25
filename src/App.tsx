@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import DLCGrid from './components/DLCGrid';
-import { DLC } from './components/DLCList';
+import { DLC } from './types';
 import ScraperViewfinder, { MirrorResult } from './components/ScraperViewfinder';
 import DiagnosticConsole, { LogEntry } from './components/DiagnosticConsole';
 import CustomCursor from './components/CustomCursor';

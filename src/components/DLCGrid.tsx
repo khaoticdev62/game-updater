@@ -1,5 +1,5 @@
 import React from 'react';
-import { DLC } from './DLCList';
+import { DLC } from '../types';
 
 interface DLCGridProps {
   dlcs: DLC[];

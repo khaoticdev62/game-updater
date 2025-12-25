@@ -1,12 +1,5 @@
 import React from 'react';
-
-export interface DLC {
-  name: string;
-  folder: string;
-  status: 'Installed' | 'Missing' | 'Update Available';
-  selected: boolean;
-  category?: string;
-}
+import { DLC } from '../types';
 
 interface DLCListProps {
   dlcs: DLC[];
@@ -22,11 +15,12 @@ const DLCList: React.FC<DLCListProps> = ({ dlcs, onToggle }) => {
             <th style={{ textAlign: 'left' }}>Select</th>
             <th style={{ textAlign: 'left' }}>DLC Name</th>
             <th style={{ textAlign: 'left' }}>Status</th>
+            <th style={{ textAlign: 'left' }}>Release Date</th>
           </tr>
         </thead>
         <tbody>
           {dlcs.map((dlc) => (
-            <tr key={dlc.folder} style={{ borderBottom: '1px solid #eee' }}>
+            <tr key={dlc.folder} style={{ borderBottom: '1px solid #eee' }} title={dlc.description}>
               <td>
                 <input
                   type="checkbox"
@@ -41,6 +35,7 @@ const DLCList: React.FC<DLCListProps> = ({ dlcs, onToggle }) => {
               }}>
                 {dlc.status}
               </td>
+              <td>{dlc.release_date || 'N/A'}</td>
             </tr>
           ))}
         </tbody>
