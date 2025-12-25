@@ -1,8 +1,9 @@
 import os
 import subprocess
 import hashlib
+import shutil
 from concurrent.futures import ThreadPoolExecutor
-from typing import Dict, List
+from typing import Dict, List, Optional
 from pathlib import Path
 
 class BuildSystem:
@@ -21,13 +22,15 @@ class BuildSystem:
         with open(self.requirements_file, 'rb') as f:
             return hashlib.sha256(f.read()).hexdigest()
 
-    def package_backend(self) -> bool:
+    def package_backend(self, output_dir: Optional[Path] = None) -> bool:
         """Packages the sidecar using PyInstaller."""
         print("BuildSystem: Packaging backend sidecar...")
+        dist_path = output_dir or self.dist_dir
         args = [
             "pyinstaller",
             "--onefile",
             "--name", "sidecar",
+            "--distpath", str(dist_path),
             "--clean",
             str(self.project_root / "sidecar.py")
         ]

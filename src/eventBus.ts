@@ -2,6 +2,7 @@ import { spawn, ChildProcess } from 'child_process';
 import path from 'path';
 import { EventEmitter } from 'events';
 import { ProgressData, PythonRequest } from './types';
+import { app } from 'electron';
 
 export class HybridEventBus extends EventEmitter {
   private sidecar: ChildProcess | null = null;
@@ -9,11 +10,19 @@ export class HybridEventBus extends EventEmitter {
   private defaultTimeout = 30000; // 30 seconds default
 
   start() {
-    const pythonPath = 'python';
-    // The script is in the root, eventBus.ts is in src/
-    const scriptPath = path.join(__dirname, '..', 'sidecar.py');
+    let pythonPath = 'python';
+    let scriptPath = path.join(__dirname, '..', 'sidecar.py');
+
+    if (app && app.isPackaged) {
+      // In production, we spawn the bundled executable
+      // PyInstaller usually outputs to 'dist/sidecar/sidecar.exe' or 'dist/sidecar.exe'
+      // After bundling with Electron, it should be in process.resourcesPath
+      pythonPath = path.join(process.resourcesPath, 'sidecar.exe');
+      scriptPath = ''; // No script needed for executable
+    }
     
-    this.sidecar = spawn(pythonPath, [scriptPath], { stdio: ['pipe', 'pipe', 'pipe'] });
+    const args = scriptPath ? [scriptPath] : [];
+    this.sidecar = spawn(pythonPath, args, { stdio: ['pipe', 'pipe', 'pipe'] });
 
     this.sidecar.stdout?.on('data', (data: Buffer) => {
       data.toString().split('\n').forEach((line: string) => {
