@@ -35,3 +35,34 @@ def test_exception_error_reporting():
                 assert response['error'] is True
                 assert "Test Error" in response['message']
                 assert response['type'] == "Exception"
+
+def test_discover_mirrors_command():
+    mock_request = {
+        "command": "discover_mirrors", 
+        "id": "test_125", 
+        "mirrors": [{"url": "http://mirror1.com", "weight": 1}]
+    }
+    
+    with patch('discovery.MirrorDiscovery.discover_best_mirrors') as mock_discover:
+        mock_discover.return_value = [{"url": "http://mirror1.com", "available": True}]
+        with patch('sys.stdin', StringIO(json.dumps(mock_request) + '\n')):
+            with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+                sidecar.main()
+                response = json.loads(mock_stdout.getvalue().strip())
+                assert response['id'] == "test_125"
+                assert response['result'][0]['url'] == "http://mirror1.com"
+
+def test_select_mirror_command():
+    mock_request = {
+        "command": "select_mirror", 
+        "id": "test_126", 
+        "url": "http://selected.com"
+    }
+    
+    with patch('discovery.set_selected_mirror') as mock_set:
+        with patch('sys.stdin', StringIO(json.dumps(mock_request) + '\n')):
+            with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+                sidecar.main()
+                mock_set.assert_called_once_with("http://selected.com")
+                response = json.loads(mock_stdout.getvalue().strip())
+                assert response['result'] == "success"
