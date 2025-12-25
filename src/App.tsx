@@ -106,12 +106,22 @@ const App = () => {
     return () => removeListener();
   }, []);
 
+  const handleIpcError = (e: unknown) => {
+    const msg = e instanceof Error ? e.message : String(e);
+    if (msg.includes('timed out')) {
+      setIsHealthy(false);
+      setResponse(`Backend Timeout: The request took too long. Check the logs for details.`);
+    } else {
+      setResponse(`Communication Error: ${msg}`);
+    }
+  };
+
   const handlePing = async () => {
     try {
       const res = await window.electron.requestPython({ command: 'ping' });
       setResponse(JSON.stringify(res));
     } catch (e) {
-      setResponse(`Error: ${e}`);
+      handleIpcError(e);
     }
   };
 
@@ -138,7 +148,7 @@ const App = () => {
       });
       setResponse(JSON.stringify(res, null, 2));
     } catch (e) {
-      setResponse(`Error: ${e}`);
+      handleIpcError(e);
     } finally {
       removeListener();
     }
@@ -166,7 +176,7 @@ const App = () => {
       });
       setResponse(JSON.stringify(res, null, 2));
     } catch (e) {
-      setResponse(`Error: ${e}`);
+      handleIpcError(e);
     } finally {
       removeListener();
     }
@@ -180,12 +190,13 @@ const App = () => {
         url: manifestUrl
       });
       if (res.result) {
-        setAvailableVersions(res.result);
-        if (res.result.length > 0) setSelectedVersion(res.result[0]);
-        setResponse(`Discovered ${res.result.length} versions.`);
+        const discovered = res.result as string[];
+        setAvailableVersions(discovered);
+        if (discovered.length > 0) setSelectedVersion(discovered[0]);
+        setResponse(`Discovered ${discovered.length} versions.`);
       }
     } catch (e) {
-      setResponse(`Error scanning versions: ${e}`);
+      handleIpcError(e);
     }
   };
 
@@ -212,10 +223,10 @@ const App = () => {
         ]
       });
       if (res.result) {
-        setDiscoveredMirrors(res.result);
+        setDiscoveredMirrors(res.result as MirrorResult[]);
       }
     } catch (e) {
-      console.error(e);
+      handleIpcError(e);
     } finally {
       setIsProbing(false);
     }
@@ -240,7 +251,7 @@ const App = () => {
       });
       setResponse(JSON.stringify(res, null, 2));
     } catch (e) {
-      setResponse(`Error: ${e}`);
+      handleIpcError(e);
     } finally {
       removeListener();
     }
