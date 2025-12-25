@@ -1,10 +1,10 @@
 # Plan: Final Quality Gate & Refinement
 
-## Phase 1: IPC & UI Polish
+## Phase 1: IPC & UI Polish [checkpoint: ee45b5e]
 - [x] Task: Remove placeholder `mockManifestUrl` from `App.tsx` and prepare for dynamic configuration.
 - [x] Task: Enhance `HybridEventBus` in `index.ts` to gracefully handle unexpected sidecar process exits and errors.
 - [x] Task: Write integration test for the `python-request` IPC channel to simulate real-world request/response cycles and progress updates.
-- [ ] Task: Conductor - User Manual Verification 'IPC & UI Polish' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'IPC & UI Polish' (Protocol in workflow.md) (ee45b5e)
 
 ## Phase 2: Scraper & Discovery Engine Hardening
 - [ ] Task: Add `beautifulsoup4` to `requirements.txt`.
