@@ -9,6 +9,11 @@ import { ErrorToast, ErrorMessage } from './components/ErrorToast';
 import { OperationsSummary, Operation } from './components/OperationsSummary';
 import { UpdateCompletionStatus, UpdateResult } from './components/UpdateCompletionStatus';
 import { ResponseDisplay } from './components/ResponseDisplay';
+import { RetryNotification } from './components/RetryNotification';
+import { MirrorSelector } from './components/MirrorSelector';
+import { OperationQueue } from './components/OperationQueue';
+import { useRetry } from './hooks/useRetry';
+import { useOperationQueue } from './hooks/useOperationQueue';
 import CustomCursor from './components/CustomCursor';
 import { Environment } from './components/Environment';
 import { TopShelf } from './components/TopShelf';
@@ -31,6 +36,8 @@ const App = () => {
   const [isHealthy, setIsHealthy] = useState<boolean>(true);
   const [isProbing, setIsProbing] = useState<boolean>(false);
   const [discoveredMirrors, setDiscoveredMirrors] = useState<MirrorResult[]>([]);
+  const [selectedMirror, setSelectedMirror] = useState<MirrorResult | null>(null);
+  const [showMirrorSelector, setShowMirrorSelector] = useState(false);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [errors, setErrors] = useState<ErrorMessage[]>([]);
   const [pendingOperations, setPendingOperations] = useState<Operation[]>([]);
@@ -38,6 +45,97 @@ const App = () => {
   const [confirmedOperationsCallback, setConfirmedOperationsCallback] = useState<(() => void) | null>(null);
   const [updateResult, setUpdateResult] = useState<UpdateResult | null>(null);
   const [showUpdateStatus, setShowUpdateStatus] = useState(false);
+
+  // Retry logic
+  const [retryState, setRetryState] = useState({
+    isVisible: false,
+    attempt: 0,
+    maxAttempts: 5,
+    nextRetryIn: 0,
+    lastError: null as Error | null
+  });
+  const [execute, state] = useRetry({
+    maxAttempts: 5,
+    initialDelay: 1000,
+    maxDelay: 30000,
+    backoffMultiplier: 2,
+    onRetry: (attempt, delay) => {
+      setRetryState({
+        isVisible: true,
+        attempt,
+        maxAttempts: 5,
+        nextRetryIn: delay,
+        lastError: null
+      });
+    },
+    onFinal: (error) => {
+      setRetryState(prev => ({
+        ...prev,
+        lastError: error
+      }));
+    }
+  });
+
+  const cancelRetry = useCallback(() => {
+    setRetryState(prev => ({ ...prev, isVisible: false }));
+  }, []);
+
+  // Operation queue
+  const {
+    add: addOperation,
+    remove: removeOperation,
+    updateProgress: updateOperationProgress,
+    start: startQueue,
+    pause: pauseQueue,
+    resume: resumeQueue,
+    cancel: cancelQueue,
+    clearCompleted: clearCompletedOperations,
+    state: queueState
+  } = useOperationQueue({ parallel: false });
+
+  const [showOperationQueue, setShowOperationQueue] = useState(false);
+
+  /**
+   * Determine if an error is retryable
+   * Retries on timeout, network, and temporary errors
+   * Does NOT retry on validation/input errors
+   */
+  const isRetryableError = useCallback((error: unknown): boolean => {
+    const msg = error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
+    
+    // Retryable errors
+    if (msg.includes('timeout') || 
+        msg.includes('network') ||
+        msg.includes('econnrefused') ||
+        msg.includes('enotfound') ||
+        msg.includes('temporary failure')) {
+      return true;
+    }
+
+    // Non-retryable errors
+    if (msg.includes('validation') ||
+        msg.includes('missing') ||
+        msg.includes('not found') ||
+        msg.includes('invalid') ||
+        msg.includes('permission')) {
+      return false;
+    }
+
+    return false;
+  }, []);
+
+  /**
+   * Wrapper for IPC requests with automatic retry
+   */
+  const requestWithRetry = useCallback(
+    async <T,>(requestFn: () => Promise<T>, shouldRetry: boolean = false): Promise<T> => {
+      if (shouldRetry && isRetryableError) {
+        return execute(requestFn);
+      }
+      return requestFn();
+    },
+    [execute, isRetryableError]
+  );
 
   // State persisted to localStorage
   const [manifestUrl, setManifestUrl] = useLocalStorage<string>('appState:manifestUrl', '');
@@ -197,7 +295,7 @@ const App = () => {
     }
   };
 
-  const handleIpcError = (e: unknown) => {
+  const handleIpcError = (e: unknown, canRetry: boolean = false) => {
     const msg = e instanceof Error ? e.message : String(e);
     
     // Check if it's an error response with proper error structure
@@ -216,10 +314,10 @@ const App = () => {
 
     // Handle other error types
     if (msg.includes('timed out')) {
-      addError('TIMEOUT_ERROR', 'Backend request timed out', 'The request took too long to complete. Check the backend status and try again.');
+      addError('TIMEOUT_ERROR', 'Backend request timed out', 'The request took too long to complete. Check the backend status and try again.', canRetry ? 0 : 8000);
       setIsHealthy(false);
     } else if (msg.includes('Network') || msg.includes('network')) {
-      addError('NETWORK_ERROR', 'Network connection error', msg);
+      addError('NETWORK_ERROR', 'Network connection error', msg, canRetry ? 0 : 8000);
       setIsHealthy(false);
     } else {
       addError('IPC_ERROR', 'Communication error', msg);
@@ -232,10 +330,13 @@ const App = () => {
 
   const handlePing = async () => {
     try {
-      const res = await window.electron.requestPython({ command: 'ping' });
-      setResponse(JSON.stringify(res));
+      const res = await requestWithRetry(
+        () => window.electron.requestPython({ command: 'ping' }),
+        true // Enable retry for ping
+      );
+      formatAndDisplayResponse('ping', { status: 'healthy' });
     } catch (e) {
-      handleIpcError(e);
+      handleIpcError(e, true);
     }
   };
 
@@ -246,11 +347,14 @@ const App = () => {
   const handleRefreshDLCs = async () => {
     try {
       setResponse("Scanning for installed and missing content...");
-      const res = await window.electron.requestPython({
-        command: 'get_dlc_status',
-        game_dir: '.',
-        manifest_url: manifestUrl
-      }) as { result: DLC[] };
+      const res = await requestWithRetry(
+        () => window.electron.requestPython({
+          command: 'get_dlc_status',
+          game_dir: '.',
+          manifest_url: manifestUrl
+        }),
+        true // Enable retry for DLC status
+      ) as { result: DLC[] };
       
       if (res.result) {
         // Preserve selection state if the DLC was already in the list
@@ -262,10 +366,10 @@ const App = () => {
           };
         });
         setDlcs(updatedDlcs);
-        setResponse(`Discovered ${updatedDlcs.length} total packs.`);
+        formatAndDisplayResponse('dlc_status', { count: updatedDlcs.length });
       }
     } catch (e) {
-      handleIpcError(e);
+      handleIpcError(e, true);
     }
   };
 
@@ -319,15 +423,20 @@ const App = () => {
 
     try {
       setResponse("Starting verification...");
-      const res = await window.electron.requestPython({ 
-        command: 'verify_all', 
-        game_dir: '.', 
-        manifest_url: manifestUrl,
-        version: selectedVersion || undefined,
-        selected_packs: dlcs.filter(d => d.selected).map(d => d.folder),
-        language: selectedLanguage,
-        id 
-      });
+      
+      // Use retry for retryable errors
+      const res = await requestWithRetry(
+        () => window.electron.requestPython({ 
+          command: 'verify_all', 
+          game_dir: '.', 
+          manifest_url: manifestUrl,
+          version: selectedVersion || undefined,
+          selected_packs: dlcs.filter(d => d.selected).map(d => d.folder),
+          language: selectedLanguage,
+          id 
+        }),
+        true // Enable retry for verify_all
+      );
 
       // Parse operations from response
       const { operations, totalSize } = parseOperations(res);
@@ -353,7 +462,7 @@ const App = () => {
         formatAndDisplayResponse('verify_no_ops', { status: 'No operations needed' });
       }
     } catch (e) {
-      handleIpcError(e);
+      handleIpcError(e, true); // Can retry
     } finally {
       removeListener();
     }
@@ -376,18 +485,21 @@ const App = () => {
   const handleDiscoverVersions = async () => {
     try {
       setResponse("Scanning for available versions...");
-      const res = await window.electron.requestPython({
-        command: 'discover_versions',
-        url: manifestUrl
-      }) as { result?: string[] };
+      const res = await requestWithRetry(
+        () => window.electron.requestPython({
+          command: 'discover_versions',
+          url: manifestUrl
+        }),
+        true // Enable retry for version discovery
+      ) as { result?: string[] };
       if (res.result) {
         const discovered = res.result;
         setAvailableVersions(discovered);
         if (discovered.length > 0) setSelectedVersion(discovered[0]);
-        setResponse(`Discovered ${discovered.length} versions.`);
+        formatAndDisplayResponse('versions_discovered', { count: discovered.length });
       }
     } catch (e) {
-      handleIpcError(e);
+      handleIpcError(e, true);
     }
   };
 
@@ -398,29 +510,46 @@ const App = () => {
 
   const handleDiscoverMirrors = async () => {
     setIsProbing(true);
-    setDiscoveredMirrors([
+    const defaultMirrors = [
       { url: 'https://fitgirl-repacks.site', weight: 10 },
       { url: 'https://elamigos.site', weight: 8 },
       { url: 'https://cs.rin.ru', weight: 5 }
-    ]);
+    ];
+    setDiscoveredMirrors(defaultMirrors);
 
     try {
-      const res = await window.electron.requestPython({
-        command: 'discover_mirrors',
-        mirrors: [
-          { url: 'https://fitgirl-repacks.site', weight: 10 },
-          { url: 'https://elamigos.site', weight: 8 },
-          { url: 'https://cs.rin.ru', weight: 5 }
-        ]
-      }) as { result?: MirrorResult[] };
-      if (res.result) {
+      const res = await requestWithRetry(
+        () => window.electron.requestPython({
+          command: 'discover_mirrors',
+          mirrors: defaultMirrors
+        }),
+        true // Enable retry for mirror discovery
+      ) as { result?: MirrorResult[] };
+      if (res.result && res.result.length > 0) {
         setDiscoveredMirrors(res.result);
+        setSelectedMirror(res.result[0]); // Auto-select best mirror
+        formatAndDisplayResponse('mirrors_discovered', { 
+          count: res.result.length,
+          healthy: res.result.filter(m => m.weight > 0).length 
+        });
+        // Show selector to allow manual override
+        setShowMirrorSelector(true);
       }
     } catch (e) {
-      handleIpcError(e);
+      handleIpcError(e, true);
+      // Still show selector with default mirrors even if discovery fails
+      setShowMirrorSelector(true);
     } finally {
       setIsProbing(false);
     }
+  };
+
+  const handleCloseMirrorSelector = () => {
+    setShowMirrorSelector(false);
+  };
+
+  const handleSelectMirror = (mirror: MirrorResult) => {
+    setSelectedMirror(mirror);
   };
 
   const handleStartUpdate = async () => {
@@ -434,15 +563,19 @@ const App = () => {
       setResponse("Starting full update workflow...");
       setProgress({ status: 'initializing' });
 
-      const res = await window.electron.requestPython({
-        command: 'start_update',
-        game_dir: '.', 
-        manifest_url: manifestUrl,
-        version: selectedVersion || undefined,
-        selected_packs: dlcs.filter(d => d.selected).map(d => d.folder),
-        language: selectedLanguage,
-        id
-      });
+      // Use retry for retryable errors
+      const res = await requestWithRetry(
+        () => window.electron.requestPython({
+          command: 'start_update',
+          game_dir: '.', 
+          manifest_url: manifestUrl,
+          version: selectedVersion || undefined,
+          selected_packs: dlcs.filter(d => d.selected).map(d => d.folder),
+          language: selectedLanguage,
+          id
+        }),
+        true // Enable retry for start_update
+      );
 
       // Parse update result
       const endTime = Date.now();
@@ -492,7 +625,7 @@ const App = () => {
       setShowUpdateStatus(true);
       setProgress(null);
 
-      handleIpcError(e);
+      handleIpcError(e, true); // Can retry
     } finally {
       removeListener();
     }
@@ -518,6 +651,16 @@ const App = () => {
         {progress && <ProgressIndicator progress={progress} isVisible={!!progress} />}
       </AnimatePresence>
 
+      {/* Retry Notification */}
+      <RetryNotification
+        isVisible={retryState.isVisible}
+        attempt={retryState.attempt}
+        maxAttempts={retryState.maxAttempts}
+        nextRetryIn={retryState.nextRetryIn}
+        lastError={retryState.lastError}
+        onCancel={cancelRetry}
+      />
+
       {/* Error Toast System */}
       <ErrorToast errors={errors} onDismiss={dismissError} />
 
@@ -537,6 +680,16 @@ const App = () => {
         isVisible={showUpdateStatus}
         onClose={handleCloseUpdateStatus}
         onRetry={handleRetryUpdate}
+      />
+
+      {/* Mirror Selector Modal */}
+      <MirrorSelector
+        mirrors={discoveredMirrors}
+        selectedMirror={selectedMirror}
+        onSelect={handleSelectMirror}
+        onClose={handleCloseMirrorSelector}
+        isVisible={showMirrorSelector}
+        isProbing={isProbing}
       />
 
       {/* TopShelf Navigation */}
@@ -661,6 +814,23 @@ const App = () => {
             </Button>
           </div>
 
+          {/* Queue Status */}
+          {queueState.operations.length > 0 && (
+            <motion.button
+              onClick={() => setShowOperationQueue(!showOperationQueue)}
+              className="w-full py-3 px-4 bg-blue-500/20 border border-blue-500/50 rounded-lg text-blue-300 hover:bg-blue-500/30 transition-colors flex items-center justify-between"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <span>
+                Operation Queue ({queueState.completedCount + queueState.failedCount}/{queueState.operations.length})
+              </span>
+              <span className="text-sm">
+                {queueState.isRunning ? '⏸ Running' : '⏹ Paused'}
+              </span>
+            </motion.button>
+          )}
+
           <div className="grid grid-cols-2 gap-4">
             <Button onClick={handleVerify} variant="primary">
               Verify All
@@ -683,6 +853,21 @@ const App = () => {
         </div>
         </motion.div>
       </AnimatePresence>
+
+      {/* Operation Queue Display */}
+      <OperationQueue
+        operations={queueState.operations}
+        isRunning={queueState.isRunning}
+        totalProgress={queueState.totalProgress}
+        completedCount={queueState.completedCount}
+        failedCount={queueState.failedCount}
+        isVisible={showOperationQueue}
+        onRemove={removeOperation}
+        onPause={pauseQueue}
+        onResume={resumeQueue}
+        onCancel={cancelQueue}
+        onClearCompleted={clearCompletedOperations}
+      />
 
       {/* Diagnostic Console Overlay */}
       <DiagnosticConsole logs={logs} onClearLogs={handleClearLogs} />
