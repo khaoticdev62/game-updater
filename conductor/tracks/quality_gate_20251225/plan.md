@@ -12,11 +12,11 @@
 - [x] Task: Enhance `tests/test_url_resolver.py` with more complex and failing HTML mock data.
 - [x] Task: Conductor - User Manual Verification 'Scraper Hardening' (Protocol in workflow.md) (9f673fa)
 
-## Phase 3: Mod Guardian & Safety Gates Finalization
+## Phase 3: Mod Guardian & Safety Gates Finalization [checkpoint: 858c254]
 - [x] Task: Refactor `ModGuardian` to explicitly target `.ts4script` and `.package` files and ignore others.
 - [x] Task: Enhance `tests/test_mod_guardian.py` to verify correct handling of non-mod files.
 - [x] Task: Add edge case tests to `tests/test_rollback.py` (e.g., permissions errors, empty backup lists).
-- [ ] Task: Conductor - User Manual Verification 'Safety Gates Finalization' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Safety Gates Finalization' (Protocol in workflow.md) (858c254)
 
 ## Phase 4: Full-System E2E Verification & Final Cleanup
 - [ ] Task: Create a new E2E test (`tests/test_e2e_full_workflow.py`) that simulates a complete user session.
