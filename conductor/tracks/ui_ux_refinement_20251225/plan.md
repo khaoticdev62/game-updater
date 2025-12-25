@@ -2,7 +2,7 @@
 
 ## Phase 1: Infrastructure & Core Layout
 - [x] Task: Install and configure Tailwind CSS. 8da9446
-- [ ] Task: Create a `Layout` component with a Sidebar/Header structure.
+- [x] Task: Create a `Layout` component with a Sidebar/Header structure. 1bd4465
 - [ ] Task: Refactor `App.tsx` to use the new layout and Tailwind base styles.
 - [ ] Task: Conductor - User Manual Verification 'UI Infrastructure'
 
