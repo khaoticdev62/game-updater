@@ -6,6 +6,7 @@
 - [ ] Task: Conductor - User Manual Verification 'Cleanup' (Protocol in workflow.md)
 
 ## Phase 2: Code Organization
-- [ ] Task: Create `scripts/reverse_engineering/` directory.
-- [ ] Task: Move `extract_pyz_manual.py`, `disas_pyc.py`, `dump_consts.py`, `find_links.py`, `pyinstxtractor.py` to the new directory.
+- [x] Task: Create `scripts/reverse_engineering/` directory.
+- [x] Task: Move `extract_pyz_manual.py`, `disas_pyc.py`, `dump_consts.py`, `find_links.py`, `pyinstxtractor.py` to the new directory.
+- [ ] Task: Conductor - User Manual Verification 'Organization' (Protocol in workflow.md)
 - [ ] Task: Conductor - User Manual Verification 'Organization' (Protocol in workflow.md)
