@@ -18,8 +18,8 @@
 - [x] Task: Add edge case tests to `tests/test_rollback.py` (e.g., permissions errors, empty backup lists).
 - [x] Task: Conductor - User Manual Verification 'Safety Gates Finalization' (Protocol in workflow.md) (858c254)
 
-## Phase 4: Full-System E2E Verification & Final Cleanup
+## Phase 4: Full-System E2E Verification & Final Cleanup [checkpoint: 89d3c4e]
 - [x] Task: Create a new E2E test (`tests/test_e2e_full_workflow.py`) that simulates a complete user session.
 - [x] Task: Run `npm run lint -- --fix` to automatically correct style issues.
 - [x] Task: Perform a final review of all code for any remaining placeholders or comments.
-- [ ] Task: Conductor - User Manual Verification 'Final Verification' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Final Verification' (Protocol in workflow.md) (89d3c4e)
