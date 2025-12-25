@@ -23,6 +23,7 @@ const App = () => {
   const [manifestUrl, setManifestUrl] = useState<string>('');
   const [availableVersions, setAvailableVersions] = useState<string[]>([]);
   const [selectedVersion, setSelectedVersion] = useState<string>('');
+  const [showHistorical, setShowHistorical] = useState<boolean>(false);
   const [selectedLanguage, setSelectedLanguage] = useState<string>('en_US');
   const [dlcs, setDlcs] = useState<DLC[]>([
     { name: 'Get to Work', folder: 'EP01', status: 'Installed', selected: true, category: 'Expansion Packs' },
@@ -188,6 +189,11 @@ const App = () => {
     }
   };
 
+  const filteredVersions = useMemo(() => {
+    if (showHistorical) return availableVersions;
+    return availableVersions.slice(0, 1); // Only latest
+  }, [availableVersions, showHistorical]);
+
   const handleDiscoverMirrors = async () => {
     setIsProbing(true);
     setDiscoveredMirrors([
@@ -271,8 +277,17 @@ const App = () => {
           <div style={{ marginTop: '10px' }}>
             <label>Target Version: </label>
             <select value={selectedVersion} onChange={(e) => setSelectedVersion(e.target.value)} style={{ padding: '5px', marginRight: '20px' }}>
-              {availableVersions.map(v => <option key={v} value={v}>{v}</option>)}
+              {filteredVersions.map(v => <option key={v} value={v}>{v}</option>)}
             </select>
+
+            <label style={{ marginRight: '20px' }}>
+              <input 
+                type="checkbox" 
+                checked={showHistorical} 
+                onChange={(e) => setShowHistorical(e.target.checked)} 
+              />
+              Show Historical Versions
+            </label>
 
             <label>Language: </label>
             <select value={selectedLanguage} onChange={(e) => setSelectedLanguage(e.target.value)} style={{ padding: '5px' }}>
