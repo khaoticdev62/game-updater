@@ -19,11 +19,11 @@
 - [x] Task: Finalize Theme & Cursor Engine (CSS Variable injection & state-aware cursor morphing) (cf5b2ba)
 - [x] Task: Conductor - User Manual Verification 'UI/UX Integration' (Protocol in workflow.md) (ac389cf)
 
-## Phase 4: Advanced Mod Guardian & Safety Gates
+## Phase 4: Advanced Mod Guardian & Safety Gates [checkpoint: 8481837]
 - [x] Task: Implement Community-Driven Selective Quarantine (Scarlet Forums integration) (36ab009)
 - [x] Task: Build Mod Guardian Policy Engine (User settings for Always/Selective/Never) (bfc81a1)
 - [x] Task: Finalize Atomic Safety Gates (Automated pre-patch restore points) (97e60bb)
-- [ ] Task: Conductor - User Manual Verification 'Safety & Mod Guardian' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Safety & Mod Guardian' (Protocol in workflow.md) (8481837)
 
 ## Phase 5: Build Optimization & Distribution
 - [ ] Task: Refine Turbo Build System (Concurrent packaging & dependency hashing)
