@@ -13,7 +13,6 @@
 - [x] Task: Conductor - User Manual Verification 'Component Polish' b98c7e1
 
 ## Phase 3: Transitions & UX Polish
-- [ ] Task: Implement smooth transitions between application states (Discovery, Updating).
-- [ ] Task: Add a "Glassmorphism" effect to overlays and tooltips.
+- [x] Task: Implement smooth transitions between application states (Discovery, Updating). d3ce40f
+- [x] Task: Add a "Glassmorphism" effect to overlays and tooltips. d3ce40f
 - [ ] Task: Ensure accessibility compliance (ARIA labels, keyboard focus states).
-- [ ] Task: Conductor - User Manual Verification 'Final UX Audit'
