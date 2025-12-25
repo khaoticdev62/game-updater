@@ -25,8 +25,8 @@
 - [x] Task: Finalize Atomic Safety Gates (Automated pre-patch restore points) (97e60bb)
 - [x] Task: Conductor - User Manual Verification 'Safety & Mod Guardian' (Protocol in workflow.md) (8481837)
 
-## Phase 5: Build Optimization & Distribution
+## Phase 5: Build Optimization & Distribution [checkpoint: 5189e92]
 - [x] Task: Refine Turbo Build System (Concurrent packaging & dependency hashing) (442a656)
-- [x] Task: Update Inno Setup Script (VC++ Redist checks & tool bundling)
-- [ ] Task: Final Production E2E Verification (Full suite test pass)
-- [ ] Task: Conductor - User Manual Verification 'Deployment' (Protocol in workflow.md)
+- [x] Task: Update Inno Setup Script (VC++ Redist checks & tool bundling) (8c49f7b)
+- [x] Task: Final Production E2E Verification (Full suite test pass)
+- [x] Task: Conductor - User Manual Verification 'Deployment' (Protocol in workflow.md) (5189e92)
