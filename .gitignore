@@ -90,3 +90,10 @@ typings/
 
 # Electron-Forge
 out/
+
+# Large build artifacts and executables
+*.exe
+*.zip
+dist/
+dist_final/
+build/
