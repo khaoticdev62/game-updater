@@ -27,6 +27,6 @@
 
 ## Phase 5: Build Optimization & Distribution
 - [x] Task: Refine Turbo Build System (Concurrent packaging & dependency hashing) (442a656)
-- [~] Task: Update Inno Setup Script (VC++ Redist checks & tool bundling)
+- [x] Task: Update Inno Setup Script (VC++ Redist checks & tool bundling)
 - [ ] Task: Final Production E2E Verification (Full suite test pass)
 - [ ] Task: Conductor - User Manual Verification 'Deployment' (Protocol in workflow.md)
