@@ -43,7 +43,8 @@ const DiagnosticConsole: React.FC<DiagnosticConsoleProps> = ({ logs, onClear }) 
         {onClear && (
           <button 
             onClick={onClear}
-            className="p-2 hover:bg-white/5 rounded-lg text-gray-600 hover:text-brand-danger transition-all active:scale-90"
+            aria-label="Clear diagnostic logs"
+            className="p-2 hover:bg-white/5 rounded-lg text-gray-600 hover:text-brand-danger transition-all outline-none focus-visible:ring-2 focus-visible:ring-brand-danger active:scale-90"
             title="Clear Logs"
           >
             <Trash2 size={14} />

@@ -276,13 +276,15 @@ const App = () => {
                         placeholder="https://example.com/manifest.json"
                         className="flex-1 bg-transparent px-4 py-2 text-sm text-gray-200 focus:outline-none placeholder:text-gray-700"
                       />
-                      <button 
-                        onClick={handleDiscoverVersions}
-                        className="bg-brand-accent hover:bg-blue-600 text-white px-6 py-2 rounded-lg text-xs font-bold transition-all shadow-lg shadow-brand-accent/20 active:scale-95 flex items-center gap-2"
-                      >
-                        <RefreshCw size={14} />
-                        Sync
-                      </button>
+                                        <button 
+                                          onClick={handleDiscoverVersions}
+                                          aria-label="Scan manifest for available versions"
+                                          className="bg-brand-accent hover:bg-blue-600 text-white px-6 py-2 rounded-lg text-xs font-bold transition-all shadow-lg shadow-brand-accent/20 outline-none focus-visible:ring-2 focus-visible:ring-white active:scale-95 flex items-center gap-2"
+                                        >
+                                          <RefreshCw size={14} />
+                                          Sync
+                                        </button>
+                      
                     </div>
                     <p className="text-[10px] text-gray-600 ml-1 italic">Point to a valid Sims 4 manifest to begin scanning for updates.</p>
                   </div>
@@ -344,20 +346,23 @@ const App = () => {
                       <p className="text-[11px] text-gray-500 mt-0.5 font-mono">Estimated allocation: {selectionSummary.size} GB</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 w-full sm:w-auto">
-                    <button 
-                      onClick={handleVerify}
-                      className="flex-1 sm:flex-none bg-white/5 hover:bg-white/10 text-gray-300 px-8 py-2.5 rounded-xl text-xs font-bold transition-all border border-white/5 active:scale-95"
-                    >
-                      Analyze Files
-                    </button>
-                    <button 
-                      onClick={handleStartUpdate}
-                      className="flex-1 sm:flex-none bg-brand-accent hover:bg-blue-600 text-white px-10 py-2.5 rounded-xl text-xs font-black transition-all shadow-xl shadow-brand-accent/20 active:scale-95 uppercase tracking-widest"
-                    >
-                      Initiate Sync
-                    </button>
-                  </div>
+                                <div className="flex items-center gap-3 w-full sm:w-auto">
+                                  <button 
+                                    onClick={handleVerify}
+                                    aria-label="Analyze local game files against manifest"
+                                    className="flex-1 sm:flex-none bg-white/5 hover:bg-white/10 text-gray-300 px-8 py-2.5 rounded-xl text-xs font-bold transition-all border border-white/5 outline-none focus-visible:ring-2 focus-visible:ring-gray-400 active:scale-95"
+                                  >
+                                    Analyze Files
+                                  </button>
+                                  <button 
+                                    onClick={handleStartUpdate}
+                                    aria-label="Initiate the game update and patching process"
+                                    className="flex-1 sm:flex-none bg-brand-accent hover:bg-blue-600 text-white px-10 py-2.5 rounded-xl text-xs font-black transition-all shadow-xl shadow-brand-accent/20 outline-none focus-visible:ring-2 focus-visible:ring-white active:scale-95 uppercase tracking-widest"
+                                  >
+                                    Initiate Sync
+                                  </button>
+                                </div>
+                  
                 </div>
               </section>
 

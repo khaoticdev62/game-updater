@@ -20,7 +20,8 @@ const ScraperViewfinder: React.FC<ScraperViewfinderProps> = ({ mirrors, isProbin
           <button 
             onClick={onScan}
             disabled={isProbing}
-            className="text-xs bg-brand-accent/10 hover:bg-brand-accent text-brand-accent hover:text-white px-3 py-1 rounded transition-all disabled:opacity-50"
+            aria-label="Scan for new content mirrors"
+            className="text-xs bg-brand-accent/10 hover:bg-brand-accent text-brand-accent hover:text-white px-3 py-1 rounded transition-all outline-none focus-visible:ring-2 focus-visible:ring-brand-accent disabled:opacity-50"
           >
             Trigger Re-Scan
           </button>

@@ -37,7 +37,8 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, isHe
           </h1>
           <button 
             onClick={onRefresh}
-            className="mt-2 flex items-center gap-2 text-xs group hover:opacity-80 transition-opacity"
+            aria-label="Refresh backend health status"
+            className="mt-2 flex items-center gap-2 text-xs group hover:opacity-80 transition-opacity outline-none focus-visible:ring-1 focus-visible:ring-brand-accent rounded-full px-1"
           >
             <div className={`w-2 h-2 rounded-full ${isHealthy ? 'bg-brand-success' : 'bg-brand-danger animate-pulse'}`} />
             <span className={isHealthy ? 'text-gray-400 group-hover:text-gray-300' : 'text-brand-danger group-hover:text-red-400'}>
@@ -46,20 +47,22 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, isHe
           </button>
         </div>
 
-        <nav className="flex-1 px-4 py-4 space-y-1">
+        <nav className="flex-1 px-4 py-4 space-y-1" role="navigation" aria-label="Main Navigation">
           {navItems.map((item) => {
             const Icon = item.icon;
             return (
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                aria-label={`Navigate to ${item.label}`}
+                aria-current={activeTab === item.id ? 'page' : undefined}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-brand-accent ${
                   activeTab === item.id 
                     ? 'bg-brand-accent text-white shadow-lg shadow-brand-accent/20' 
                     : 'text-gray-400 hover:bg-white/5 hover:text-gray-200'
                 }`}
               >
-                <Icon size={18} />
+                <Icon size={18} aria-hidden="true" />
                 <span className="font-medium text-sm">{item.label}</span>
               </button>
             );
