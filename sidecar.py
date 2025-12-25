@@ -168,6 +168,20 @@ def main():
                 resolved = list(graph.resolve_dependencies(selected))
                 response = {"id": req_id, "result": resolved}
 
+            elif command == "get_dlc_status":
+                from update_logic import DLCManager
+                game_dir = request.get("game_dir")
+                manifest_url = request.get("manifest_url")
+                
+                # We need to fetch the manifest first to pass it to DLCManager
+                from manifest import ManifestFetcher
+                fetcher = ManifestFetcher(manifest_url)
+                manifest_json = fetcher.fetch_manifest_json()
+                
+                manager = DLCManager(game_dir, json.dumps(manifest_json))
+                status = manager.get_dlc_status()
+                response = {"id": req_id, "result": status}
+
             else:
                 response = {"id": req_id, "error": f"Unknown command: {command}"}
                 

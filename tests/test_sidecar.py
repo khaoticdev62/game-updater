@@ -37,15 +37,8 @@ def test_discover_mirrors_command():
     mock_discovery = MagicMock()
     mock_discovery.MirrorDiscovery.return_value.discover_best_mirrors.return_value = [{"url": "http://mirror1.com", "available": True}]
     
-    # Asyncio run mock
-    async def async_run_mock(coro):
-        return [{"url": "http://mirror1.com", "available": True}]
-    
     # We need to mock asyncio.run because discover_best_mirrors is async
-    # But since we're mocking the module, we can just make the return value of run() contain the result.
-    
     with patch.dict('sys.modules', {'discovery': mock_discovery, 'asyncio': MagicMock(run=lambda x: x)}):
-        # We also need to fix the discover_best_mirrors return value to not be a coroutine since we mocked run
         mock_discovery.MirrorDiscovery.return_value.discover_best_mirrors.return_value = [{"url": "http://mirror1.com", "available": True}]
 
         with patch('sys.stdin', StringIO(json.dumps(mock_request) + '\n')):
@@ -71,3 +64,29 @@ def test_select_mirror_command():
                 mock_discovery.set_selected_mirror.assert_called_once_with("http://selected.com")
                 response = get_last_json_line(mock_stdout.getvalue())
                 assert response['result'] == "success"
+
+def test_get_dlc_status_command():
+    mock_request = {
+        "command": "get_dlc_status",
+        "id": "test_dlc",
+        "game_dir": "/path/to/game",
+        "manifest_url": "http://manifest.com"
+    }
+    
+    mock_update_logic = MagicMock()
+    mock_manifest = MagicMock()
+    
+    mock_manager = mock_update_logic.DLCManager.return_value
+    mock_manager.get_dlc_status.return_value = [{"name": "EP01", "status": "Installed", "description": "Desc"}]
+    
+    mock_fetcher = mock_manifest.ManifestFetcher.return_value
+    mock_fetcher.fetch_manifest_json.return_value = {"dlcs": []}
+
+    with patch.dict('sys.modules', {'update_logic': mock_update_logic, 'manifest': mock_manifest}):
+        with patch('sys.stdin', StringIO(json.dumps(mock_request) + '\n')):
+            with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+                sidecar.main()
+                response = get_last_json_line(mock_stdout.getvalue())
+                assert response['id'] == "test_dlc"
+                assert response['result'][0]['name'] == "EP01"
+                assert response['result'][0]['description'] == "Desc"
