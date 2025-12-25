@@ -20,8 +20,8 @@
 - [x] Task: Conductor - User Manual Verification 'UI/UX Integration' (Protocol in workflow.md) (ac389cf)
 
 ## Phase 4: Advanced Mod Guardian & Safety Gates
-- [ ] Task: Implement Community-Driven Selective Quarantine (Scarlet Forums integration)
-- [ ] Task: Build Mod Guardian Policy Engine (User settings for Always/Selective/Never)
+- [x] Task: Implement Community-Driven Selective Quarantine (Scarlet Forums integration) (36ab009)
+- [~] Task: Build Mod Guardian Policy Engine (User settings for Always/Selective/Never)
 - [ ] Task: Finalize Atomic Safety Gates (Automated pre-patch restore points)
 - [ ] Task: Conductor - User Manual Verification 'Safety & Mod Guardian' (Protocol in workflow.md)
 
