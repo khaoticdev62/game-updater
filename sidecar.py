@@ -62,6 +62,25 @@ def main():
                 
                 response = {"id": req_id, "result": {"success": success, "message": message}}
                 
+            elif command == "check_interrupted":
+                game_dir = request.get("game_dir")
+                # Using a dummy manifest URL for initialization
+                manager = UpdateManager(game_dir, "", aria2)
+                response = {"id": req_id, "result": {"interrupted": manager.check_interrupted()}}
+
+            elif command == "run_recovery":
+                game_dir = request.get("game_dir")
+                restore_point = request.get("restore_point")
+                manager = UpdateManager(game_dir, "", aria2)
+                
+                success = manager.recovery.run_recovery(restore_point=restore_point)
+                
+                from doctor import BackendDoctor
+                doctor = BackendDoctor()
+                diagnostics = doctor.check_all()
+                
+                response = {"id": req_id, "result": {"success": success, "diagnostics": diagnostics}}
+
             else:
                 response = {"id": req_id, "error": f"Unknown command: {command}"}
                 

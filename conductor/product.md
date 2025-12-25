@@ -15,6 +15,7 @@ The goal is to reverse engineer, rebuild, and improve the Sims 4 Updater by anad
 - **Modern User Interface:** A clean, intuitive GUI built with modern principles, featuring detailed progress tracking and status reporting.
 - **Advanced DLC Management:** Granular selection and management of expansion packs, game packs, stuff packs, and kits.
 - **High-Performance Infrastructure:** Implementation of multi-threaded downloading and intelligent delta patching to optimize speed and data usage.
+- **Live Manifest Integration:** Real-time fetching of game manifests and dynamic URL resolution for content delivery.
 
 ## Technical Strategy & Research
 - **Reverse Engineering:** Deep analysis of communication protocols, manifest file formats, and original patching logic.

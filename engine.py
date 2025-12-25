@@ -9,13 +9,10 @@ class VerificationEngine:
 
     @staticmethod
     def hash_file(file_path):
-        """Calculates MD5 hash of a file."""
-        hasher = hashlib.md5()
+        """Calculates MD5 hash of a file using optimized file_digest."""
         try:
             with open(file_path, 'rb') as f:
-                for chunk in iter(lambda: f.read(8192), b""):
-                    hasher.update(chunk)
-            return hasher.hexdigest().upper()
+                return hashlib.file_digest(f, "md5").hexdigest().upper()
         except Exception:
             return None
 

@@ -8,8 +8,8 @@
 ## Backend (Logic & Reverse Engineering)
 - **Language:** Python 3.11+.
 - **Networking:** 
-    - **HTTPX:** For high-level API requests and manifest fetching.
-    - **Aiohttp:** For high-performance, asynchronous file downloading and multi-threading.
+    - **HTTPX:** For high-level API requests, manifest fetching, and URL resolution.
+    - **aria2c:** For high-performance, multi-threaded downloading (orchestrated via Python).
 - **Patching:** **PyXdelta (xdelta3)** for intelligent binary delta patching and file repairs.
 - **Reverse Engineering Tools:** 
     - `pyinstxtractor` for extracting original source.

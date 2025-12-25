@@ -2,5 +2,15 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [~] Track: Live Manifest Integration & Full Workflow Orchestration
-*Link: [./conductor/tracks/live_manifest_20251221/](./conductor/tracks/live_manifest_20251221/)*
+## [x] Track: Download & Patching Implementation
+*Link: [./conductor/tracks/download_patching_20251221/](./conductor/tracks/download_patching_20251221/)*
+
+---
+
+## [x] Track: Update Execution & DLC Management
+*Link: [./conductor/tracks/update_dlc_mgmt_20251221/](./conductor/tracks/update_dlc_mgmt_20251221/)*
+
+---
+
+## [~] Track: Production Overhaul & Professional Alignment
+*Link: [./conductor/tracks/production_overhaul_20251224/](./conductor/tracks/production_overhaul_20251224/)*

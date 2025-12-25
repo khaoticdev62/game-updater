@@ -1,19 +1,32 @@
 import os
 import json
+from pathlib import Path
 from engine import ManifestParser, VerificationEngine, Version
 from download import DownloadQueue
 from patch import Patcher
-from manifest import ManifestFetcher, URLResolver # Import new classes
+from manifest import ManifestFetcher, URLResolver
+from janitor import OperationLogger, RecoveryOrchestrator
+from paths import get_app_data_path
 
 class UpdateManager:
     def __init__(self, game_dir, manifest_url, aria2_manager, fetcher=None, resolver=None):
-        self.game_dir = game_dir
+        self.game_dir = Path(game_dir)
         self.fetcher = fetcher or ManifestFetcher(manifest_url)
         self.resolver = resolver or URLResolver()
         self.parser = None # Will be initialized after fetching manifest
         self.engine = VerificationEngine()
         self.queue = DownloadQueue(aria2_manager)
         self.patcher = Patcher()
+        
+        # Professional Alignment: Resilience Components
+        app_data = get_app_data_path()
+        self.op_logger = OperationLogger(app_data / "operations.json")
+        self.recovery = RecoveryOrchestrator(self.game_dir)
+        self.lock_file = self.game_dir / "update.lock"
+
+    def check_interrupted(self) -> bool:
+        """Checks if a previous update session was interrupted."""
+        return self.lock_file.exists()
 
     def get_operations(self, progress_callback=None):
         """
@@ -86,15 +99,20 @@ class UpdateManager:
 
     def apply_operations(self, operations, progress_callback=None):
         """
-        Executes the provided operations.
+        Executes the provided operations with resilience (lock file + logging).
         """
+        # Create session lock
+        self.lock_file.touch()
+        self.op_logger.clear_log()
+
         # 1. Handle full downloads
         download_tasks = [op for op in operations if op['type'] == 'download_full']
         if download_tasks:
             self.queue.clear()
-            for task in download_tasks:
+            for i, task in enumerate(download_tasks):
                 url = task['url']
                 self.queue.add_task(url, self.game_dir, filename=task['file'])
+                self.op_logger.log_operation(f"dl_{i}", task)
             
             def dl_callback(p):
                 if progress_callback:
@@ -103,12 +121,18 @@ class UpdateManager:
             success = self.queue.process_all(callback=dl_callback)
             if not success:
                 return False, "Some downloads failed"
+            
+            # Mark all downloads as completed in log
+            for i in range(len(download_tasks)):
+                self.op_logger.update_status(f"dl_{i}", "completed")
 
         # 2. Handle patches
         patch_tasks = [op for op in operations if op['type'] == 'patch_delta']
         for i, task in enumerate(patch_tasks):
             rel_path = task['file']
             full_path = os.path.join(self.game_dir, rel_path)
+            self.op_logger.log_operation(f"patch_{i}", task)
+            
             # In a real scenario, patch_file would be downloaded to a temp dir
             patch_file = os.path.join(self.game_dir, rel_path + ".delta") 
             
@@ -123,6 +147,13 @@ class UpdateManager:
             success, message = self.patcher.apply_patch_safe(full_path, patch_file, task['target_md5'])
             if not success:
                 return False, f"Patching failed for {rel_path}: {message}"
+            
+            self.op_logger.update_status(f"patch_{i}", "completed")
+
+        # Successful completion: cleanup
+        if self.lock_file.exists():
+            self.lock_file.unlink()
+        self.op_logger.clear_log()
 
         return True, "All operations completed successfully"
 
