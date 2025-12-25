@@ -13,7 +13,7 @@
 - **Patching:** **PyXdelta (xdelta3)** for intelligent binary delta patching and file repairs.
 - **Reverse Engineering Tools:** 
     - `pyinstxtractor` for extracting original source.
-    - `uncompyle6` or `decompyle3` for Python bytecode analysis.
+    - **Scripts:** Custom decompilation and analysis tools (relocated to `scripts/reverse_engineering/`).
 - **Resilience & Safety:**
     - **JSON Stateful Logging:** For resumable background operations.
     - **Rollback Orchestration:** Time-stamped ZIP-based game state preservation.

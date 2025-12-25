@@ -34,4 +34,10 @@ contextBridge.exposeInMainWorld('electron', {
 
           },
 
+          onBackendDisconnected: (callback: any) => {
+            const listener = () => callback();
+            ipcRenderer.on('backend-disconnected', listener);
+            return () => ipcRenderer.removeListener('backend-disconnected', listener);
+          },
+
         });

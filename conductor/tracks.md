@@ -22,5 +22,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [~] Track: Project Maintenance & Cleanup
-*Link: [./conductor/tracks/maintenance_cleanup_20251225/](./conductor/tracks/maintenance_cleanup_20251225/)*
+## [~] Track: Final Quality Gate & Refinement
+*Link: [./conductor/tracks/quality_gate_20251225/](./conductor/tracks/quality_gate_20251225/)*

@@ -53,6 +53,13 @@ class HybridEventBus extends EventEmitter {
     this.sidecar.stderr?.on('data', (data) => {
       console.error(`[Python Stderr]: ${data}`);
     });
+
+    this.sidecar.on('exit', (code) => {
+      console.error(`Sidecar process exited with code ${code}`);
+      this.emit('backend-disconnected');
+      // Attempt to restart after a delay
+      setTimeout(() => this.start(), 3000);
+    });
   }
 
   request(payload: any): Promise<any> {
@@ -128,6 +135,12 @@ app.on('ready', () => {
   eventBus.on('backend-ready', () => {
     BrowserWindow.getAllWindows().forEach(win => {
       win.webContents.send('backend-ready');
+    });
+  });
+
+  eventBus.on('backend-disconnected', () => {
+    BrowserWindow.getAllWindows().forEach(win => {
+      win.webContents.send('backend-disconnected');
     });
   });
 });

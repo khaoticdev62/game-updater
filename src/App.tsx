@@ -11,6 +11,7 @@ const App = () => {
   const [isProbing, setIsProbing] = useState<boolean>(false);
   const [discoveredMirrors, setDiscoveredMirrors] = useState<MirrorResult[]>([]);
   const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [manifestUrl, setManifestUrl] = useState<string>('');
   const [dlcs, setDlcs] = useState<DLC[]>([
     { name: 'Get to Work', folder: 'EP01', status: 'Installed', selected: true },
     { name: 'Get Together', folder: 'EP02', status: 'Missing', selected: false },
@@ -55,9 +56,14 @@ const App = () => {
       pollId = setInterval(poll, pollInterval);
     });
 
+    const removeDisconnectListener = window.electron.onBackendDisconnected(() => {
+      setIsHealthy(false);
+    });
+
     return () => {
       clearInterval(pollId);
       removeReadyListener();
+      removeDisconnectListener();
     };
   }, []);
 
@@ -68,8 +74,6 @@ const App = () => {
     });
     return () => removeListener();
   }, []);
-
-  const mockManifestUrl = "https://jsonplaceholder.typicode.com/todos/1"; // Public static JSON endpoint
 
   const handlePing = async () => {
     try {
@@ -95,7 +99,7 @@ const App = () => {
       const res = await window.electron.requestPython({ 
         command: 'verify_all', 
         game_dir: '.', 
-        manifest_url: mockManifestUrl,
+        manifest_url: manifestUrl,
         id 
       });
       setResponse(JSON.stringify(res, null, 2));
@@ -120,7 +124,7 @@ const App = () => {
       const res = await window.electron.requestPython({ 
         command: 'start_update', 
         game_dir: '.', 
-        manifest_url: mockManifestUrl,
+        manifest_url: manifestUrl,
         id 
       });
       setResponse(JSON.stringify(res, null, 2));
@@ -169,7 +173,7 @@ const App = () => {
       const res = await window.electron.requestPython({
         command: 'start_update',
         game_dir: '.', 
-        manifest_url: mockManifestUrl,
+        manifest_url: manifestUrl,
         id
       });
       setResponse(JSON.stringify(res, null, 2));
@@ -195,6 +199,17 @@ const App = () => {
         </span>
       </div>
       
+      <section style={{ marginBottom: '20px' }}>
+        <h3>Configuration</h3>
+        <input 
+          type="text" 
+          value={manifestUrl} 
+          onChange={(e) => setManifestUrl(e.target.value)}
+          placeholder="Enter Manifest URL"
+          style={{ width: '300px', padding: '5px' }}
+        />
+      </section>
+
       <section style={{ marginBottom: '20px' }}>
         <h3>Available Content</h3>
         <DLCList dlcs={dlcs} onToggle={toggleDLC} />
