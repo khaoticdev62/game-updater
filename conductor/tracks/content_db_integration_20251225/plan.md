@@ -8,8 +8,8 @@
 
 ## Phase 2: DLC Manager Integration
 - [x] Task: Update `DLCManager` in `update_logic.py` to utilize the new database. 72ebf5c
-- [ ] Task: Implement "Missing Content Discovery" logic to flag uninstalled packs from the DB.
-- [ ] Task: Enhance `get_dlc_status` IPC command to include rich metadata (descriptions, release dates).
+- [x] Task: Implement "Missing Content Discovery" logic to flag uninstalled packs from the DB. 22a6897
+- [~] Task: Enhance `get_dlc_status` IPC command to include rich metadata (descriptions, release dates).
 - [ ] Task: Conductor - User Manual Verification 'Discovery Integration' (Protocol in workflow.md)
 
 ## Phase 3: UI Enrichment
