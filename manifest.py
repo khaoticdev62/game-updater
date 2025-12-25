@@ -4,6 +4,7 @@ import os
 import sys
 import re
 from typing import Optional
+from bs4 import BeautifulSoup
 
 class ManifestFetcher:
     def __init__(self, manifest_url):
@@ -76,36 +77,39 @@ class URLResolver:
             return url
 
     def _resolve_mediafire_link(self, url: str) -> str:
-        """Resolves MediaFire download page to direct link."""
+        """Resolves MediaFire download page to direct link using BeautifulSoup."""
         try:
             response = self.client.get(url)
-            # More flexible MediaFire regex
-            match = re.search(r'href="(https?://download[^"]+mediafire\.com/[^"]+)"', response.text)
-            if match:
-                return match.group(1)
+            soup = BeautifulSoup(response.text, "html.parser")
+            link = soup.find('a', {'id': 'downloadButton'})
+            if link and 'href' in link.attrs:
+                return link['href']
         except Exception:
             pass
         return url
 
     def _resolve_fitgirl_link(self, url: str) -> str:
-        """Resolves FitGirl repack page to a preferred download link (e.g. Torrent)."""
+        """Resolves FitGirl repack page using BeautifulSoup."""
         try:
             response = self.client.get(url)
-            match = re.search(r'href="([^"]+\.torrent)"', response.text)
-            if match:
-                return match.group(1)
+            soup = BeautifulSoup(response.text, "html.parser")
+            # Find a link where the text contains 'torrent'
+            link = soup.find('a', string=re.compile(r'torrent', re.IGNORECASE))
+            if link and 'href' in link.attrs:
+                return link['href']
         except Exception:
             pass
         return url
 
     def _resolve_elamigos_link(self, url: str) -> str:
-        """Resolves ElAmigos page to a mirror link."""
+        """Resolves ElAmigos page to a mirror link using BeautifulSoup."""
         try:
             response = self.client.get(url)
-            # Match any mediafire link on the page
-            match = re.search(r'href="(https?://[^"]*mediafire\.com/[^"]+)"', response.text)
-            if match:
-                return match.group(1)
+            soup = BeautifulSoup(response.text, "html.parser")
+            # Find a link whose href contains 'mediafire.com'
+            link = soup.find('a', href=re.compile(r'mediafire\.com'))
+            if link and 'href' in link.attrs:
+                return link['href']
         except Exception:
             pass
         return url

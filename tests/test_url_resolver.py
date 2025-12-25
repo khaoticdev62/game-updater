@@ -26,7 +26,8 @@ def test_resolve_mediafire_link(httpx_mock):
     mediafire_page_url = "http://www.mediafire.com/file/some_id/file.zip"
     direct_download_url = "https://download1234.mediafire.com/random/some_id/file.zip"
     
-    httpx_mock.add_response(url=mediafire_page_url, text=f'href="{direct_download_url}"')
+    mock_html = f'<div><a id="downloadButton" href="{direct_download_url}">Download</a></div>'
+    httpx_mock.add_response(url=mediafire_page_url, text=mock_html)
     
     resolver = URLResolver()
     resolved = resolver.resolve_url(mediafire_page_url)
@@ -35,7 +36,8 @@ def test_resolve_mediafire_link(httpx_mock):
 def test_resolve_fitgirl_link(httpx_mock):
     fitgirl_url = "https://fitgirl-repacks.site/some-game/"
     download_link = "https://example.com/game.torrent"
-    httpx_mock.add_response(url=fitgirl_url, text=f'href="{download_link}"')
+    mock_html = f'<ul><li><a href="{download_link}">Magnet / .torrent</a></li></ul>'
+    httpx_mock.add_response(url=fitgirl_url, text=mock_html)
     
     resolver = URLResolver()
     resolved = resolver.resolve_url(fitgirl_url)
@@ -44,10 +46,12 @@ def test_resolve_fitgirl_link(httpx_mock):
 def test_resolve_elamigos_link(httpx_mock):
     elamigos_url = "https://elamigos.site/game/some-game"
     download_link = "https://mediafire.com/file/some_id"
-    httpx_mock.add_response(url=elamigos_url, text=f'href="{download_link}"')
+    mock_html = f'<div><a href="{download_link}">MediaFire Link</a></div>'
+    httpx_mock.add_response(url=elamigos_url, text=mock_html)
     
     direct_dl = "https://download.mediafire.com/direct.zip"
-    httpx_mock.add_response(url=download_link, text=f'href="{direct_dl}"')
+    mock_mediafire_html = f'<div><a id="downloadButton" href="{direct_dl}">Download</a></div>'
+    httpx_mock.add_response(url=download_link, text=mock_mediafire_html)
 
     resolver = URLResolver()
     resolved = resolver.resolve_url(elamigos_url)

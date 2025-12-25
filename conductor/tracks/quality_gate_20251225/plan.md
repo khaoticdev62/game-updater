@@ -7,9 +7,9 @@
 - [x] Task: Conductor - User Manual Verification 'IPC & UI Polish' (Protocol in workflow.md) (ee45b5e)
 
 ## Phase 2: Scraper & Discovery Engine Hardening
-- [ ] Task: Add `beautifulsoup4` to `requirements.txt`.
-- [ ] Task: Refactor `URLResolver` in `manifest.py` to use `BeautifulSoup` for HTML parsing instead of fragile regex.
-- [ ] Task: Enhance `tests/test_url_resolver.py` with more complex and failing HTML mock data.
+- [x] Task: Add `beautifulsoup4` to `requirements.txt`.
+- [x] Task: Refactor `URLResolver` in `manifest.py` to use `BeautifulSoup` for HTML parsing instead of fragile regex.
+- [x] Task: Enhance `tests/test_url_resolver.py` with more complex and failing HTML mock data.
 - [ ] Task: Conductor - User Manual Verification 'Scraper Hardening' (Protocol in workflow.md)
 
 ## Phase 3: Mod Guardian & Safety Gates Finalization
