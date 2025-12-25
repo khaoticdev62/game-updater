@@ -12,6 +12,7 @@
     - **aria2c:** For high-performance, multi-threaded downloading (orchestrated via Python).
 - **Patching:** **PyXdelta (xdelta3)** for intelligent binary delta patching and file repairs.
 - **Reverse Engineering Tools:** 
+    - **BeautifulSoup:** For robust HTML parsing of mirror and redirector pages.
     - `pyinstxtractor` for extracting original source.
     - **Scripts:** Custom decompilation and analysis tools (relocated to `scripts/reverse_engineering/`).
 - **Resilience & Safety:**

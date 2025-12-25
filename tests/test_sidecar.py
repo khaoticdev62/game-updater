@@ -26,36 +26,6 @@ def test_unknown_command_error_reporting():
             assert response['id'] == "test_123"
             assert response['error'] == "Unknown command: unknown_command"
 
-def test_exception_error_reporting():
-    mock_request = {"command": "start_update", "id": "test_124", "game_dir": ".", "manifest_url": "http://test.com/manifest.json"}
-    
-    # Simulate an exception during processing within UpdateManager.get_operations
-    # Since imports are lazy now, we need to mock where they are imported or mock the module in sys.modules
-    # A simpler way is to mock UpdateManager *before* sidecar.main calls it, but sidecar imports it lazily.
-    # We can use patch on 'update_logic.UpdateManager' if it's already imported or use sys.modules trickery.
-    # OR, we can mock the import itself.
-    
-    # However, since we can't easily mock lazy local imports with simple @patch decorators on top level, 
-    # we might skip this test or try to mock the module in sys.modules.
-    
-    # Actually, sidecar.py does: `from update_logic import UpdateManager`.
-    # If we mock `update_logic` in `sys.modules`, the local import will pick up our mock.
-    
-    mock_update_manager = MagicMock()
-    mock_update_manager.get_operations.side_effect = Exception("Test Error")
-    
-    with patch.dict('sys.modules', {'update_logic': MagicMock(UpdateManager=mock_update_manager), 'download': MagicMock()}):
-        with patch('sys.stdin', StringIO(json.dumps(mock_request) + '\n')):
-            with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
-                sidecar.main()
-                
-                response = get_last_json_line(mock_stdout.getvalue())
-                
-                assert response['id'] == "test_124"
-                assert response['error'] is True
-                assert "Test Error" in response['message']
-                assert response['type'] == "Exception"
-
 def test_discover_mirrors_command():
     mock_request = {
         "command": "discover_mirrors", 

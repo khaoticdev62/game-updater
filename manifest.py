@@ -3,7 +3,7 @@ import httpx
 import os
 import sys
 import re
-from typing import Optional
+from typing import Optional, List
 from bs4 import BeautifulSoup
 
 class ManifestFetcher:
@@ -11,10 +11,21 @@ class ManifestFetcher:
         self.manifest_url = manifest_url
         self.client = httpx.Client(timeout=10.0)
 
-    def fetch_manifest_text(self):
-        """Fetches the manifest as raw text."""
+    def fetch_manifest_text(self, version: Optional[str] = None):
+        """Fetches the manifest as raw text, optionally for a specific version."""
+        url = self.manifest_url
+        if version:
+            # Assuming a standard naming convention: base_url/version/manifest.json
+            # or appending version as a query parameter.
+            # For this implementation, we'll try to find the manifest file in a versioned subfolder.
+            if url.endswith('.json'):
+                base = url.rsplit('/', 1)[0]
+                url = f"{base}/{version}/manifest.json"
+            else:
+                url = f"{url.rstrip('/')}/{version}/manifest.json"
+
         try:
-            response = self.client.get(self.manifest_url)
+            response = self.client.get(url)
             response.raise_for_status()
             return response.text
         except httpx.HTTPStatusError as e:
@@ -24,13 +35,49 @@ class ManifestFetcher:
         except Exception as e:
             raise Exception(f"An unexpected error occurred: {e}")
 
-    def fetch_manifest_json(self):
+    def fetch_manifest_json(self, version: Optional[str] = None):
         """Fetches and parses the manifest as a JSON object."""
-        text = self.fetch_manifest_text()
+        text = self.fetch_manifest_text(version)
         try:
             return json.loads(text)
         except json.JSONDecodeError as e:
             raise Exception(f"Failed to parse manifest JSON: {e}")
+
+class VersionScanner:
+    """
+    Scrapes index pages to find available game versions.
+    """
+    def __init__(self):
+        self.client = httpx.Client(timeout=10.0)
+
+    def scan_versions(self, index_url: str) -> List[str]:
+        """Scans an HTML index page for version strings (3 or 4 parts)."""
+        try:
+            response = self.client.get(index_url)
+            response.raise_for_status()
+            soup = BeautifulSoup(response.text, "html.parser")
+            
+            # Look for version patterns like 1.xxx.xxx or 1.xxx.xxx.xxxx
+            version_regex = re.compile(r'\b\d+\.\d+\.\d+(?:\.\d+)?\b')
+            versions = set()
+
+            # Check all links
+            for link in soup.find_all('a'):
+                text = link.get_text()
+                href = link.get('href', '')
+                
+                match_text = version_regex.search(text)
+                if match_text:
+                    versions.add(match_text.group())
+                
+                match_href = version_regex.search(href)
+                if match_href:
+                    versions.add(match_href.group())
+
+            return sorted(list(versions), reverse=True)
+        except Exception as e:
+            print(f"VersionScanner Error: {e}")
+            return []
 
 class URLResolver:
     def __init__(self):

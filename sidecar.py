@@ -32,13 +32,14 @@ def main():
                 
                 game_dir = request.get("game_dir")
                 manifest_url = request.get("manifest_url")
+                version = request.get("version")
                 
                 manager = UpdateManager(game_dir, manifest_url, aria2)
                 
                 def on_progress(p):
                     print(json.dumps({"id": req_id, "type": "progress", "data": p}), flush=True)
 
-                ops = manager.get_operations(progress_callback=on_progress)
+                ops = manager.get_operations(progress_callback=on_progress, target_version=version)
                 response = {"id": req_id, "result": ops}
                 
             elif command == "start_update": # New command for orchestrated update
@@ -48,6 +49,7 @@ def main():
 
                 game_dir = request.get("game_dir")
                 manifest_url = request.get("manifest_url")
+                version = request.get("version")
                 
                 manager = UpdateManager(game_dir, manifest_url, aria2)
                 
@@ -56,7 +58,7 @@ def main():
 
                 # First, get operations
                 on_progress({'status': 'fetching_manifest', 'message': 'Fetching manifest...'})
-                operations = manager.get_operations(progress_callback=on_progress)
+                operations = manager.get_operations(progress_callback=on_progress, target_version=version)
                 
                 if not operations:
                     response = {"id": req_id, "result": {"success": False, "message": "No operations found or manifest error."}}
@@ -132,6 +134,13 @@ def main():
                 manager = RollbackManager(game_dir)
                 zip_name = manager.create_restore_point(files)
                 response = {"id": req_id, "result": {"zip_name": zip_name}}
+
+            elif command == "discover_versions":
+                url = request.get("url")
+                from manifest import VersionScanner
+                scanner = VersionScanner()
+                versions = scanner.scan_versions(url)
+                response = {"id": req_id, "result": versions}
 
             else:
                 response = {"id": req_id, "error": f"Unknown command: {command}"}

@@ -20,6 +20,8 @@ const App = () => {
   const [discoveredMirrors, setDiscoveredMirrors] = useState<MirrorResult[]>([]);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [manifestUrl, setManifestUrl] = useState<string>('');
+  const [availableVersions, setAvailableVersions] = useState<string[]>([]);
+  const [selectedVersion, setSelectedVersion] = useState<string>('');
   const [dlcs, setDlcs] = useState<DLC[]>([
     { name: 'Get to Work', folder: 'EP01', status: 'Installed', selected: true },
     { name: 'Get Together', folder: 'EP02', status: 'Missing', selected: false },
@@ -107,6 +109,7 @@ const App = () => {
         command: 'verify_all', 
         game_dir: '.', 
         manifest_url: manifestUrl,
+        version: selectedVersion || undefined,
         id 
       });
       setResponse(JSON.stringify(res, null, 2));
@@ -132,6 +135,7 @@ const App = () => {
         command: 'start_update', 
         game_dir: '.', 
         manifest_url: manifestUrl,
+        version: selectedVersion || undefined,
         id 
       });
       setResponse(JSON.stringify(res, null, 2));
@@ -139,6 +143,23 @@ const App = () => {
       setResponse(`Error: ${e}`);
     } finally {
       removeListener();
+    }
+  };
+
+  const handleDiscoverVersions = async () => {
+    try {
+      setResponse("Scanning for available versions...");
+      const res = await window.electron.requestPython({
+        command: 'discover_versions',
+        url: manifestUrl
+      });
+      if (res.result) {
+        setAvailableVersions(res.result);
+        if (res.result.length > 0) setSelectedVersion(res.result[0]);
+        setResponse(`Discovered ${res.result.length} versions.`);
+      }
+    } catch (e) {
+      setResponse(`Error scanning versions: ${e}`);
     }
   };
 
@@ -181,6 +202,7 @@ const App = () => {
         command: 'start_update',
         game_dir: '.', 
         manifest_url: manifestUrl,
+        version: selectedVersion || undefined,
         id
       });
       setResponse(JSON.stringify(res, null, 2));
@@ -208,13 +230,24 @@ const App = () => {
       
       <section style={{ marginBottom: '20px' }}>
         <h3>Configuration</h3>
-        <input 
-          type="text" 
-          value={manifestUrl} 
-          onChange={(e) => setManifestUrl(e.target.value)}
-          placeholder="Enter Manifest URL"
-          style={{ width: '300px', padding: '5px' }}
-        />
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <input 
+            type="text" 
+            value={manifestUrl} 
+            onChange={(e) => setManifestUrl(e.target.value)}
+            placeholder="Enter Manifest URL"
+            style={{ width: '300px', padding: '5px' }}
+          />
+          <button onClick={handleDiscoverVersions}>Discover Versions</button>
+        </div>
+        {availableVersions.length > 0 && (
+          <div style={{ marginTop: '10px' }}>
+            <label>Target Version: </label>
+            <select value={selectedVersion} onChange={(e) => setSelectedVersion(e.target.value)} style={{ padding: '5px' }}>
+              {availableVersions.map(v => <option key={v} value={v}>{v}</option>)}
+            </select>
+          </div>
+        )}
       </section>
 
       <section style={{ marginBottom: '20px' }}>

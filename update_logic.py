@@ -28,7 +28,7 @@ class UpdateManager:
         """Checks if a previous update session was interrupted."""
         return self.lock_file.exists()
 
-    def get_operations(self, progress_callback=None):
+    def get_operations(self, progress_callback=None, target_version: Optional[str] = None):
         """
         Analyzes local files against manifest and returns list of operations.
         Operations: {'type': 'download'|'patch'|'nothing', 'file': ..., 'reason': ...}
@@ -37,7 +37,7 @@ class UpdateManager:
         try:
             if progress_callback:
                 progress_callback({'status': 'fetching_manifest'})
-            manifest_json = self.fetcher.fetch_manifest_json()
+            manifest_json = self.fetcher.fetch_manifest_json(version=target_version)
             self.parser = ManifestParser(json.dumps(manifest_json)) # ManifestParser expects string
         except Exception as e:
             if progress_callback:
