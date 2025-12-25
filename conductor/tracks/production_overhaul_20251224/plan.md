@@ -22,7 +22,7 @@
 ## Phase 4: Advanced Mod Guardian & Safety Gates
 - [x] Task: Implement Community-Driven Selective Quarantine (Scarlet Forums integration) (36ab009)
 - [x] Task: Build Mod Guardian Policy Engine (User settings for Always/Selective/Never) (bfc81a1)
-- [ ] Task: Finalize Atomic Safety Gates (Automated pre-patch restore points)
+- [x] Task: Finalize Atomic Safety Gates (Automated pre-patch restore points) (97e60bb)
 - [ ] Task: Conductor - User Manual Verification 'Safety & Mod Guardian' (Protocol in workflow.md)
 
 ## Phase 5: Build Optimization & Distribution
