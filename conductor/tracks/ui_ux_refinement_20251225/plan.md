@@ -9,7 +9,7 @@
 ## Phase 2: Component Redesign
 - [x] Task: Redesign `DLCGrid` and `DLCList` with modern card styles and hover effects. 092529e
 - [x] Task: Redesign the `Configuration` section with cleaner input groups and buttons. 0ad6dae
-- [ ] Task: Redesign the `DiagnosticConsole` to support severity-based syntax highlighting.
+- [x] Task: Redesign the `DiagnosticConsole` to support severity-based syntax highlighting. b98c7e1
 - [ ] Task: Conductor - User Manual Verification 'Component Polish'
 
 ## Phase 3: Transitions & UX Polish
