@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronUp, X, Trash2 } from 'lucide-react';
+import { ChevronUp, Trash2 } from 'lucide-react';
 
 export interface LogEntry {
   timestamp: string;
@@ -11,9 +11,10 @@ export interface LogEntry {
 
 interface DiagnosticConsoleProps {
   logs: LogEntry[];
+  onClearLogs?: () => void;
 }
 
-const DiagnosticConsole: React.FC<DiagnosticConsoleProps> = ({ logs }) => {
+const DiagnosticConsole: React.FC<DiagnosticConsoleProps> = ({ logs, onClearLogs }) => {
   const consoleEndRef = useRef<HTMLDivElement>(null);
   const [isMinimized, setIsMinimized] = useState<boolean>(false);
   const [selectedLevel, setSelectedLevel] = useState<string>('All');
@@ -64,9 +65,10 @@ const DiagnosticConsole: React.FC<DiagnosticConsoleProps> = ({ logs }) => {
             <ChevronUp size={18} className={`transform transition-transform ${isMinimized ? 'rotate-180' : ''}`} />
           </button>
           <button
-            onClick={() => {}}
-            className="p-1 hover:bg-white/10 rounded transition-colors text-white/70 hover:text-white"
-            title="Clear logs"
+            onClick={onClearLogs}
+            disabled={!onClearLogs}
+            className="p-1 hover:bg-white/10 rounded transition-colors text-white/70 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed"
+            title={onClearLogs ? "Clear logs" : "Clear logs not available"}
           >
             <Trash2 size={18} />
           </button>

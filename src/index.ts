@@ -21,17 +21,28 @@ ipcMain.handle('python-request', async (event: IpcMainInvokeEvent, request: Pyth
   const id = Math.random().toString(36).substring(7);
   const fullRequest = { ...request, id };
 
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     // Listen for progress from the bus and forward to renderer
     const progressListener = (data: ProgressData) => {
       event.sender.send(`python-progress-${id}`, data);
     };
-    
+
     eventBus.on(`progress-${id}`, progressListener);
 
     eventBus.request(fullRequest).then((response) => {
       eventBus.removeListener(`progress-${id}`, progressListener);
       resolve(response);
+    }).catch((error) => {
+      eventBus.removeListener(`progress-${id}`, progressListener);
+      const errorResponse = {
+        id: fullRequest.id,
+        error: {
+          code: 'IPC_ERROR',
+          message: error instanceof Error ? error.message : 'Unknown IPC error',
+          timestamp: new Date().toISOString()
+        }
+      };
+      reject(errorResponse);
     });
   });
 });

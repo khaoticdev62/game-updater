@@ -4,6 +4,8 @@ import DLCGrid from './components/DLCGrid';
 import { DLC } from './types';
 import ScraperViewfinder, { MirrorResult } from './components/ScraperViewfinder';
 import DiagnosticConsole, { LogEntry } from './components/DiagnosticConsole';
+import { ProgressIndicator } from './components/ProgressIndicator';
+import { ErrorToast, ErrorMessage } from './components/ErrorToast';
 import CustomCursor from './components/CustomCursor';
 import { Environment } from './components/Environment';
 import { TopShelf } from './components/TopShelf';
@@ -26,6 +28,7 @@ const App = () => {
   const [isProbing, setIsProbing] = useState<boolean>(false);
   const [discoveredMirrors, setDiscoveredMirrors] = useState<MirrorResult[]>([]);
   const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [errors, setErrors] = useState<ErrorMessage[]>([]);
   const [manifestUrl, setManifestUrl] = useState<string>('');
   const [availableVersions, setAvailableVersions] = useState<string[]>([]);
   const [selectedVersion, setSelectedVersion] = useState<string>('');
@@ -48,10 +51,10 @@ const App = () => {
     { code: 'it_IT', name: 'Italian' },
   ];
 
-  // Logic to calculate estimated space (Simplified UI-side)
+  // Calculate estimated storage space (UI-side mock estimate)
   const selectionSummary = useMemo(() => {
     const selectedCount = dlcs.filter(d => d.selected).length;
-    // Mock estimate: 2GB per DLC
+    // Mock estimate: ~2.1GB per DLC (including overlays and translations)
     const estimatedGB = (selectedCount * 2.1).toFixed(1);
     return { count: selectedCount, size: estimatedGB };
   }, [dlcs]);
@@ -112,14 +115,54 @@ const App = () => {
     return () => removeListener();
   }, []);
 
+  const addError = (code: string, message: string, details?: string, autoDismissIn: number = 8000) => {
+    const errorId = `${code}-${Date.now()}-${Math.random()}`;
+    const error: ErrorMessage = {
+      id: errorId,
+      code,
+      message,
+      details,
+      timestamp: Date.now(),
+      autoDismissIn
+    };
+    setErrors(prev => [...prev, error]);
+  };
+
+  const dismissError = (id: string) => {
+    setErrors(prev => prev.filter(e => e.id !== id));
+  };
+
   const handleIpcError = (e: unknown) => {
     const msg = e instanceof Error ? e.message : String(e);
-    if (msg.includes('timed out')) {
-      setIsHealthy(false);
-      setResponse(`Backend Timeout: The request took too long. Check the logs for details.`);
-    } else {
-      setResponse(`Communication Error: ${msg}`);
+    
+    // Check if it's an error response with proper error structure
+    if (e && typeof e === 'object' && 'error' in e) {
+      const errorObj = (e as any).error;
+      if (errorObj && typeof errorObj === 'object' && 'code' in errorObj) {
+        addError(
+          errorObj.code || 'IPC_ERROR',
+          errorObj.message || msg,
+          errorObj.details
+        );
+        setIsHealthy(false);
+        return;
+      }
     }
+
+    // Handle other error types
+    if (msg.includes('timed out')) {
+      addError('TIMEOUT_ERROR', 'Backend request timed out', 'The request took too long to complete. Check the backend status and try again.');
+      setIsHealthy(false);
+    } else if (msg.includes('Network') || msg.includes('network')) {
+      addError('NETWORK_ERROR', 'Network connection error', msg);
+      setIsHealthy(false);
+    } else {
+      addError('IPC_ERROR', 'Communication error', msg);
+    }
+  };
+
+  const handleClearLogs = () => {
+    setLogs([]);
   };
 
   const handlePing = async () => {
@@ -171,34 +214,6 @@ const App = () => {
       setResponse("Starting verification...");
       const res = await window.electron.requestPython({ 
         command: 'verify_all', 
-        game_dir: '.', 
-        manifest_url: manifestUrl,
-        version: selectedVersion || undefined,
-        selected_packs: dlcs.filter(d => d.selected).map(d => d.folder),
-        language: selectedLanguage,
-        id 
-      });
-      setResponse(JSON.stringify(res, null, 2));
-    } catch (e) {
-      handleIpcError(e);
-    } finally {
-      removeListener();
-    }
-  };
-
-  const handleUpdate = async () => {
-    // This button will now trigger the full orchestrated update workflow, similar to handleStartUpdate
-    // but without needing to fetch the manifest again, as it's already done in handleVerify.
-    // For now, we'll make it call start_update for consistency with the new sidecar logic.
-    const id = Math.random().toString(36).substring(7);
-    const removeListener = window.electron.onPythonProgress(id, (data) => {
-      setProgress(data);
-    });
-
-    try {
-      setResponse("Starting mock update...");
-      const res = await window.electron.requestPython({ 
-        command: 'start_update', 
         game_dir: '.', 
         manifest_url: manifestUrl,
         version: selectedVersion || undefined,
@@ -292,6 +307,14 @@ const App = () => {
   return (
     <Environment isHealthy={isHealthy} isProbing={isProbing}>
       <CustomCursor isHealthy={isHealthy} isProbing={isProbing} />
+
+      {/* Progress Indicator Overlay */}
+      <AnimatePresence>
+        {progress && <ProgressIndicator progress={progress} isVisible={!!progress} />}
+      </AnimatePresence>
+
+      {/* Error Toast System */}
+      <ErrorToast errors={errors} onDismiss={dismissError} />
 
       {/* TopShelf Navigation */}
       <TopShelf activeView={activeView} onViewChange={setActiveView} />
@@ -430,17 +453,7 @@ const App = () => {
             <ScraperViewfinder mirrors={discoveredMirrors} isProbing={isProbing} />
           </VisionCard>
 
-          {/* Progress Display */}
-          {progress && (
-            <div className="glass-medium rounded-lg p-4 border border-white/20">
-              <p className="text-white mb-2">
-                {progress.status}
-                {progress.current && ` (${progress.current} / ${progress.total})`}
-              </p>
-              {progress.file && <p className="text-white/70 text-sm">{progress.file}</p>}
-              {progress.message && <p className="text-white/70 text-sm">{progress.message}</p>}
-            </div>
-          )}
+          {/* Progress Display - Note: Component displays as floating overlay via ProgressIndicator */}
 
           {/* Response Output */}
           <div className="glass-medium rounded-lg p-4 border border-white/20 max-h-64 overflow-auto">
@@ -453,7 +466,7 @@ const App = () => {
       </AnimatePresence>
 
       {/* Diagnostic Console Overlay */}
-      <DiagnosticConsole logs={logs} />
+      <DiagnosticConsole logs={logs} onClearLogs={handleClearLogs} />
     </Environment>
   );
 };

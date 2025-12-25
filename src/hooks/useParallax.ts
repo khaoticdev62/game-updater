@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 
 interface ParallaxState {
   x: number;
@@ -20,6 +20,29 @@ interface UseParallaxReturn {
  * Tracks mouse movement relative to the element and calculates
  * 3D transform values for a magnetic, depth-aware effect.
  *
+ * IMPORTANT USAGE REQUIREMENTS:
+ * =============================
+ * The calling component MUST attach the event handlers to the element containing the effect.
+ * The element must track its position using e.currentTarget in the event handlers.
+ *
+ * Example usage:
+ * ```tsx
+ * const { transform, handleMouseMove, handleMouseLeave } = useParallax(8);
+ *
+ * return (
+ *   <div
+ *     style={{ transform }}
+ *     onMouseMove={handleMouseMove}
+ *     onMouseLeave={handleMouseLeave}
+ *   >
+ *     Content here
+ *   </div>
+ * );
+ * ```
+ *
+ * WARNING: The effect relies on event.clientX/clientY relative to getBoundingClientRect().
+ * If handlers are not properly attached, the parallax effect will fail silently.
+ *
  * @param strength - Controls the intensity of the parallax effect (default: 10)
  * @returns Object with transform string and event handlers
  */
@@ -31,12 +54,9 @@ export const useParallax = (strength: number = 10): UseParallaxReturn => {
     rotateY: 0,
   });
 
-  const elementRef = useRef<HTMLDivElement>(null);
-
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!elementRef.current) return;
-
-    const rect = elementRef.current.getBoundingClientRect();
+    // Get the position of the element the event is attached to
+    const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
 
