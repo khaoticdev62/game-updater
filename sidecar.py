@@ -1,14 +1,12 @@
 import sys
 import json
 import os
-from engine import VerificationEngine, ManifestParser
-from download import Aria2Manager
-from patch import Patcher
-from update_logic import UpdateManager
-from manifest import ManifestFetcher, URLResolver
 
 def main():
-    aria2 = Aria2Manager()
+    # Signal readiness immediately to the UI
+    print(json.dumps({"type": "ready"}), flush=True)
+    
+    aria2 = None
     
     for line in sys.stdin:
         try:
@@ -21,12 +19,17 @@ def main():
                 response = {"id": req_id, "result": "pong"}
                 
             elif command == "hash_file":
+                from engine import VerificationEngine
                 path = request.get("path")
                 engine = VerificationEngine()
                 file_hash = engine.hash_file(path)
                 response = {"id": req_id, "result": file_hash}
                 
             elif command == "verify_all":
+                from update_logic import UpdateManager
+                from download import Aria2Manager
+                if aria2 is None: aria2 = Aria2Manager()
+                
                 game_dir = request.get("game_dir")
                 manifest_url = request.get("manifest_url")
                 
@@ -39,6 +42,10 @@ def main():
                 response = {"id": req_id, "result": ops}
                 
             elif command == "start_update": # New command for orchestrated update
+                from update_logic import UpdateManager
+                from download import Aria2Manager
+                if aria2 is None: aria2 = Aria2Manager()
+
                 game_dir = request.get("game_dir")
                 manifest_url = request.get("manifest_url")
                 
@@ -63,12 +70,20 @@ def main():
                 response = {"id": req_id, "result": {"success": success, "message": message}}
                 
             elif command == "check_interrupted":
+                from update_logic import UpdateManager
+                from download import Aria2Manager
+                if aria2 is None: aria2 = Aria2Manager()
+
                 game_dir = request.get("game_dir")
                 # Using a dummy manifest URL for initialization
                 manager = UpdateManager(game_dir, "", aria2)
                 response = {"id": req_id, "result": {"interrupted": manager.check_interrupted()}}
 
             elif command == "run_recovery":
+                from update_logic import UpdateManager
+                from download import Aria2Manager
+                if aria2 is None: aria2 = Aria2Manager()
+
                 game_dir = request.get("game_dir")
                 restore_point = request.get("restore_point")
                 manager = UpdateManager(game_dir, "", aria2)
@@ -134,4 +149,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

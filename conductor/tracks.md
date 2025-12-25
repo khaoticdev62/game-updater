@@ -12,5 +12,10 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [~] Track: Production Overhaul & Professional Alignment
+## [x] Track: Production Overhaul & Professional Alignment
 *Link: [./conductor/tracks/production_overhaul_20251224/](./conductor/tracks/production_overhaul_20251224/)*
+
+---
+
+## [~] Track: Startup Latency Annihilation
+*Link: [./conductor/tracks/startup_latency_20251225/](./conductor/tracks/startup_latency_20251225/)*
