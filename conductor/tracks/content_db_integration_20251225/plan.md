@@ -7,7 +7,7 @@
 - [x] Task: Conductor - User Manual Verification 'Metadata Core' (Protocol in workflow.md) 74d8e9a
 
 ## Phase 2: DLC Manager Integration
-- [ ] Task: Update `DLCManager` in `update_logic.py` to utilize the new database.
+- [x] Task: Update `DLCManager` in `update_logic.py` to utilize the new database. 72ebf5c
 - [ ] Task: Implement "Missing Content Discovery" logic to flag uninstalled packs from the DB.
 - [ ] Task: Enhance `get_dlc_status` IPC command to include rich metadata (descriptions, release dates).
 - [ ] Task: Conductor - User Manual Verification 'Discovery Integration' (Protocol in workflow.md)
