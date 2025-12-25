@@ -12,12 +12,12 @@
 - [x] Task: Build Manual Mirror Selection API (Interactive override for Intelligence Hub) (6acad97)
 - [x] Task: Conductor - User Manual Verification 'Discovery Engine' (Protocol in workflow.md) (1752c79)
 
-## Phase 3: UI/UX IPC & Integration Wiring
-- [x] Task: Implement Hybrid Event Bus (Continuous 60fps streaming for progress, polling for health)
+## Phase 3: UI/UX IPC & Integration Wiring [checkpoint: ac389cf]
+- [x] Task: Implement Hybrid Event Bus (Continuous 60fps streaming for progress, polling for health) (d04ad80)
 - [x] Task: Wire Intelligence Viewfinder (Real-time scraping visualization) (ea10445)
 - [x] Task: Connect Diagnostic Console (Real-time structured log streaming) (94b8e62)
-- [x] Task: Finalize Theme & Cursor Engine (CSS Variable injection & state-aware cursor morphing)
-- [ ] Task: Conductor - User Manual Verification 'UI/UX Integration' (Protocol in workflow.md)
+- [x] Task: Finalize Theme & Cursor Engine (CSS Variable injection & state-aware cursor morphing) (cf5b2ba)
+- [x] Task: Conductor - User Manual Verification 'UI/UX Integration' (Protocol in workflow.md) (ac389cf)
 
 ## Phase 4: Advanced Mod Guardian & Safety Gates
 - [ ] Task: Implement Community-Driven Selective Quarantine (Scarlet Forums integration)
