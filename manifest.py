@@ -3,25 +3,21 @@ import httpx
 import os
 import sys
 import re
-
-# Optional: Add curl_cffi for impersonation if needed based on research
-# from curl_cffi import requests as curl_requests 
+from typing import Optional
 
 class ManifestFetcher:
     def __init__(self, manifest_url):
         self.manifest_url = manifest_url
-        # For now, we'll use httpx. If curl_cffi is strictly needed,
-        # it can be integrated here, but httpx is generally easier.
-        self.client = httpx.Client(timeout=10.0) # Using httpx as it's more Pythonic and modern
+        self.client = httpx.Client(timeout=10.0)
 
     def fetch_manifest_text(self):
         """Fetches the manifest as raw text."""
         try:
             response = self.client.get(self.manifest_url)
-            response.raise_for_status() # Raise an exception for HTTP errors
+            response.raise_for_status()
             return response.text
         except httpx.HTTPStatusError as e:
-            raise Exception(f"HTTP error fetching manifest: {e.response.status_code} - {e.response.text}")
+            raise Exception(f"HTTP error fetching manifest: {e.response.status_code}")
         except httpx.RequestError as e:
             raise Exception(f"Network error fetching manifest: {e}")
         except Exception as e:
@@ -37,44 +33,82 @@ class ManifestFetcher:
 
 class URLResolver:
     def __init__(self):
-        self.client = httpx.Client(timeout=10.0, follow_redirects=True)
+        self.client = httpx.Client(timeout=10.0, follow_redirects=False)
 
-    def resolve_url(self, url):
-        """Resolves a URL, following redirects and attempting to get a direct link."""
+    def resolve_url(self, url: str, depth: int = 0) -> str:
+        """
+        Resolves a URL dynamically, handling redirectors and direct links.
+        Recursive up to 3 levels to handle chained redirectors.
+        """
+        if depth > 3:
+            return url
+
+        # 1. Check for known redirector patterns
+        resolved = url
+        if "mediafire.com" in url and ("/file/" in url or "/view/" in url):
+            resolved = self._resolve_mediafire_link(url)
+        elif "fitgirl-repacks.site" in url:
+            resolved = self._resolve_fitgirl_link(url)
+        elif "elamigos.site" in url:
+            resolved = self._resolve_elamigos_link(url)
+        elif "cs.rin.ru" in url:
+            resolved = self._resolve_cs_rin_link(url)
+
+        if resolved != url:
+            return self.resolve_url(resolved, depth + 1)
+
+        # 2. Default behavior: follow redirects manually
+        if any(url.lower().endswith(ext) for ext in [".torrent", ".zip", ".rar", ".7z", ".exe"]):
+            return url
+
         try:
-            # Special handling for MediaFire as observed in original tool research
-            if "mediafire.com" in url:
-                return self._resolve_mediafire_link(url)
+            response = self.client.head(url)
+            if response.status_code in [301, 302, 303, 307, 308]:
+                redirect_url = response.headers.get("Location")
+                if redirect_url:
+                    if redirect_url.startswith("/"):
+                        from urllib.parse import urljoin
+                        redirect_url = urljoin(url, redirect_url)
+                    return self.resolve_url(redirect_url, depth + 1)
             
-            # Default behavior: just follow redirects
-            response = self.client.head(url) # Use HEAD to avoid downloading large files
-            response.raise_for_status()
-            return str(response.url) # Final URL after redirects
-        except httpx.HTTPStatusError as e:
-            raise Exception(f"HTTP error resolving URL: {e.response.status_code} - {e.response.text}")
-        except httpx.RequestError as e:
-            raise Exception(f"Network error resolving URL: {e}")
-        except Exception as e:
-            raise Exception(f"An unexpected error occurred: {e}")
+            return str(response.url)
+        except Exception:
+            return url
 
-    def _resolve_mediafire_link(self, url):
-        """Attempts to resolve a MediaFire download page to a direct download link."""
-        # This is a simplified example based on common MediaFire patterns.
-        # Real-world MediaFire resolution might involve parsing HTML with BeautifulSoup.
-        response = self.client.get(url)
-        response.raise_for_status()
-        
-        # Look for direct download link in the HTML
-        # This regex is a placeholder and would need to be refined based on actual MediaFire page structure
-        match = re.search(r'href="(https?://download\d+\.mediafire\.com/.*?)"', response.text)
-        if match:
-            return match.group(1)
-        
-        # Fallback if specific direct link is not found
-        # Try to find a download link with an onclick attribute or a data-url attribute
-        match_onclick = re.search(r"onclick=\"window\.open\('(https?://(?:www\.)?mediafire\.com/download/.*?)'\)\"", response.text)
-        if match_onclick:
-            return match_onclick.group(1)
-        
-        # If no direct link found, return the original URL or raise an error
+    def _resolve_mediafire_link(self, url: str) -> str:
+        """Resolves MediaFire download page to direct link."""
+        try:
+            response = self.client.get(url)
+            # More flexible MediaFire regex
+            match = re.search(r'href="(https?://download[^"]+mediafire\.com/[^"]+)"', response.text)
+            if match:
+                return match.group(1)
+        except Exception:
+            pass
+        return url
+
+    def _resolve_fitgirl_link(self, url: str) -> str:
+        """Resolves FitGirl repack page to a preferred download link (e.g. Torrent)."""
+        try:
+            response = self.client.get(url)
+            match = re.search(r'href="([^"]+\.torrent)"', response.text)
+            if match:
+                return match.group(1)
+        except Exception:
+            pass
+        return url
+
+    def _resolve_elamigos_link(self, url: str) -> str:
+        """Resolves ElAmigos page to a mirror link."""
+        try:
+            response = self.client.get(url)
+            # Match any mediafire link on the page
+            match = re.search(r'href="(https?://[^"]*mediafire\.com/[^"]+)"', response.text)
+            if match:
+                return match.group(1)
+        except Exception:
+            pass
+        return url
+
+    def _resolve_cs_rin_link(self, url: str) -> str:
         return url
