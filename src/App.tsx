@@ -428,8 +428,8 @@ const App = () => {
       )}
 
       {activeTab === 'diagnostics' && (
-        <div className="animate-in fade-in duration-500 h-full flex flex-col">
-          <DiagnosticConsole logs={logs} />
+        <div className="animate-in fade-in duration-500 h-[70vh] flex flex-col">
+          <DiagnosticConsole logs={logs} onClear={() => setLogs([])} />
         </div>
       )}
 
