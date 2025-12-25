@@ -1,10 +1,10 @@
 # Plan: Version History & Legacy Patching
 
-## Phase 1: Backend Version Discovery
+## Phase 1: Backend Version Discovery [checkpoint: 8926da3]
 - [x] Task: Implement `VersionScanner` in `manifest.py` to identify available versions from a base index URL.
 - [x] Task: Update `ManifestFetcher` to support fetching a specific version's manifest.
 - [x] Task: Write unit tests for `VersionScanner` with mock HTML indexes.
-- [ ] Task: Conductor - User Manual Verification 'Version Discovery' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Version Discovery' (Protocol in workflow.md) (8926da3)
 
 ## Phase 2: UI Version Selection
 - [x] Task: Implement `get_available_versions` command in `sidecar.py`.
