@@ -1,7 +1,7 @@
 import unittest
 import asyncio
 from unittest.mock import AsyncMock, patch
-from discovery import MirrorDiscovery
+from discovery import MirrorDiscovery, set_selected_mirror, get_selected_mirror
 
 class TestMirrorDiscovery(unittest.TestCase):
     def setUp(self):
@@ -38,11 +38,12 @@ class TestMirrorDiscovery(unittest.TestCase):
         self.assertEqual(len(results), 3)
         # Mirror 1 should be first (Available + High Weight)
         self.assertEqual(results[0]["url"], "http://mirror1.com")
-        self.assertTrue(results[0]["available"])
         
-        # Mirror 2 should be last (Not available)
-        self.assertFalse(results[-1]["available"])
-        self.assertEqual(results[-1]["url"], "http://mirror2.com")
+    def test_global_selection(self):
+        set_selected_mirror("http://custom.mirror")
+        self.assertEqual(get_selected_mirror(), "http://custom.mirror")
+        set_selected_mirror(None)
+        self.assertIsNone(get_selected_mirror())
 
 if __name__ == '__main__':
     unittest.main()

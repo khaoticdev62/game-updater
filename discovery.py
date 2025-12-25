@@ -1,6 +1,16 @@
 import asyncio
 import httpx
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
+
+# Global state for selected mirrors
+_selected_mirror: Optional[str] = None
+
+def set_selected_mirror(url: Optional[str]):
+    global _selected_mirror
+    _selected_mirror = url
+
+def get_selected_mirror() -> Optional[str]:
+    return _selected_mirror
 
 class MirrorDiscovery:
     """
@@ -18,7 +28,6 @@ class MirrorDiscovery:
         url = mirror["url"]
         try:
             start_time = asyncio.get_event_loop().time()
-            # Use HEAD request to check availability without downloading
             response = await client.head(url, timeout=5.0)
             latency = asyncio.get_event_loop().time() - start_time
             

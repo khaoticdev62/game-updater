@@ -81,6 +81,20 @@ def main():
                 
                 response = {"id": req_id, "result": {"success": success, "diagnostics": diagnostics}}
 
+            elif command == "discover_mirrors":
+                mirrors = request.get("mirrors", [])
+                from discovery import MirrorDiscovery
+                discovery = MirrorDiscovery(mirrors)
+                import asyncio
+                results = asyncio.run(discovery.discover_best_mirrors())
+                response = {"id": req_id, "result": results}
+
+            elif command == "select_mirror":
+                url = request.get("url")
+                from discovery import set_selected_mirror
+                set_selected_mirror(url)
+                response = {"id": req_id, "result": "success"}
+
             else:
                 response = {"id": req_id, "error": f"Unknown command: {command}"}
                 
