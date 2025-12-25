@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import DLCList, { DLC } from './components/DLCList';
+import ScraperViewfinder, { MirrorResult } from './components/ScraperViewfinder';
 
 const App = () => {
   const [response, setResponse] = useState<string>('');
   const [progress, setProgress] = useState<any>(null);
   const [isHealthy, setIsHealthy] = useState<boolean>(true);
+  const [isProbing, setIsProbing] = useState<boolean>(false);
+  const [discoveredMirrors, setDiscoveredMirrors] = useState<MirrorResult[]>([]);
   const [dlcs, setDlcs] = useState<DLC[]>([
     { name: 'Get to Work', folder: 'EP01', status: 'Installed', selected: true },
     { name: 'Get Together', folder: 'EP02', status: 'Missing', selected: false },
@@ -90,6 +93,33 @@ const App = () => {
     }
   };
 
+  const handleDiscoverMirrors = async () => {
+    setIsProbing(true);
+    setDiscoveredMirrors([
+      { url: 'https://fitgirl-repacks.site', weight: 10 },
+      { url: 'https://elamigos.site', weight: 8 },
+      { url: 'https://cs.rin.ru', weight: 5 }
+    ]);
+
+    try {
+      const res = await window.electron.requestPython({
+        command: 'discover_mirrors',
+        mirrors: [
+          { url: 'https://fitgirl-repacks.site', weight: 10 },
+          { url: 'https://elamigos.site', weight: 8 },
+          { url: 'https://cs.rin.ru', weight: 5 }
+        ]
+      });
+      if (res.result) {
+        setDiscoveredMirrors(res.result);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsProbing(false);
+    }
+  };
+
   const handleStartUpdate = async () => {
     const id = Math.random().toString(36).substring(7);
     const removeListener = window.electron.onPythonProgress(id, (data) => {
@@ -136,6 +166,12 @@ const App = () => {
         <button onClick={handleVerify} style={{ marginLeft: '10px' }}>Verify All (Live Mock)</button>
         <button onClick={handleUpdate} style={{ marginLeft: '10px' }}>Start Mock Update (Live Mock)</button>
         <button onClick={handleStartUpdate} style={{ marginLeft: '10px', fontWeight: 'bold' }}>Update Game (Live Mock)</button>
+        <button onClick={handleDiscoverMirrors} style={{ marginLeft: '10px', background: '#2980b9', color: 'white' }}>Scan for Mirrors</button>
+      </section>
+
+      <section style={{ marginBottom: '20px' }}>
+        <h3>Intelligence Hub</h3>
+        <ScraperViewfinder mirrors={discoveredMirrors} isProbing={isProbing} />
       </section>
 
       {progress && (

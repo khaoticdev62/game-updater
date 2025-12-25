@@ -14,7 +14,7 @@
 
 ## Phase 3: UI/UX IPC & Integration Wiring
 - [x] Task: Implement Hybrid Event Bus (Continuous 60fps streaming for progress, polling for health)
-- [ ] Task: Wire Intelligence Viewfinder (Real-time scraping visualization)
+- [x] Task: Wire Intelligence Viewfinder (Real-time scraping visualization)
 - [ ] Task: Connect Diagnostic Console (Real-time structured log streaming)
 - [ ] Task: Finalize Theme & Cursor Engine (CSS Variable injection & state-aware cursor morphing)
 - [ ] Task: Conductor - User Manual Verification 'UI/UX Integration' (Protocol in workflow.md)
