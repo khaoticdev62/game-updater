@@ -1,0 +1,19 @@
+﻿{
+  "mcp": {
+    "allowed": ["lsp-py", "lsp-ts"]
+  },
+  "mcpServers": {
+    "lsp-py": {
+      "command": "mcp-language-server",
+      "args": ["--workspace", ".", "--lsp", "pyright-langserver", "--", "--stdio"],
+      "cwd": ".",
+      "timeout": 600000
+    },
+    "lsp-ts": {
+      "command": "mcp-language-server",
+      "args": ["--workspace", ".", "--lsp", "typescript-language-server", "--", "--stdio"],
+      "cwd": ".",
+      "timeout": 600000
+    }
+  }
+}

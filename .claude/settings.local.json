@@ -3,7 +3,14 @@
     "allow": [
       "Bash(git checkout:*)",
       "Bash(git branch:*)",
-      "Bash(gh repo view:*)"
+      "Bash(gh repo view:*)",
+      "Bash(cat:*)",
+      "Bash(dir:*)",
+      "Bash(ls -la \"C:\\\\Users\\\\thecr\\\\Desktop\\\\sims_4_updater_v2\\\\conductor\\\\tracks\"\" && echo \"---\" && ls -la \"C:UsersthecrDesktopsims_4_updater_v2conductorarchive\"\")",
+      "Bash(npm install:*)",
+      "Bash(npm test:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
