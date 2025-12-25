@@ -10,7 +10,8 @@ export class HybridEventBus extends EventEmitter {
 
   start() {
     const pythonPath = 'python';
-    const scriptPath = path.join(__dirname, '..', '..', 'sidecar.py');
+    // The script is in the root, eventBus.ts is in src/
+    const scriptPath = path.join(__dirname, '..', 'sidecar.py');
     
     this.sidecar = spawn(pythonPath, [scriptPath], { stdio: ['pipe', 'pipe', 'pipe'] });
 

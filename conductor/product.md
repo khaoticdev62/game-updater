@@ -18,6 +18,7 @@ The goal is to reverse engineer, rebuild, and improve the Sims 4 Updater by anad
 - **Live Manifest Integration:** Real-time fetching of game manifests and dynamic URL resolution for content delivery.
 - **Production-Grade Resilience:** Stateful operation logging, interruption recovery, and optimized file verification engines.
 - **Advanced Mod Guardian:** Automated community-driven protection against broken or outdated mods during game updates.
+- **Intelligence Hub:** A comprehensive, queryable database of all Sims 4 content, providing rich metadata (descriptions, release dates) and improved discovery of community-driven content.
 - **Legacy Version Management:** Ability to discover and patch to specific previous game versions (e.g., v1.119.0).
 - **Intelligent Dependency-Aware Installation:** Granular selection of DLCs with automated resolution of required core files and dependencies.
 

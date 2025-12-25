@@ -4,7 +4,7 @@
 - [x] Task: Implement request timeouts in `HybridEventBus.request` in `src/index.ts`. 54cb7eb
 - [x] Task: Add global error handling for timeout rejections in the frontend. cf2d403
 - [x] Task: Write tests to verify IPC timeout behavior. 54cb7eb
-- [ ] Task: Conductor - User Manual Verification 'IPC Resilience'
+- [x] Task: Conductor - User Manual Verification 'IPC Resilience' 54cb7eb
 
 ## Phase 2: Unified Packaging Logic
 - [ ] Task: Implement production path resolution for the sidecar in `src/index.ts`.

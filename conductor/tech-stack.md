@@ -9,6 +9,7 @@
 - **Language:** Python 3.11+.
 - **Networking:** 
     - **HTTPX:** For high-level API requests, manifest fetching, and URL resolution.
+    - **Pydantic:** For robust data modeling and internal metadata consistency.
     - **aria2c:** For high-performance, multi-threaded downloading (orchestrated via Python).
 - **Patching:** **PyXdelta (xdelta3)** for intelligent binary delta patching and file repairs.
 - **Reverse Engineering Tools:** 
