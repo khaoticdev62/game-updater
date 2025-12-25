@@ -22,6 +22,8 @@ class UpdateManager:
         """
         # Fetch manifest first
         try:
+            if progress_callback:
+                progress_callback({'status': 'fetching_manifest'})
             manifest_json = self.fetcher.fetch_manifest_json()
             self.parser = ManifestParser(json.dumps(manifest_json)) # ManifestParser expects string
         except Exception as e:
