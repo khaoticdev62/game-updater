@@ -244,35 +244,47 @@ class DLCManager:
     def get_dlc_status(self):
         """
         Returns a list of DLCs and their status, enriched with metadata.
+        Discovers content from manifest and supplements with content_db.
         """
-        available_dlcs = self.data.get("dlcs", [])
-        status_list = []
+        manifest_dlcs = self.data.get("dlcs", [])
+        status_dict = {}
 
-        for dlc in available_dlcs:
+        # 1. Process items from manifest
+        for dlc in manifest_dlcs:
             folder_name = dlc.get("folder")
+            if not folder_name:
+                continue
+                
             dlc_name = dlc.get("name")
-            full_path = os.path.join(self.game_dir, folder_name) if folder_name else None
+            full_path = os.path.join(self.game_dir, folder_name)
             
-            if not full_path or not os.path.exists(full_path):
-                status = "Missing"
-            else:
-                status = "Installed"
+            status = "Installed" if os.path.exists(full_path) else "Missing"
             
-            dlc_info = {
+            status_dict[folder_name] = {
                 "name": dlc_name,
                 "folder": folder_name,
                 "status": status
             }
 
-            # Enrich with metadata if available in DB
-            metadata = self.db.get(folder_name)
-            if metadata:
-                dlc_info["description"] = metadata.description
-                if hasattr(metadata, "release_date"):
-                    dlc_info["release_date"] = metadata.release_date
-                if hasattr(metadata, "source"):
-                    dlc_info["source"] = metadata.source
+        # 2. Supplemental Discovery from Database
+        # This ensures EPs and SPs are visible even if not in the current manifest version.
+        for item_id, metadata in self.db.items():
+            if item_id not in status_dict:
+                full_path = os.path.join(self.game_dir, item_id)
+                status = "Installed" if os.path.exists(full_path) else "Missing"
+                
+                status_dict[item_id] = {
+                    "name": metadata.name,
+                    "folder": item_id,
+                    "status": status
+                }
+
+            # Enrich with metadata
+            info = status_dict[item_id]
+            info["description"] = metadata.description
+            if hasattr(metadata, "release_date"):
+                info["release_date"] = metadata.release_date
+            if hasattr(metadata, "source"):
+                info["source"] = metadata.source
             
-            status_list.append(dlc_info)
-            
-        return status_list
+        return list(status_dict.values())
