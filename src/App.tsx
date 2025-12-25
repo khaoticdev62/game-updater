@@ -4,6 +4,10 @@ import { DLC } from './types';
 import ScraperViewfinder, { MirrorResult } from './components/ScraperViewfinder';
 import DiagnosticConsole, { LogEntry } from './components/DiagnosticConsole';
 import CustomCursor from './components/CustomCursor';
+import { Environment } from './components/Environment';
+import { TopShelf } from './components/TopShelf';
+import { VisionCard } from './components/VisionCard';
+import { Button } from './components/Button';
 
 interface ProgressData {
   status: string;
@@ -14,6 +18,7 @@ interface ProgressData {
 }
 
 const App = () => {
+  const [activeView, setActiveView] = useState<string>('dashboard');
   const [response, setResponse] = useState<string>('');
   const [progress, setProgress] = useState<ProgressData | null>(null);
   const [isHealthy, setIsHealthy] = useState<boolean>(true);
@@ -284,94 +289,165 @@ const App = () => {
   };
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
+    <Environment isHealthy={isHealthy} isProbing={isProbing}>
       <CustomCursor isHealthy={isHealthy} isProbing={isProbing} />
-      <h1>Sims 4 Updater</h1>
-      <div style={{ marginBottom: '10px' }}>
-        Backend Status: 
-        <span style={{ 
-          color: isHealthy ? '#2ecc71' : '#e74c3c', 
-          fontWeight: 'bold',
-          marginLeft: '5px'
-        }}>
-          {isHealthy ? '● Healthy' : '● Disconnected'}
-        </span>
-      </div>
-      
-      <section style={{ marginBottom: '20px' }}>
-        <h3>Configuration</h3>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <input 
-            type="text" 
-            value={manifestUrl} 
-            onChange={(e) => setManifestUrl(e.target.value)}
-            placeholder="Enter Manifest URL"
-            style={{ width: '300px', padding: '5px' }}
-          />
-          <button onClick={handleDiscoverVersions}>Discover Versions</button>
-        </div>
-        {availableVersions.length > 0 && (
-          <div style={{ marginTop: '10px' }}>
-            <label>Target Version: </label>
-            <select value={selectedVersion} onChange={(e) => setSelectedVersion(e.target.value)} style={{ padding: '5px', marginRight: '20px' }}>
-              {filteredVersions.map(v => <option key={v} value={v}>{v}</option>)}
-            </select>
 
-            <label style={{ marginRight: '20px' }}>
-              <input 
-                type="checkbox" 
-                checked={showHistorical} 
-                onChange={(e) => setShowHistorical(e.target.checked)} 
-              />
-              Show Historical Versions
-            </label>
+      {/* TopShelf Navigation */}
+      <TopShelf activeView={activeView} onViewChange={setActiveView} />
 
-            <label>Language: </label>
-            <select value={selectedLanguage} onChange={(e) => setSelectedLanguage(e.target.value)} style={{ padding: '5px' }}>
-              {languages.map(l => <option key={l.code} value={l.code}>{l.name}</option>)}
-            </select>
+      {/* Main Content Area */}
+      <div className="min-h-screen flex flex-col p-8">
+        {/* Header Section */}
+        <div className="mb-12">
+          <h1 className="text-5xl font-bold text-white mb-4">Sims 4 Updater</h1>
+          <div className="flex items-center gap-3">
+            <span className="text-white/70">Backend Status:</span>
+            <span className={`flex items-center gap-2 font-semibold ${isHealthy ? 'text-green-400' : 'text-red-400'}`}>
+              <span className="text-2xl">●</span>
+              {isHealthy ? 'Healthy' : 'Disconnected'}
+            </span>
           </div>
-        )}
-        <div style={{ marginTop: '15px', padding: '10px', background: '#2c3e50', borderRadius: '4px', border: '1px solid #3498db' }}>
-          <strong>Selection Summary:</strong> {selectionSummary.count} packs selected. 
-          Estimated space required: <span style={{ color: '#2ecc71' }}>{selectionSummary.size} GB</span>
         </div>
-      </section>
 
-      <section style={{ marginBottom: '20px' }}>
-        <h3>Available Content</h3>
-        <DLCGrid dlcs={dlcs} onToggle={toggleDLC} />
-      </section>
+        {/* Dashboard View */}
+        <div className="space-y-8">
+          {/* Configuration Section */}
+          <VisionCard variant="elevated" className="border-white/20">
+            <div className="mb-6">
+              <h2 className="text-2xl font-semibold text-white mb-4">Configuration</h2>
 
-      <section style={{ marginBottom: '20px' }}>
-        <button onClick={handlePing}>Ping Python</button>
-        <button onClick={handleRefreshDLCs} style={{ marginLeft: '10px' }}>Refresh Content List</button>
-        <button onClick={handleVerify} style={{ marginLeft: '10px' }}>Verify All (Live Mock)</button>
-        <button onClick={handleUpdate} style={{ marginLeft: '10px' }}>Start Mock Update (Live Mock)</button>
-        <button onClick={handleStartUpdate} style={{ marginLeft: '10px', fontWeight: 'bold' }}>Update Game (Live Mock)</button>
-        <button onClick={handleDiscoverMirrors} style={{ marginLeft: '10px', background: '#2980b9', color: 'white' }}>Scan for Mirrors</button>
-      </section>
+              <div className="space-y-4">
+                <div className="flex gap-4">
+                  <input
+                    type="text"
+                    value={manifestUrl}
+                    onChange={(e) => setManifestUrl(e.target.value)}
+                    placeholder="Enter Manifest URL"
+                    className="flex-1 px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  />
+                  <Button
+                    onClick={handleDiscoverVersions}
+                    variant="primary"
+                  >
+                    Discover Versions
+                  </Button>
+                </div>
 
-      <section style={{ marginBottom: '20px' }}>
-        <h3>Intelligence Hub</h3>
-        <ScraperViewfinder mirrors={discoveredMirrors} isProbing={isProbing} />
-      </section>
+                {availableVersions.length > 0 && (
+                  <div className="space-y-4 pt-4 border-t border-white/10">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-white/70 text-sm mb-2">Target Version:</label>
+                        <select
+                          value={selectedVersion}
+                          onChange={(e) => setSelectedVersion(e.target.value)}
+                          className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        >
+                          {filteredVersions.map(v => <option key={v} value={v}>{v}</option>)}
+                        </select>
+                      </div>
 
-      <section style={{ marginBottom: '20px' }}>
-        <h3>Diagnostic Console</h3>
-        <DiagnosticConsole logs={logs} />
-      </section>
+                      <div>
+                        <label className="block text-white/70 text-sm mb-2">Language:</label>
+                        <select
+                          value={selectedLanguage}
+                          onChange={(e) => setSelectedLanguage(e.target.value)}
+                          className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        >
+                          {languages.map(l => <option key={l.code} value={l.code}>{l.name}</option>)}
+                        </select>
+                      </div>
+                    </div>
 
-      {progress && (
-        <div style={{ padding: '10px', background: '#f0f0f0', marginBottom: '10px' }}>
-          Progress: {progress.status} {progress.current ? `${progress.current} / ${progress.total}` : ''} - {progress.file || progress.message}
+                    <label className="flex items-center gap-2 text-white/70 cursor-pointer hover:text-white/90 transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={showHistorical}
+                        onChange={(e) => setShowHistorical(e.target.checked)}
+                        className="w-4 h-4 rounded bg-white/20 border border-white/30 checked:bg-blue-500"
+                      />
+                      Show Historical Versions
+                    </label>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Selection Summary */}
+            <div className="mt-6 pt-6 border-t border-white/10 bg-white/5 rounded-lg p-4">
+              <div className="text-white">
+                <p className="font-semibold mb-2">Selection Summary</p>
+                <p className="text-white/70 text-sm">
+                  {selectionSummary.count} packs selected
+                </p>
+                <p className="text-lg font-bold text-green-400 mt-1">
+                  {selectionSummary.size} GB required
+                </p>
+              </div>
+            </div>
+          </VisionCard>
+
+          {/* Available Content Section */}
+          <VisionCard variant="elevated">
+            <h2 className="text-2xl font-semibold text-white mb-4">Available Content</h2>
+            <DLCGrid dlcs={dlcs} onToggle={toggleDLC} />
+          </VisionCard>
+
+          {/* Action Buttons Section */}
+          <div className="grid grid-cols-3 gap-4">
+            <Button onClick={handlePing} variant="secondary">
+              Ping Python
+            </Button>
+            <Button onClick={handleRefreshDLCs} variant="secondary">
+              Refresh Content List
+            </Button>
+            <Button onClick={handleDiscoverMirrors} variant="secondary">
+              Scan for Mirrors
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <Button onClick={handleVerify} variant="primary">
+              Verify All
+            </Button>
+            <Button onClick={handleStartUpdate} variant="primary">
+              Update Game
+            </Button>
+          </div>
+
+          {/* Intelligence Hub */}
+          <VisionCard variant="elevated">
+            <h2 className="text-2xl font-semibold text-white mb-4">Intelligence Hub</h2>
+            <ScraperViewfinder mirrors={discoveredMirrors} isProbing={isProbing} />
+          </VisionCard>
+
+          {/* Diagnostic Console */}
+          <VisionCard variant="elevated">
+            <h2 className="text-2xl font-semibold text-white mb-4">Diagnostic Console</h2>
+            <DiagnosticConsole logs={logs} />
+          </VisionCard>
+
+          {/* Progress Display */}
+          {progress && (
+            <div className="glass-medium rounded-lg p-4 border border-white/20">
+              <p className="text-white mb-2">
+                {progress.status}
+                {progress.current && ` (${progress.current} / ${progress.total})`}
+              </p>
+              {progress.file && <p className="text-white/70 text-sm">{progress.file}</p>}
+              {progress.message && <p className="text-white/70 text-sm">{progress.message}</p>}
+            </div>
+          )}
+
+          {/* Response Output */}
+          <div className="glass-medium rounded-lg p-4 border border-white/20 max-h-64 overflow-auto">
+            <p className="text-white/50 text-sm font-mono whitespace-pre-wrap break-words">
+              {response}
+            </p>
+          </div>
         </div>
-      )}
-      
-      <pre style={{ background: '#eee', padding: '10px', overflowX: 'auto' }}>
-        {response}
-      </pre>
-    </div>
+      </div>
+    </Environment>
   );
 };
 
