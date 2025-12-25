@@ -421,11 +421,8 @@ const App = () => {
             <ScraperViewfinder mirrors={discoveredMirrors} isProbing={isProbing} />
           </VisionCard>
 
-          {/* Diagnostic Console */}
-          <VisionCard variant="elevated">
-            <h2 className="text-2xl font-semibold text-white mb-4">Diagnostic Console</h2>
-            <DiagnosticConsole logs={logs} />
-          </VisionCard>
+          {/* Diagnostic Console is now a floating overlay */}
+          <DiagnosticConsole logs={logs} />
 
           {/* Progress Display */}
           {progress && (
