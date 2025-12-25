@@ -16,4 +16,4 @@
 - [x] Task: Update `DLC` interface in `types.d.ts` and `DLCList.tsx` to include metadata fields. d6202bb
 - [x] Task: Redesign `DLCGrid` item to show a tooltip or expanded view with the pack description. f314649
 - [x] Task: Add a "Show Historical Versions" toggle to view old patches in the UI. fe11ce1
-- [ ] Task: Conductor - User Manual Verification 'UI Enrichment' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'UI Enrichment' (Protocol in workflow.md) 997afb3
