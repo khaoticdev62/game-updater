@@ -6,7 +6,7 @@
 - [x] Task: Write tests to verify IPC timeout behavior. 54cb7eb
 - [x] Task: Conductor - User Manual Verification 'IPC Resilience' 54cb7eb
 
-## Phase 2: Unified Packaging Logic
+## Phase 2: Unified Packaging Logic [checkpoint: f127122]
 - [x] Task: Implement production path resolution for the sidecar in `src/index.ts`. a91e22e
 - [x] Task: Update `build_system.py` to ensure the executable is named consistently. a91e22e
 - [x] Task: Verify sidecar spawning in both development and 'mock' production environments. 69fa3d0
