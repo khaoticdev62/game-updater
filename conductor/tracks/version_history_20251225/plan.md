@@ -6,11 +6,11 @@
 - [x] Task: Write unit tests for `VersionScanner` with mock HTML indexes.
 - [x] Task: Conductor - User Manual Verification 'Version Discovery' (Protocol in workflow.md) (8926da3)
 
-## Phase 2: UI Version Selection
+## Phase 2: UI Version Selection [checkpoint: a5936be]
 - [x] Task: Implement `get_available_versions` command in `sidecar.py`.
 - [x] Task: Add a Version Selector dropdown in `App.tsx`.
 - [x] Task: Wire the Version Selector to the manifest fetching logic.
-- [ ] Task: Conductor - User Manual Verification 'Version UI' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Version UI' (Protocol in workflow.md) (a5936be)
 - [ ] Task: Conductor - User Manual Verification 'Version UI' (Protocol in workflow.md)
 
 ## Phase 3: Legacy Patching Support
