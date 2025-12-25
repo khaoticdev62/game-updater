@@ -18,10 +18,20 @@ contextBridge.exposeInMainWorld('electron', {
 
         const listener = (event: any, data: any) => callback(data);
 
-        ipcRenderer.on('python-log', listener);
+            ipcRenderer.on('python-log', listener);
 
-        return () => ipcRenderer.removeListener('python-log', listener);
+            return () => ipcRenderer.removeListener('python-log', listener);
 
-      },
+          },
 
-    });
+          onBackendReady: (callback: any) => {
+
+            const listener = () => callback();
+
+            ipcRenderer.on('backend-ready', listener);
+
+            return () => ipcRenderer.removeListener('backend-ready', listener);
+
+          },
+
+        });

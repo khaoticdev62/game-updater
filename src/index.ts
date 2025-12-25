@@ -25,6 +25,10 @@ class HybridEventBus extends EventEmitter {
         if (!line.trim()) return;
         try {
           const message = JSON.parse(line);
+          if (message.type === 'ready') {
+            this.emit('backend-ready');
+            return;
+          }
           if (message.timestamp && message.level) {
             this.emit('python-log', message);
             return;
@@ -118,6 +122,12 @@ app.on('ready', () => {
   eventBus.on('python-log', (data) => {
     BrowserWindow.getAllWindows().forEach(win => {
       win.webContents.send('python-log', data);
+    });
+  });
+
+  eventBus.on('backend-ready', () => {
+    BrowserWindow.getAllWindows().forEach(win => {
+      win.webContents.send('backend-ready');
     });
   });
 });

@@ -19,19 +19,46 @@ const App = () => {
 
   // Health Polling Logic
   useEffect(() => {
+    let pollInterval = 100; // Start fast
+    let timeoutId: NodeJS.Timeout;
+    let pollId: NodeJS.Timeout;
+    const startTime = Date.now();
+
     const poll = async () => {
       try {
         const start = Date.now();
         await window.electron.requestPython({ command: 'ping' });
         const latency = Date.now() - start;
         setIsHealthy(latency < 1000);
+        // If successful, back off immediately
+        clearInterval(pollId);
+        pollInterval = 5000;
+        pollId = setInterval(poll, pollInterval);
       } catch (e) {
         setIsHealthy(false);
+        // If failing for more than 5s, back off anyway
+        if (Date.now() - startTime > 5000 && pollInterval < 5000) {
+           clearInterval(pollId);
+           pollInterval = 5000;
+           pollId = setInterval(poll, pollInterval);
+        }
       }
     };
 
-    const interval = setInterval(poll, 5000);
-    return () => clearInterval(interval);
+    pollId = setInterval(poll, pollInterval);
+
+    // Listen for backend-ready event for immediate switch
+    const removeReadyListener = window.electron.onBackendReady(() => {
+      setIsHealthy(true);
+      clearInterval(pollId);
+      pollInterval = 5000;
+      pollId = setInterval(poll, pollInterval);
+    });
+
+    return () => {
+      clearInterval(pollId);
+      removeReadyListener();
+    };
   }, []);
 
   // Log Streaming Logic
