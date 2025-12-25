@@ -9,10 +9,23 @@ export interface DLC {
   source?: string;
 }
 
+export interface ProgressData {
+  status: string;
+  current?: number;
+  total?: number;
+  file?: string;
+  message?: string;
+}
+
+export interface PythonRequest {
+  command: string;
+  [key: string]: unknown;
+}
+
 export interface IElectron {
-  requestPython: (request: any) => Promise<any>;
-  onPythonProgress: (id: string, callback: (data: any) => void) => () => void;
-  onPythonLog: (callback: (data: any) => void) => () => void;
+  requestPython: (request: PythonRequest) => Promise<unknown>;
+  onPythonProgress: (id: string, callback: (data: ProgressData) => void) => () => void;
+  onPythonLog: (callback: (data: unknown) => void) => () => void;
   onBackendReady: (callback: () => void) => () => void;
   onBackendDisconnected: (callback: () => void) => () => void;
 }

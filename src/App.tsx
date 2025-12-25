@@ -66,7 +66,7 @@ const App = () => {
         clearInterval(pollId);
         pollInterval = 5000;
         pollId = setInterval(poll, pollInterval);
-      } catch (e) {
+      } catch {
         setIsHealthy(false);
         // If failing for more than 5s, back off anyway
         if (Date.now() - startTime > 5000 && pollInterval < 5000) {
