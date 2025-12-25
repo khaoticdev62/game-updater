@@ -11,11 +11,31 @@ import { FuseV1Options, FuseVersion } from '@electron/fuses';
 import { mainConfig } from './webpack.main.config';
 import { rendererConfig } from './webpack.renderer.config';
 
+import path from 'path';
+import { execSync } from 'child_process';
+
 const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
+    extraResource: [
+      './dist/sidecar.exe',
+    ],
   },
   rebuildConfig: {},
+  hooks: {
+    generateAssets: async () => {
+      console.log('Hooks: Building Python sidecar...');
+      // We use the same 'mock' command logic but for the real build
+      const buildScript = `
+from build_system import BuildSystem
+from pathlib import Path
+bs = BuildSystem(Path('.'))
+if not bs.package_backend(Path('dist')):
+    raise Exception('Backend packaging failed')
+`;
+      execSync(`python -c "${buildScript.replace(/\n/g, ';')}"`, { stdio: 'inherit' });
+    },
+  },
   makers: [
     new MakerSquirrel({}),
     new MakerZIP({}, ['darwin']),
