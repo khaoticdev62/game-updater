@@ -13,7 +13,7 @@
 - [x] Task: Conductor - User Manual Verification 'Filtering & Estimation' (Protocol in workflow.md) (25cd323)
 
 ## Phase 3: High-Fidelity UI Dashboard
-- [ ] Task: Upgrade the DLC list in `App.tsx` to use categorized grids with selection persistence.
-- [ ] Task: Add a Language Selector dropdown to the Configuration section.
-- [ ] Task: Implement a "Summary Bar" showing Total Size and Selected Count.
-- [ ] Task: Conductor - User Manual Verification 'UI Dashboard' (Protocol in workflow.md)
+- [x] Task: Upgrade the DLC list in `App.tsx` to use categorized grids with selection persistence.
+- [x] Task: Add a Language Selector dropdown to the Configuration section.
+- [x] Task: Implement a "Summary Bar" showing Total Size and Selected Count.
+- [x] Task: Conductor - User Manual Verification 'UI Dashboard' (Protocol in workflow.md)

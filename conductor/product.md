@@ -19,6 +19,7 @@ The goal is to reverse engineer, rebuild, and improve the Sims 4 Updater by anad
 - **Production-Grade Resilience:** Stateful operation logging, interruption recovery, and optimized file verification engines.
 - **Advanced Mod Guardian:** Automated community-driven protection against broken or outdated mods during game updates.
 - **Legacy Version Management:** Ability to discover and patch to specific previous game versions (e.g., v1.119.0).
+- **Intelligent Dependency-Aware Installation:** Granular selection of DLCs with automated resolution of required core files and dependencies.
 
 ## Technical Strategy & Research
 - **Reverse Engineering:** Deep analysis of communication protocols, manifest file formats, and original patching logic.

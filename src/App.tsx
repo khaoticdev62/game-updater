@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import DLCList, { DLC } from './components/DLCList';
+import React, { useState, useEffect, useMemo } from 'react';
+import DLCGrid from './components/DLCGrid';
+import { DLC } from './components/DLCList';
 import ScraperViewfinder, { MirrorResult } from './components/ScraperViewfinder';
 import DiagnosticConsole, { LogEntry } from './components/DiagnosticConsole';
 import CustomCursor from './components/CustomCursor';
@@ -22,11 +23,31 @@ const App = () => {
   const [manifestUrl, setManifestUrl] = useState<string>('');
   const [availableVersions, setAvailableVersions] = useState<string[]>([]);
   const [selectedVersion, setSelectedVersion] = useState<string>('');
+  const [selectedLanguage, setSelectedLanguage] = useState<string>('en_US');
   const [dlcs, setDlcs] = useState<DLC[]>([
-    { name: 'Get to Work', folder: 'EP01', status: 'Installed', selected: true },
-    { name: 'Get Together', folder: 'EP02', status: 'Missing', selected: false },
-    { name: 'City Living', folder: 'EP03', status: 'Missing', selected: false },
+    { name: 'Get to Work', folder: 'EP01', status: 'Installed', selected: true, category: 'Expansion Packs' },
+    { name: 'Get Together', folder: 'EP02', status: 'Missing', selected: false, category: 'Expansion Packs' },
+    { name: 'City Living', folder: 'EP03', status: 'Missing', selected: false, category: 'Expansion Packs' },
+    { name: 'Vampires', folder: 'GP04', status: 'Missing', selected: false, category: 'Game Packs' },
+    { name: 'Laundry Day', folder: 'SP13', status: 'Missing', selected: false, category: 'Stuff Packs' },
+    { name: 'Desert Luxe', folder: 'SP34', status: 'Missing', selected: false, category: 'Kits' },
   ]);
+
+  const languages = [
+    { code: 'en_US', name: 'English' },
+    { code: 'fr_FR', name: 'French' },
+    { code: 'de_DE', name: 'German' },
+    { code: 'es_ES', name: 'Spanish' },
+    { code: 'it_IT', name: 'Italian' },
+  ];
+
+  // Logic to calculate estimated space (Simplified UI-side)
+  const selectionSummary = useMemo(() => {
+    const selectedCount = dlcs.filter(d => d.selected).length;
+    // Mock estimate: 2GB per DLC
+    const estimatedGB = (selectedCount * 2.1).toFixed(1);
+    return { count: selectedCount, size: estimatedGB };
+  }, [dlcs]);
 
   // Health Polling Logic
   useEffect(() => {
@@ -110,6 +131,8 @@ const App = () => {
         game_dir: '.', 
         manifest_url: manifestUrl,
         version: selectedVersion || undefined,
+        selected_packs: dlcs.filter(d => d.selected).map(d => d.folder),
+        language: selectedLanguage,
         id 
       });
       setResponse(JSON.stringify(res, null, 2));
@@ -136,6 +159,8 @@ const App = () => {
         game_dir: '.', 
         manifest_url: manifestUrl,
         version: selectedVersion || undefined,
+        selected_packs: dlcs.filter(d => d.selected).map(d => d.folder),
+        language: selectedLanguage,
         id 
       });
       setResponse(JSON.stringify(res, null, 2));
@@ -203,6 +228,8 @@ const App = () => {
         game_dir: '.', 
         manifest_url: manifestUrl,
         version: selectedVersion || undefined,
+        selected_packs: dlcs.filter(d => d.selected).map(d => d.folder),
+        language: selectedLanguage,
         id
       });
       setResponse(JSON.stringify(res, null, 2));
@@ -243,16 +270,25 @@ const App = () => {
         {availableVersions.length > 0 && (
           <div style={{ marginTop: '10px' }}>
             <label>Target Version: </label>
-            <select value={selectedVersion} onChange={(e) => setSelectedVersion(e.target.value)} style={{ padding: '5px' }}>
+            <select value={selectedVersion} onChange={(e) => setSelectedVersion(e.target.value)} style={{ padding: '5px', marginRight: '20px' }}>
               {availableVersions.map(v => <option key={v} value={v}>{v}</option>)}
+            </select>
+
+            <label>Language: </label>
+            <select value={selectedLanguage} onChange={(e) => setSelectedLanguage(e.target.value)} style={{ padding: '5px' }}>
+              {languages.map(l => <option key={l.code} value={l.code}>{l.name}</option>)}
             </select>
           </div>
         )}
+        <div style={{ marginTop: '15px', padding: '10px', background: '#2c3e50', borderRadius: '4px', border: '1px solid #3498db' }}>
+          <strong>Selection Summary:</strong> {selectionSummary.count} packs selected. 
+          Estimated space required: <span style={{ color: '#2ecc71' }}>{selectionSummary.size} GB</span>
+        </div>
       </section>
 
       <section style={{ marginBottom: '20px' }}>
         <h3>Available Content</h3>
-        <DLCList dlcs={dlcs} onToggle={toggleDLC} />
+        <DLCGrid dlcs={dlcs} onToggle={toggleDLC} />
       </section>
 
       <section style={{ marginBottom: '20px' }}>

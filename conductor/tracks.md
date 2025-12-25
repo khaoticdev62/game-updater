@@ -1,5 +1,4 @@
 ---
 
-## [~] Track: Intelligent Dependency-Aware DLC Management
-*Link: [./conductor/tracks/dlc_dependency_20251225/](./conductor/tracks/dlc_dependency_20251225/)*
-
+## [~] Track: Intelligence Hub - Content Metadata & Discovery Integration
+*Link: [./conductor/tracks/content_db_integration_20251225/](./conductor/tracks/content_db_integration_20251225/)*

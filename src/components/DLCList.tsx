@@ -5,6 +5,7 @@ export interface DLC {
   folder: string;
   status: 'Installed' | 'Missing' | 'Update Available';
   selected: boolean;
+  category?: string;
 }
 
 interface DLCListProps {

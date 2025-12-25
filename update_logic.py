@@ -136,6 +136,66 @@ class UpdateManager:
                     
         return operations
 
+    def apply_operations(self, operations, progress_callback=None):
+        """
+        Executes the provided operations with resilience (lock file + logging).
+        """
+        # Create session lock
+        self.lock_file.touch()
+        self.op_logger.clear_log()
+
+        # 1. Handle full downloads
+        download_tasks = [op for op in operations if op['type'] == 'download_full']
+        if download_tasks:
+            self.queue.clear()
+            for i, task in enumerate(download_tasks):
+                url = task['url']
+                self.queue.add_task(url, self.game_dir, filename=task['file'])
+                self.op_logger.log_operation(f"dl_{i}", task)
+            
+            def dl_callback(p):
+                if progress_callback:
+                    progress_callback({'status': 'downloading', **p})
+
+            success = self.queue.process_all(callback=dl_callback)
+            if not success:
+                return False, "Some downloads failed"
+            
+            # Mark all downloads as completed in log
+            for i in range(len(download_tasks)):
+                self.op_logger.update_status(f"dl_{i}", "completed")
+
+        # 2. Handle patches
+        patch_tasks = [op for op in operations if op['type'] == 'patch_delta']
+        for i, task in enumerate(patch_tasks):
+            rel_path = task['file']
+            full_path = os.path.join(self.game_dir, rel_path)
+            self.op_logger.log_operation(f"patch_{i}", task)
+            
+            # In a real scenario, patch_file would be downloaded to a temp dir
+            patch_file = os.path.join(self.game_dir, rel_path + ".delta") 
+            
+            if progress_callback:
+                progress_callback({
+                    'status': 'patching',
+                    'current': i + 1,
+                    'total': len(patch_tasks),
+                    'file': rel_path
+                })
+
+            success, message = self.patcher.apply_patch_safe(full_path, patch_file, task['target_md5'])
+            if not success:
+                return False, f"Patching failed for {rel_path}: {message}"
+            
+            self.op_logger.update_status(f"patch_{i}", "completed")
+
+        # Successful completion: cleanup
+        if self.lock_file.exists():
+            self.lock_file.unlink()
+        self.op_logger.clear_log()
+
+        return True, "All operations completed successfully"
+
 class SpaceCalculator:
     """
     Estimates disk space requirements for an update session.

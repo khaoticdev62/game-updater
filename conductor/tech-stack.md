@@ -18,6 +18,8 @@
 - **Resilience & Safety:**
     - **JSON Stateful Logging:** For resumable background operations.
     - **Rollback Orchestration:** Time-stamped ZIP-based game state preservation.
+- **Dependency Management:**
+    - **DLCGraph:** Custom directed-graph engine for resolving pack-level dependencies and core requirements.
 
 ## Communication & Integration
 - **Process Communication:** Electron IPC (Inter-Process Communication) to bridge the TypeScript UI and the Python backend.
