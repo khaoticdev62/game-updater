@@ -91,6 +91,12 @@ typings/
 # Electron-Forge
 out/
 
+# PostCSS config
+postcss.config.js
+
+# Conductor archive
+/conductor/archive/
+
 # Large build artifacts and executables
 *.exe
 *.zip
