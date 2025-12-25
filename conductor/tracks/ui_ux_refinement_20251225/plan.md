@@ -7,7 +7,7 @@
 - [x] Task: Conductor - User Manual Verification 'UI Infrastructure' b157e90
 
 ## Phase 2: Component Redesign
-- [ ] Task: Redesign `DLCGrid` and `DLCList` with modern card styles and hover effects.
+- [x] Task: Redesign `DLCGrid` and `DLCList` with modern card styles and hover effects. 092529e
 - [ ] Task: Redesign the `Configuration` section with cleaner input groups and buttons.
 - [ ] Task: Redesign the `DiagnosticConsole` to support severity-based syntax highlighting.
 - [ ] Task: Conductor - User Manual Verification 'Component Polish'
