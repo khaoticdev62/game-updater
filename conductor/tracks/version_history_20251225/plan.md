@@ -13,8 +13,8 @@
 - [x] Task: Conductor - User Manual Verification 'Version UI' (Protocol in workflow.md) (a5936be)
 - [ ] Task: Conductor - User Manual Verification 'Version UI' (Protocol in workflow.md)
 
-## Phase 3: Legacy Patching Support
+## Phase 3: Legacy Patching Support [checkpoint: a493e88]
 - [x] Task: Update `UpdateManager` to handle "downgrade" or "specific version" scenarios (ensuring it doesn't just check if local is 'less than' target).
 - [x] Task: Verify end-to-end flow of selecting an old version and generating operations.
-- [ ] Task: Conductor - User Manual Verification 'Legacy Patching' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Legacy Patching' (Protocol in workflow.md) (a493e88)
 - [ ] Task: Conductor - User Manual Verification 'Legacy Patching' (Protocol in workflow.md)
