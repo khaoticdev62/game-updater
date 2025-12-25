@@ -49,5 +49,27 @@ class TestModGuardian(unittest.TestCase):
         self.assertTrue((self.game_dir / "_Quarantine" / "BrokenMod.ts4script").exists())
         self.assertTrue(mod2.exists())
 
+    def test_policy_engine(self):
+        # Setup files
+        mod1 = self.mods_dir / "BrokenMod.ts4script"
+        mod1.write_text("broken")
+        mod2 = self.mods_dir / "Unknown.package"
+        mod2.write_text("unknown")
+        
+        # 1. Policy: Never
+        self.guardian.policy = 'never'
+        count = self.guardian.run_guardian()
+        self.assertEqual(count, 0)
+        self.assertTrue(mod1.exists())
+        
+        # 2. Policy: Always
+        self.guardian.policy = 'always'
+        count = self.guardian.run_guardian()
+        self.assertEqual(count, 2)
+        self.assertFalse(mod1.exists())
+        self.assertFalse(mod2.exists())
+        self.assertTrue((self.game_dir / "_Quarantine" / "BrokenMod.ts4script").exists())
+        self.assertTrue((self.game_dir / "_Quarantine" / "Unknown.package").exists())
+
 if __name__ == '__main__':
     unittest.main()

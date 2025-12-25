@@ -8,12 +8,28 @@ from logging_system import get_logger
 class ModGuardian:
     """
     Identifies and quarantines potentially broken mods based on community reports.
+    Supports policies: 'always', 'selective', 'never'.
     """
-    def __init__(self, game_dir: Path):
+    def __init__(self, game_dir: Path, policy: str = 'selective'):
         self.game_dir = game_dir
         self.mods_dir = game_dir / "Mods"
         self.quarantine_dir = game_dir / "_Quarantine"
         self.broken_mods_data: List[Dict[str, Any]] = []
+        self.policy = policy
+
+    def run_guardian(self) -> int:
+        """Runs the guardian logic based on the current policy."""
+        if self.policy == 'never':
+            return 0
+        
+        if self.policy == 'always':
+            # Quarantine EVERYTHING in Mods
+            all_mods = [f for f in self.mods_dir.rglob("*") if f.is_file()]
+            return self.quarantine_mods(all_mods)
+        
+        # Default: selective
+        broken = self.scan_for_broken_mods()
+        return self.quarantine_mods(broken)
 
     def load_community_data(self, data_path: Path):
         """Loads known broken mods from a community source (JSON)."""
