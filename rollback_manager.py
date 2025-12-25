@@ -30,6 +30,8 @@ class RollbackManager:
                     if full_path.exists():
                         zip_ref.write(full_path, rel_path)
             return zip_name
+        except PermissionError:
+            return None
         except Exception:
             if zip_path.exists():
                 zip_path.unlink()

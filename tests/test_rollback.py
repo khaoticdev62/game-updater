@@ -3,6 +3,7 @@ import os
 import tempfile
 import zipfile
 from pathlib import Path
+from unittest.mock import patch
 from rollback_manager import RollbackManager
 
 class TestRollbackManager(unittest.TestCase):
@@ -41,6 +42,16 @@ class TestRollbackManager(unittest.TestCase):
             self.assertIn("Bin/TS4_x64.exe", names)
             self.assertIn("Game/resource.cfg", names)
             self.assertEqual(len(names), 2)
+
+    def test_rollback_edge_cases(self):
+        # 1. Test rollback with non-existent restore point
+        self.assertFalse(self.manager.rollback("non_existent_backup.zip"))
+
+        # 2. Test create with permissions error
+        with unittest.mock.patch('zipfile.ZipFile') as mock_zip:
+            mock_zip.side_effect = PermissionError("Mocked permissions error")
+            zip_name = self.manager.create_restore_point(["some_file.txt"])
+            self.assertIsNone(zip_name)
 
 if __name__ == '__main__':
     unittest.main()

@@ -23,8 +23,8 @@ class ModGuardian:
             return 0
         
         if self.policy == 'always':
-            # Quarantine EVERYTHING in Mods
-            all_mods = [f for f in self.mods_dir.rglob("*") if f.is_file()]
+            # Quarantine all supported mod files
+            all_mods = list(self.mods_dir.rglob("*.ts4script")) + list(self.mods_dir.rglob("*.package"))
             return self.quarantine_mods(all_mods)
         
         # Default: selective
@@ -40,19 +40,19 @@ class ModGuardian:
             get_logger().error(f"ModGuardian: Failed to load community data: {e}")
 
     def scan_for_broken_mods(self) -> List[Path]:
-        """Scans the Mods folder for matches in broken_mods_data."""
+        """Scans for .ts4script and .package files matching broken_mods_data."""
         if not self.mods_dir.exists():
             return []
 
         found = []
-        # Support recursive scan for subfolders
-        for mod_file in self.mods_dir.rglob("*"):
-            if mod_file.is_file():
-                for broken in self.broken_mods_data:
-                    # Match by filename (simplified matching for prototype)
-                    if broken["filename"].lower() == mod_file.name.lower():
-                        found.append(mod_file)
-                        break
+        # Target specific mod file types
+        mod_files = list(self.mods_dir.rglob("*.ts4script")) + list(self.mods_dir.rglob("*.package"))
+
+        for mod_file in mod_files:
+            for broken in self.broken_mods_data:
+                if broken["filename"].lower() == mod_file.name.lower():
+                    found.append(mod_file)
+                    break
         return found
 
     def quarantine_mods(self, mods: List[Path]) -> int:

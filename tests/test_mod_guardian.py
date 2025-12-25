@@ -71,5 +71,20 @@ class TestModGuardian(unittest.TestCase):
         self.assertTrue((self.game_dir / "_Quarantine" / "BrokenMod.ts4script").exists())
         self.assertTrue((self.game_dir / "_Quarantine" / "Unknown.package").exists())
 
+    def test_ignores_non_mod_files(self):
+        # Create a non-mod file
+        readme = self.mods_dir / "readme.txt"
+        readme.write_text("info")
+
+        # Selective scan should find nothing to quarantine
+        self.guardian.policy = 'selective'
+        self.guardian.load_community_data(self.community_file)
+        self.assertEqual(self.guardian.run_guardian(), 0)
+
+        # 'Always' policy should also ignore it
+        self.guardian.policy = 'always'
+        self.assertEqual(self.guardian.run_guardian(), 0)
+        self.assertTrue(readme.exists())
+
 if __name__ == '__main__':
     unittest.main()
