@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import DLCGrid from './components/DLCGrid';
 import { DLC } from './types';
@@ -6,11 +6,15 @@ import ScraperViewfinder, { MirrorResult } from './components/ScraperViewfinder'
 import DiagnosticConsole, { LogEntry } from './components/DiagnosticConsole';
 import { ProgressIndicator } from './components/ProgressIndicator';
 import { ErrorToast, ErrorMessage } from './components/ErrorToast';
+import { OperationsSummary, Operation } from './components/OperationsSummary';
+import { UpdateCompletionStatus, UpdateResult } from './components/UpdateCompletionStatus';
+import { ResponseDisplay } from './components/ResponseDisplay';
 import CustomCursor from './components/CustomCursor';
 import { Environment } from './components/Environment';
 import { TopShelf } from './components/TopShelf';
 import { VisionCard } from './components/VisionCard';
 import { Button } from './components/Button';
+import { useLocalStorage, saveAppState, loadAppState, clearAppState } from './hooks/useLocalStorage';
 
 interface ProgressData {
   status: string;
@@ -29,19 +33,48 @@ const App = () => {
   const [discoveredMirrors, setDiscoveredMirrors] = useState<MirrorResult[]>([]);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [errors, setErrors] = useState<ErrorMessage[]>([]);
-  const [manifestUrl, setManifestUrl] = useState<string>('');
+  const [pendingOperations, setPendingOperations] = useState<Operation[]>([]);
+  const [showOperationsSummary, setShowOperationsSummary] = useState(false);
+  const [confirmedOperationsCallback, setConfirmedOperationsCallback] = useState<(() => void) | null>(null);
+  const [updateResult, setUpdateResult] = useState<UpdateResult | null>(null);
+  const [showUpdateStatus, setShowUpdateStatus] = useState(false);
+
+  // State persisted to localStorage
+  const [manifestUrl, setManifestUrl] = useLocalStorage<string>('appState:manifestUrl', '');
+  const [selectedVersion, setSelectedVersion] = useLocalStorage<string>('appState:selectedVersion', '');
+  const [selectedLanguage, setSelectedLanguage] = useLocalStorage<string>('appState:selectedLanguage', 'en_US');
+
+  // Non-persisted state
   const [availableVersions, setAvailableVersions] = useState<string[]>([]);
-  const [selectedVersion, setSelectedVersion] = useState<string>('');
   const [showHistorical, setShowHistorical] = useState<boolean>(false);
-  const [selectedLanguage, setSelectedLanguage] = useState<string>('en_US');
-  const [dlcs, setDlcs] = useState<DLC[]>([
-    { name: 'Get to Work', folder: 'EP01', status: 'Installed', selected: true, category: 'Expansion Packs' },
-    { name: 'Get Together', folder: 'EP02', status: 'Missing', selected: false, category: 'Expansion Packs' },
-    { name: 'City Living', folder: 'EP03', status: 'Missing', selected: false, category: 'Expansion Packs' },
-    { name: 'Vampires', folder: 'GP04', status: 'Missing', selected: false, category: 'Game Packs' },
-    { name: 'Laundry Day', folder: 'SP13', status: 'Missing', selected: false, category: 'Stuff Packs' },
-    { name: 'Desert Luxe', folder: 'SP34', status: 'Missing', selected: false, category: 'Kits' },
-  ]);
+  // Initialize DLC state with localStorage restoration
+  const initializeDlcs = (): DLC[] => {
+    const defaultDlcs: DLC[] = [
+      { name: 'Get to Work', folder: 'EP01', status: 'Installed', selected: true, category: 'Expansion Packs' },
+      { name: 'Get Together', folder: 'EP02', status: 'Missing', selected: false, category: 'Expansion Packs' },
+      { name: 'City Living', folder: 'EP03', status: 'Missing', selected: false, category: 'Expansion Packs' },
+      { name: 'Vampires', folder: 'GP04', status: 'Missing', selected: false, category: 'Game Packs' },
+      { name: 'Laundry Day', folder: 'SP13', status: 'Missing', selected: false, category: 'Stuff Packs' },
+      { name: 'Desert Luxe', folder: 'SP34', status: 'Missing', selected: false, category: 'Kits' },
+    ];
+
+    // Try to restore DLC selections from localStorage
+    try {
+      const savedState = loadAppState();
+      if (savedState.dlcSelections) {
+        return defaultDlcs.map(dlc => ({
+          ...dlc,
+          selected: savedState.dlcSelections?.[dlc.folder] ?? dlc.selected
+        }));
+      }
+    } catch (error) {
+      console.warn('Failed to restore DLC selections from storage');
+    }
+
+    return defaultDlcs;
+  };
+
+  const [dlcs, setDlcs] = useState<DLC[]>(initializeDlcs);
 
   const languages = [
     { code: 'en_US', name: 'English' },
@@ -115,6 +148,16 @@ const App = () => {
     return () => removeListener();
   }, []);
 
+  // Save DLC selections to localStorage when they change
+  useEffect(() => {
+    const dlcSelections = dlcs.reduce((acc, dlc) => {
+      acc[dlc.folder] = dlc.selected;
+      return acc;
+    }, {} as Record<string, boolean>);
+    
+    saveAppState({ dlcSelections });
+  }, [dlcs]);
+
   const addError = (code: string, message: string, details?: string, autoDismissIn: number = 8000) => {
     const errorId = `${code}-${Date.now()}-${Math.random()}`;
     const error: ErrorMessage = {
@@ -130,6 +173,28 @@ const App = () => {
 
   const dismissError = (id: string) => {
     setErrors(prev => prev.filter(e => e.id !== id));
+  };
+
+  /**
+   * Format command responses for user-friendly display
+   * Extracts key information and presents it clearly
+   */
+  const formatAndDisplayResponse = (command: string, data: any) => {
+    const formatters: Record<string, (d: any) => string> = {
+      verify_complete: (d) => `✓ Verification Complete\n\n${d.summary}`,
+      verify_no_ops: (d) => '✓ All files verified and up-to-date',
+      update_started: (d) => `✓ Update started\n\nProcessing ${d.operationsCount} operations...`,
+      update_complete: (d) => `✓ Update Complete\n\nSuccessfully processed ${d.operationsCount} operations`,
+      ping: (d) => '✓ Backend is responding normally',
+      versions_discovered: (d) => `✓ Found ${d.count} versions available`,
+      dlc_status: (d) => `✓ Scanned ${d.count} DLC packs`,
+      mirrors_discovered: (d) => `✓ Found ${d.count} mirrors (${d.healthy} healthy)`
+    };
+
+    const formatter = formatters[command];
+    if (formatter && data) {
+      setResponse(formatter(data));
+    }
   };
 
   const handleIpcError = (e: unknown) => {
@@ -204,6 +269,48 @@ const App = () => {
     }
   };
 
+  // Parse operations from verify_all response
+  const parseOperations = (response: any): { operations: Operation[]; totalSize: number } => {
+    const operations: Operation[] = [];
+    let totalSize = 0;
+
+    // Handle different response formats
+    if (response?.result?.operations) {
+      response.result.operations.forEach((op: any) => {
+        operations.push({
+          type: op.type || 'update',
+          file: op.file || op.filename,
+          path: op.path || op.filepath,
+          size: op.size || 0,
+          status: op.status
+        });
+        totalSize += op.size || 0;
+      });
+    } else if (response?.result?.files) {
+      // Alternative format: list of files to download/verify
+      response.result.files.forEach((file: any) => {
+        operations.push({
+          type: file.type || 'download',
+          file: file.name || file.filename,
+          size: file.size || 0
+        });
+        totalSize += file.size || 0;
+      });
+    } else if (Array.isArray(response?.result)) {
+      // Direct array format
+      response.result.forEach((item: any) => {
+        operations.push({
+          type: item.type || 'update',
+          file: item.file || item.name,
+          size: item.size || 0
+        });
+        totalSize += item.size || 0;
+      });
+    }
+
+    return { operations, totalSize };
+  };
+
   const handleVerify = async () => {
     const id = Math.random().toString(36).substring(7);
     const removeListener = window.electron.onPythonProgress(id, (data) => {
@@ -221,12 +328,49 @@ const App = () => {
         language: selectedLanguage,
         id 
       });
-      setResponse(JSON.stringify(res, null, 2));
+
+      // Parse operations from response
+      const { operations, totalSize } = parseOperations(res);
+
+      if (operations.length > 0) {
+        // Show operations summary and wait for confirmation
+        setPendingOperations(operations);
+        setShowOperationsSummary(true);
+        
+        // Set callback for when user confirms
+        setConfirmedOperationsCallback(() => {
+          setShowOperationsSummary(false);
+          setResponse(`Verified ${operations.length} operations. Ready to update. Click "Update Game" to proceed.`);
+          formatAndDisplayResponse('verify_complete', {
+            operationsCount: operations.length,
+            totalSize: totalSize,
+            summary: `${operations.length} file(s) to process (${(totalSize / 1024 / 1024).toFixed(2)} MB)`
+          });
+        });
+      } else {
+        // No operations needed
+        setResponse("Verification complete: All files are up-to-date. No operations needed.");
+        formatAndDisplayResponse('verify_no_ops', { status: 'No operations needed' });
+      }
     } catch (e) {
       handleIpcError(e);
     } finally {
       removeListener();
     }
+  };
+
+  const handleConfirmOperations = () => {
+    if (confirmedOperationsCallback) {
+      confirmedOperationsCallback();
+      setConfirmedOperationsCallback(null);
+    }
+  };
+
+  const handleCancelOperations = () => {
+    setShowOperationsSummary(false);
+    setPendingOperations([]);
+    setConfirmedOperationsCallback(null);
+    setResponse("Verification cancelled.");
   };
 
   const handleDiscoverVersions = async () => {
@@ -281,12 +425,15 @@ const App = () => {
 
   const handleStartUpdate = async () => {
     const id = Math.random().toString(36).substring(7);
+    const startTime = Date.now();
     const removeListener = window.electron.onPythonProgress(id, (data) => {
       setProgress(data);
     });
 
     try {
       setResponse("Starting full update workflow...");
+      setProgress({ status: 'initializing' });
+
       const res = await window.electron.requestPython({
         command: 'start_update',
         game_dir: '.', 
@@ -296,12 +443,70 @@ const App = () => {
         language: selectedLanguage,
         id
       });
-      setResponse(JSON.stringify(res, null, 2));
+
+      // Parse update result
+      const endTime = Date.now();
+      const result: UpdateResult = {
+        status: 'completed',
+        operationsProcessed: res?.result?.processed || res?.result?.operationsProcessed || 0,
+        operationsFailed: res?.result?.failed || res?.result?.operationsFailed || 0,
+        startTime,
+        endTime,
+        errors: res?.result?.errors || [],
+        summary: res?.result?.summary || 
+                  `Successfully updated ${res?.result?.processed || 0} operation(s). ` +
+                  `Failed: ${res?.result?.failed || 0}`
+      };
+
+      // Determine if partial or failed
+      if (result.operationsFailed > 0) {
+        result.status = result.operationsFailed === result.operationsProcessed ? 'failed' : 'partial';
+      }
+
+      setUpdateResult(result);
+      setShowUpdateStatus(true);
+      setProgress(null);
+
+      // Format and display response
+      formatAndDisplayResponse('update_complete', {
+        operationsCount: result.operationsProcessed,
+        failed: result.operationsFailed,
+        duration: ((endTime - startTime) / 1000).toFixed(1)
+      });
     } catch (e) {
+      // Handle update failure
+      const endTime = Date.now();
+      const errorMsg = e instanceof Error ? e.message : String(e);
+      
+      const result: UpdateResult = {
+        status: 'failed',
+        operationsProcessed: 0,
+        operationsFailed: 1,
+        startTime,
+        endTime,
+        errors: [{ file: 'update_command', error: errorMsg }],
+        summary: `Update failed: ${errorMsg}`
+      };
+
+      setUpdateResult(result);
+      setShowUpdateStatus(true);
+      setProgress(null);
+
       handleIpcError(e);
     } finally {
       removeListener();
     }
+  };
+
+  const handleCloseUpdateStatus = () => {
+    setShowUpdateStatus(false);
+    setUpdateResult(null);
+  };
+
+  const handleRetryUpdate = () => {
+    setShowUpdateStatus(false);
+    setUpdateResult(null);
+    handleStartUpdate();
   };
 
   return (
@@ -315,6 +520,24 @@ const App = () => {
 
       {/* Error Toast System */}
       <ErrorToast errors={errors} onDismiss={dismissError} />
+
+      {/* Operations Summary Modal */}
+      <OperationsSummary
+        operations={pendingOperations}
+        totalSize={pendingOperations.reduce((sum, op) => sum + (op.size || 0), 0)}
+        isVisible={showOperationsSummary}
+        onConfirm={handleConfirmOperations}
+        onCancel={handleCancelOperations}
+        isLoading={!!progress}
+      />
+
+      {/* Update Completion Status Modal */}
+      <UpdateCompletionStatus
+        result={updateResult}
+        isVisible={showUpdateStatus}
+        onClose={handleCloseUpdateStatus}
+        onRetry={handleRetryUpdate}
+      />
 
       {/* TopShelf Navigation */}
       <TopShelf activeView={activeView} onViewChange={setActiveView} />
@@ -456,11 +679,7 @@ const App = () => {
           {/* Progress Display - Note: Component displays as floating overlay via ProgressIndicator */}
 
           {/* Response Output */}
-          <div className="glass-medium rounded-lg p-4 border border-white/20 max-h-64 overflow-auto">
-            <p className="text-white/50 text-sm font-mono whitespace-pre-wrap break-words">
-              {response}
-            </p>
-          </div>
+          <ResponseDisplay response={response} isLoading={isProbing} />
         </div>
         </motion.div>
       </AnimatePresence>
