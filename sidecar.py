@@ -33,13 +33,20 @@ def main():
                 game_dir = request.get("game_dir")
                 manifest_url = request.get("manifest_url")
                 version = request.get("version")
+                selected_packs = request.get("selected_packs")
+                language = request.get("language", "en_US")
                 
                 manager = UpdateManager(game_dir, manifest_url, aria2)
                 
                 def on_progress(p):
                     print(json.dumps({"id": req_id, "type": "progress", "data": p}), flush=True)
 
-                ops = manager.get_operations(progress_callback=on_progress, target_version=version)
+                ops = manager.get_operations(
+                    progress_callback=on_progress, 
+                    target_version=version,
+                    selected_packs=selected_packs,
+                    target_language=language
+                )
                 response = {"id": req_id, "result": ops}
                 
             elif command == "start_update": # New command for orchestrated update
@@ -50,6 +57,8 @@ def main():
                 game_dir = request.get("game_dir")
                 manifest_url = request.get("manifest_url")
                 version = request.get("version")
+                selected_packs = request.get("selected_packs")
+                language = request.get("language", "en_US")
                 
                 manager = UpdateManager(game_dir, manifest_url, aria2)
                 
@@ -58,7 +67,12 @@ def main():
 
                 # First, get operations
                 on_progress({'status': 'fetching_manifest', 'message': 'Fetching manifest...'})
-                operations = manager.get_operations(progress_callback=on_progress, target_version=version)
+                operations = manager.get_operations(
+                    progress_callback=on_progress, 
+                    target_version=version,
+                    selected_packs=selected_packs,
+                    target_language=language
+                )
                 
                 if not operations:
                     response = {"id": req_id, "result": {"success": False, "message": "No operations found or manifest error."}}

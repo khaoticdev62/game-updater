@@ -7,9 +7,9 @@
 - [x] Task: Conductor - User Manual Verification 'Dependency Engine' (Protocol in workflow.md) (60bea56)
 
 ## Phase 2: Targeted Operation Filtering
-- [ ] Task: Update `UpdateManager.get_operations` to accept a `selection` list.
-- [ ] Task: Implement logic to prune operations for unselected content while keeping dependencies.
-- [ ] Task: Create `SpaceCalculator` utility to estimate download and install sizes.
+- [x] Task: Update `UpdateManager.get_operations` to accept a `selection` list.
+- [x] Task: Implement logic to prune operations for unselected content while keeping dependencies.
+- [x] Task: Create `SpaceCalculator` utility to estimate download and install sizes.
 - [ ] Task: Conductor - User Manual Verification 'Filtering & Estimation' (Protocol in workflow.md)
 
 ## Phase 3: High-Fidelity UI Dashboard
