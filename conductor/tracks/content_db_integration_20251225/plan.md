@@ -6,7 +6,7 @@
 - [x] Task: Write tests to verify data integrity and model validation. 0b43b3b
 - [x] Task: Conductor - User Manual Verification 'Metadata Core' (Protocol in workflow.md) 74d8e9a
 
-## Phase 2: DLC Manager Integration
+## Phase 2: DLC Manager Integration [checkpoint: 35ea815]
 - [x] Task: Update `DLCManager` in `update_logic.py` to utilize the new database. 72ebf5c
 - [x] Task: Implement "Missing Content Discovery" logic to flag uninstalled packs from the DB. 22a6897
 - [x] Task: Enhance `get_dlc_status` IPC command to include rich metadata (descriptions, release dates). cfdbfb6
