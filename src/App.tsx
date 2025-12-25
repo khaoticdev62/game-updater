@@ -239,99 +239,108 @@ const App = () => {
       
       {activeTab === 'dashboard' && (
         <div className="space-y-8 animate-in fade-in duration-500">
-          <section className="bg-white/5 border border-gray-800 rounded-2xl p-6 shadow-xl backdrop-blur-sm">
-            <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-              <Settings className="text-brand-accent" size={20} />
-              Configuration
+          <section className="bg-white/5 border border-gray-800 rounded-2xl p-8 shadow-xl backdrop-blur-md relative overflow-hidden group">
+            {/* Background Accent Gradient */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-brand-accent/5 blur-[100px] -mr-32 -mt-32 rounded-full" />
+            
+            <h3 className="text-xl font-bold text-white mb-8 flex items-center gap-3">
+              <div className="w-8 h-8 bg-brand-accent/10 rounded-lg flex items-center justify-center">
+                <Settings className="text-brand-accent" size={18} />
+              </div>
+              Core Configuration
             </h3>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-400">Manifest URL</label>
-                <div className="flex gap-2">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 relative z-10">
+              <div className="space-y-4">
+                <label className="text-[11px] font-bold text-gray-500 uppercase tracking-[0.2em] ml-1">Manifest Update Source</label>
+                <div className="flex gap-2 p-1.5 bg-black/40 border border-gray-700/50 rounded-xl focus-within:border-brand-accent transition-all duration-300">
                   <input 
                     type="text" 
                     value={manifestUrl} 
                     onChange={(e) => setManifestUrl(e.target.value)}
-                    placeholder="Enter URL"
-                    className="flex-1 bg-black/40 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-brand-accent transition-colors"
+                    placeholder="https://example.com/manifest.json"
+                    className="flex-1 bg-transparent px-4 py-2 text-sm text-gray-200 focus:outline-none placeholder:text-gray-700"
                   />
                   <button 
                     onClick={handleDiscoverVersions}
-                    className="bg-brand-accent hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all active:scale-95"
+                    className="bg-brand-accent hover:bg-blue-600 text-white px-6 py-2 rounded-lg text-xs font-bold transition-all shadow-lg shadow-brand-accent/20 active:scale-95 flex items-center gap-2"
                   >
-                    Scan
+                    <RefreshCw size={14} />
+                    Sync
                   </button>
                 </div>
+                <p className="text-[10px] text-gray-600 ml-1 italic">Point to a valid Sims 4 manifest to begin scanning for updates.</p>
               </div>
 
               {availableVersions.length > 0 && (
-                <div className="space-y-4">
+                <div className="space-y-6 animate-in slide-in-from-right-4 duration-500">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-400">Target Version</label>
+                      <label className="text-[11px] font-bold text-gray-500 uppercase tracking-[0.2em] ml-1">Target Version</label>
                       <select 
                         value={selectedVersion} 
                         onChange={(e) => setSelectedVersion(e.target.value)}
-                        className="w-full bg-black/40 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-accent"
+                        className="w-full bg-black/40 border border-gray-700/50 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-accent transition-all appearance-none cursor-pointer hover:bg-black/60"
                       >
                         {filteredVersions.map(v => <option key={v} value={v}>{v}</option>)}
                       </select>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-400">Language</label>
+                      <label className="text-[11px] font-bold text-gray-500 uppercase tracking-[0.2em] ml-1">Language Sector</label>
                       <select 
                         value={selectedLanguage} 
                         onChange={(e) => setSelectedLanguage(e.target.value)}
-                        className="w-full bg-black/40 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-accent"
+                        className="w-full bg-black/40 border border-gray-700/50 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-accent transition-all appearance-none cursor-pointer hover:bg-black/60"
                       >
                         {languages.map(l => <option key={l.code} value={l.code}>{l.name}</option>)}
                       </select>
                     </div>
                   </div>
                   
-                  <label className="flex items-center gap-3 group cursor-pointer">
-                    <div className={`w-5 h-5 rounded border border-gray-600 flex items-center justify-center transition-all ${showHistorical ? 'bg-brand-accent border-brand-accent' : 'bg-black/40'}`}>
-                      {showHistorical && <CheckCircle2 size={12} className="text-white" />}
-                    </div>
-                    <input 
-                      type="checkbox" 
-                      checked={showHistorical} 
-                      onChange={(e) => setShowHistorical(e.target.checked)} 
-                      className="hidden"
-                    />
-                    <span className="text-sm text-gray-400 group-hover:text-gray-200 transition-colors">Show Historical Versions</span>
-                  </label>
+                  <div className="flex items-center justify-between">
+                    <label className="flex items-center gap-3 group cursor-pointer">
+                      <div className={`w-5 h-5 rounded-md border border-gray-700 flex items-center justify-center transition-all duration-300 ${showHistorical ? 'bg-brand-accent border-brand-accent shadow-lg shadow-brand-accent/20' : 'bg-black/40 group-hover:border-gray-500'}`}>
+                        {showHistorical && <CheckCircle2 size={12} className="text-white" />}
+                      </div>
+                      <input 
+                        type="checkbox" 
+                        checked={showHistorical} 
+                        onChange={(e) => setShowHistorical(e.target.checked)} 
+                        className="hidden"
+                      />
+                      <span className="text-xs font-medium text-gray-500 group-hover:text-gray-300 transition-colors">Show Legacy Patches</span>
+                    </label>
+                  </div>
                 </div>
               )}
             </div>
 
-            <div className="mt-8 p-4 bg-brand-accent/5 border border-brand-accent/20 rounded-xl flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <button 
-                  onClick={handlePing}
-                  className="p-2 hover:bg-white/5 rounded-lg text-gray-400 hover:text-white transition-colors"
-                  title="Check Backend Connectivity"
-                >
-                  <RefreshCw size={18} className={isHealthy ? '' : 'text-brand-danger'} />
-                </button>
+            <div className="mt-10 p-6 bg-gradient-to-r from-brand-accent/[0.03] to-transparent border border-brand-accent/10 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-6 transition-all duration-500 group-hover:border-brand-accent/20">
+              <div className="flex items-center gap-6">
+                <div className="flex -space-x-2">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="w-8 h-8 rounded-full border-2 border-brand-dark bg-gray-800 flex items-center justify-center">
+                      <div className="w-1.5 h-1.5 rounded-full bg-brand-accent/40" />
+                    </div>
+                  ))}
+                </div>
                 <div>
-                  <p className="text-sm font-semibold text-gray-200">{selectionSummary.count} Content Packs Selected</p>
-                  <p className="text-xs text-gray-500 mt-0.5">Estimated storage needed: {selectionSummary.size} GB</p>
+                  <p className="text-sm font-bold text-gray-200 tracking-tight">{selectionSummary.count} Units Selected for Deployment</p>
+                  <p className="text-[11px] text-gray-500 mt-0.5 font-mono">Estimated allocation: {selectionSummary.size} GB</p>
                 </div>
               </div>
-              <div className="flex gap-3">
+              <div className="flex items-center gap-3 w-full sm:w-auto">
                 <button 
                   onClick={handleVerify}
-                  className="bg-gray-800 hover:bg-gray-700 text-gray-200 px-6 py-2 rounded-lg text-sm font-semibold transition-all"
+                  className="flex-1 sm:flex-none bg-white/5 hover:bg-white/10 text-gray-300 px-8 py-2.5 rounded-xl text-xs font-bold transition-all border border-white/5 active:scale-95"
                 >
-                  Verify
+                  Analyze Files
                 </button>
                 <button 
                   onClick={handleStartUpdate}
-                  className="bg-brand-accent hover:bg-blue-600 text-white px-8 py-2 rounded-lg text-sm font-bold transition-all shadow-lg shadow-brand-accent/20 active:scale-95"
+                  className="flex-1 sm:flex-none bg-brand-accent hover:bg-blue-600 text-white px-10 py-2.5 rounded-xl text-xs font-black transition-all shadow-xl shadow-brand-accent/20 active:scale-95 uppercase tracking-widest"
                 >
-                  Update Now
+                  Initiate Sync
                 </button>
               </div>
             </div>
