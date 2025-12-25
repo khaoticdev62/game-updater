@@ -142,6 +142,18 @@ def main():
                 versions = scanner.scan_versions(url)
                 response = {"id": req_id, "result": versions}
 
+            elif command == "resolve_dlc_dependencies":
+                selected = request.get("selected", [])
+                dependencies = request.get("dependencies", {})
+                from engine import DLCGraph
+                graph = DLCGraph()
+                for pack, reqs in dependencies.items():
+                    for req in reqs:
+                        graph.add_dependency(pack, req)
+                
+                resolved = list(graph.resolve_dependencies(selected))
+                response = {"id": req_id, "result": resolved}
+
             else:
                 response = {"id": req_id, "error": f"Unknown command: {command}"}
                 
