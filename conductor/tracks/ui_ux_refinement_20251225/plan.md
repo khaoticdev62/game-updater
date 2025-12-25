@@ -1,6 +1,6 @@
 # Plan: Visual Identity & UI Refinement
 
-## Phase 1: Infrastructure & Core Layout
+## Phase 1: Infrastructure & Core Layout [checkpoint: 2b25721]
 - [x] Task: Install and configure Tailwind CSS. 8da9446
 - [x] Task: Create a `Layout` component with a Sidebar/Header structure. 1bd4465
 - [x] Task: Refactor `App.tsx` to use the new layout and Tailwind base styles. b157e90
