@@ -6,11 +6,11 @@
 - [x] Task: Write unit tests for dependency resolution (ensuring child packs flag their parents).
 - [x] Task: Conductor - User Manual Verification 'Dependency Engine' (Protocol in workflow.md) (60bea56)
 
-## Phase 2: Targeted Operation Filtering
+## Phase 2: Targeted Operation Filtering [checkpoint: 25cd323]
 - [x] Task: Update `UpdateManager.get_operations` to accept a `selection` list.
 - [x] Task: Implement logic to prune operations for unselected content while keeping dependencies.
 - [x] Task: Create `SpaceCalculator` utility to estimate download and install sizes.
-- [ ] Task: Conductor - User Manual Verification 'Filtering & Estimation' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Filtering & Estimation' (Protocol in workflow.md) (25cd323)
 
 ## Phase 3: High-Fidelity UI Dashboard
 - [ ] Task: Upgrade the DLC list in `App.tsx` to use categorized grids with selection persistence.
