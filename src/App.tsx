@@ -188,9 +188,9 @@ const App = () => {
       const res = await window.electron.requestPython({
         command: 'discover_versions',
         url: manifestUrl
-      });
+      }) as { result?: string[] };
       if (res.result) {
-        const discovered = res.result as string[];
+        const discovered = res.result;
         setAvailableVersions(discovered);
         if (discovered.length > 0) setSelectedVersion(discovered[0]);
         setResponse(`Discovered ${discovered.length} versions.`);
@@ -221,9 +221,9 @@ const App = () => {
           { url: 'https://elamigos.site', weight: 8 },
           { url: 'https://cs.rin.ru', weight: 5 }
         ]
-      });
+      }) as { result?: MirrorResult[] };
       if (res.result) {
-        setDiscoveredMirrors(res.result as MirrorResult[]);
+        setDiscoveredMirrors(res.result);
       }
     } catch (e) {
       handleIpcError(e);

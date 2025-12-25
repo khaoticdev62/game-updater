@@ -11,7 +11,6 @@ import { FuseV1Options, FuseVersion } from '@electron/fuses';
 import { mainConfig } from './webpack.main.config';
 import { rendererConfig } from './webpack.renderer.config';
 
-import path from 'path';
 import { execSync } from 'child_process';
 
 const config: ForgeConfig = {
@@ -25,15 +24,9 @@ const config: ForgeConfig = {
   hooks: {
     generateAssets: async () => {
       console.log('Hooks: Building Python sidecar...');
-      // We use the same 'mock' command logic but for the real build
-      const buildScript = `
-from build_system import BuildSystem
-from pathlib import Path
-bs = BuildSystem(Path('.'))
-if not bs.package_backend(Path('dist')):
-    raise Exception('Backend packaging failed')
-`;
-      execSync(`python -c "${buildScript.replace(/\n/g, ';')}"`, { stdio: 'inherit' });
+      // Using escaped double quotes for the inner strings to work reliably on Windows
+      const cmd = 'python -c "from build_system import BuildSystem; from pathlib import Path; bs = BuildSystem(Path(\'.\')); bs.package_backend(Path(\'dist\'))"';
+      execSync(cmd, { stdio: 'inherit' });
     },
   },
   makers: [

@@ -13,21 +13,26 @@ jest.mock('electron', () => ({
 
 describe('Spawning Logic Verification', () => {
   let bus: HybridEventBus;
-  let mockSidecar: any;
+  let mockSidecar: unknown;
 
-  beforeEach(() => {
-    mockSidecar = new EventEmitter();
-    mockSidecar.stdout = new EventEmitter();
-    mockSidecar.stderr = new EventEmitter();
-    mockSidecar.stdin = { write: jest.fn() };
-    (spawn as jest.Mock).mockReturnValue(mockSidecar);
-
-    bus = new HybridEventBus();
+    beforeEach(() => {
+      const emitter = new EventEmitter();
+      const mockWithInputs = emitter as unknown as {
+        stdout: EventEmitter;
+        stderr: EventEmitter;
+        stdin: { write: jest.Mock };
+      };
+      mockWithInputs.stdout = new EventEmitter();
+      mockWithInputs.stderr = new EventEmitter();
+      mockWithInputs.stdin = { write: jest.fn() };
+      mockSidecar = mockWithInputs;
+      (spawn as jest.Mock).mockReturnValue(mockSidecar);
+      bus = new HybridEventBus();
     jest.clearAllMocks();
   });
 
   test('should spawn sidecar.py in development', () => {
-    (app as any).isPackaged = false;
+    (app as unknown as { isPackaged: boolean }).isPackaged = false;
     bus.start();
     
     expect(spawn).toHaveBeenCalledWith(
@@ -38,8 +43,8 @@ describe('Spawning Logic Verification', () => {
   });
 
   test('should spawn sidecar.exe in production', () => {
-    (app as any).isPackaged = true;
-    (process as any).resourcesPath = '/mock/resources';
+    (app as unknown as { isPackaged: boolean }).isPackaged = true;
+    (process as unknown as { resourcesPath: string }).resourcesPath = '/mock/resources';
     bus.start();
     
     expect(spawn).toHaveBeenCalledWith(

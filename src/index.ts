@@ -1,7 +1,5 @@
 import { app, BrowserWindow, ipcMain, IpcMainInvokeEvent } from 'electron';
-import { spawn, ChildProcess } from 'child_process';
-import path from 'path';
-import { EventEmitter } from 'events';
+// @ts-expect-error: electron-squirrel-startup does not have types
 import squirrelStartup from 'electron-squirrel-startup';
 import { ProgressData, PythonRequest } from './types';
 import { HybridEventBus } from './eventBus';

@@ -1,7 +1,7 @@
 import { spawn, ChildProcess } from 'child_process';
 import path from 'path';
 import { EventEmitter } from 'events';
-import { ProgressData, PythonRequest } from './types';
+import { PythonRequest } from './types';
 import { app } from 'electron';
 
 export class HybridEventBus extends EventEmitter {
