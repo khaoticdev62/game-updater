@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import DLCGrid from './components/DLCGrid';
 import { DLC } from './types';
 import ScraperViewfinder, { MirrorResult } from './components/ScraperViewfinder';
@@ -295,8 +296,16 @@ const App = () => {
       {/* TopShelf Navigation */}
       <TopShelf activeView={activeView} onViewChange={setActiveView} />
 
-      {/* Main Content Area */}
-      <div className="min-h-screen flex flex-col p-8">
+      {/* Main Content Area with Page Transitions */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeView}
+          className="min-h-screen flex flex-col p-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.3 }}
+        >
         {/* Header Section */}
         <div className="mb-12">
           <h1 className="text-5xl font-bold text-white mb-4">Sims 4 Updater</h1>
@@ -421,9 +430,6 @@ const App = () => {
             <ScraperViewfinder mirrors={discoveredMirrors} isProbing={isProbing} />
           </VisionCard>
 
-          {/* Diagnostic Console is now a floating overlay */}
-          <DiagnosticConsole logs={logs} />
-
           {/* Progress Display */}
           {progress && (
             <div className="glass-medium rounded-lg p-4 border border-white/20">
@@ -443,7 +449,11 @@ const App = () => {
             </p>
           </div>
         </div>
-      </div>
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Diagnostic Console Overlay */}
+      <DiagnosticConsole logs={logs} />
     </Environment>
   );
 };
