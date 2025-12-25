@@ -30,9 +30,9 @@ const DiagnosticConsole: React.FC<DiagnosticConsoleProps> = ({ logs, onClear }) 
   };
 
   return (
-    <div className="flex flex-col h-full bg-black/60 border border-gray-800 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-xl">
+    <div className="flex flex-col h-full bg-white/[0.03] border border-white/10 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-2xl">
       {/* Console Header */}
-      <div className="flex items-center justify-between px-6 py-4 bg-white/[0.02] border-b border-gray-800">
+      <div className="flex items-center justify-between px-6 py-4 bg-white/[0.05] border-b border-white/10">
         <div className="flex items-center gap-3">
           <div className="w-2 h-2 rounded-full bg-brand-success animate-pulse" />
           <h3 className="text-xs font-black uppercase tracking-[0.3em] text-gray-400 flex items-center gap-2">
