@@ -6,11 +6,11 @@
 - [x] Task: Write integration test for the `python-request` IPC channel to simulate real-world request/response cycles and progress updates.
 - [x] Task: Conductor - User Manual Verification 'IPC & UI Polish' (Protocol in workflow.md) (ee45b5e)
 
-## Phase 2: Scraper & Discovery Engine Hardening
+## Phase 2: Scraper & Discovery Engine Hardening [checkpoint: 9f673fa]
 - [x] Task: Add `beautifulsoup4` to `requirements.txt`.
 - [x] Task: Refactor `URLResolver` in `manifest.py` to use `BeautifulSoup` for HTML parsing instead of fragile regex.
 - [x] Task: Enhance `tests/test_url_resolver.py` with more complex and failing HTML mock data.
-- [ ] Task: Conductor - User Manual Verification 'Scraper Hardening' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Scraper Hardening' (Protocol in workflow.md) (9f673fa)
 
 ## Phase 3: Mod Guardian & Safety Gates Finalization
 - [ ] Task: Refactor `ModGuardian` to explicitly target `.ts4script` and `.package` files and ignore others.
