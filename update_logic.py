@@ -9,6 +9,8 @@ from manifest import ManifestFetcher, URLResolver
 from janitor import OperationLogger, RecoveryOrchestrator
 from paths import get_app_data_path
 
+from content_db import EXPANSIONS, STUFF_PACKS, COMMUNITY_CONTENT
+
 class UpdateManager:
     def __init__(self, game_dir, manifest_url, aria2_manager, fetcher=None, resolver=None):
         self.game_dir = Path(game_dir)
@@ -237,14 +239,12 @@ class DLCManager:
     def __init__(self, game_dir, manifest_json):
         self.game_dir = game_dir
         self.data = json.loads(manifest_json)
+        self.db = {item.id: item for item in EXPANSIONS + STUFF_PACKS + COMMUNITY_CONTENT}
 
     def get_dlc_status(self):
         """
-        Returns a list of DLCs and their status.
-        Status: 'Installed', 'Missing', 'Update Available'
+        Returns a list of DLCs and their status, enriched with metadata.
         """
-        # Original manifest has a 'links' section or similar for DLCs
-        # Let's assume a 'dlcs' key for clarity in our new implementation
         available_dlcs = self.data.get("dlcs", [])
         status_list = []
 
@@ -256,13 +256,23 @@ class DLCManager:
             if not full_path or not os.path.exists(full_path):
                 status = "Missing"
             else:
-                # Basic check for now, can be improved with version checking
                 status = "Installed"
             
-            status_list.append({
+            dlc_info = {
                 "name": dlc_name,
                 "folder": folder_name,
                 "status": status
-            })
+            }
+
+            # Enrich with metadata if available in DB
+            metadata = self.db.get(folder_name)
+            if metadata:
+                dlc_info["description"] = metadata.description
+                if hasattr(metadata, "release_date"):
+                    dlc_info["release_date"] = metadata.release_date
+                if hasattr(metadata, "source"):
+                    dlc_info["source"] = metadata.source
+            
+            status_list.append(dlc_info)
             
         return status_list

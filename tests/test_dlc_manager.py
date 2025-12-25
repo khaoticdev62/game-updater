@@ -52,3 +52,22 @@ def test_dlc_status_multiple(tmp_path):
     assert len(status) == 2
     assert status[0]['status'] == "Installed"
     assert status[1]['status'] == "Missing"
+
+def test_dlc_status_with_rich_metadata(tmp_path):
+    game_dir = tmp_path / "game"
+    game_dir.mkdir()
+    
+    manifest = {
+        "dlcs": [
+            {"name": "Get to Work", "folder": "EP01"}
+        ]
+    }
+    
+    manager = DLCManager(str(game_dir), json.dumps(manifest))
+    status = manager.get_dlc_status()
+    
+    # We expect EP01 to have metadata from content_db
+    ep01_status = next(s for s in status if s['folder'] == "EP01")
+    assert "description" in ep01_status
+    assert "release_date" in ep01_status
+    assert "Rule the workplace" in ep01_status["description"]
