@@ -10,7 +10,7 @@
 - [x] Task: Update `DLCManager` in `update_logic.py` to utilize the new database. 72ebf5c
 - [x] Task: Implement "Missing Content Discovery" logic to flag uninstalled packs from the DB. 22a6897
 - [x] Task: Enhance `get_dlc_status` IPC command to include rich metadata (descriptions, release dates). cfdbfb6
-- [ ] Task: Conductor - User Manual Verification 'Discovery Integration' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Discovery Integration' (Protocol in workflow.md) cfdbfb6
 
 ## Phase 3: UI Enrichment
 - [ ] Task: Update `DLC` interface in `types.d.ts` and `DLCList.tsx` to include metadata fields.
