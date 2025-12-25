@@ -1,6 +1,6 @@
 # Plan: Production Readiness - Unified Packaging & IPC Resilience
 
-## Phase 1: IPC Resilience
+## Phase 1: IPC Resilience [checkpoint: 4193b5c]
 - [x] Task: Implement request timeouts in `HybridEventBus.request` in `src/index.ts`. 54cb7eb
 - [x] Task: Add global error handling for timeout rejections in the frontend. cf2d403
 - [x] Task: Write tests to verify IPC timeout behavior. 54cb7eb
