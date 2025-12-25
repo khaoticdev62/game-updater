@@ -234,7 +234,12 @@ const App = () => {
   };
 
   return (
-    <Layout activeTab={activeTab} setActiveTab={setActiveTab} isHealthy={isHealthy}>
+    <Layout 
+      activeTab={activeTab} 
+      setActiveTab={setActiveTab} 
+      isHealthy={isHealthy}
+      onRefresh={handlePing}
+    >
       <CustomCursor isHealthy={isHealthy} isProbing={isProbing} />
       
       {activeTab === 'dashboard' && (

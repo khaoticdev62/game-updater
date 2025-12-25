@@ -14,9 +14,10 @@ interface LayoutProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   isHealthy: boolean;
+  onRefresh?: () => void;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, isHealthy }) => {
+const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, isHealthy, onRefresh }) => {
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'dlcs', label: 'Content Manager', icon: Download },
@@ -34,12 +35,15 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, isHe
           <h1 className="text-xl font-bold bg-gradient-to-r from-brand-accent to-blue-400 bg-clip-text text-transparent">
             Sims 4 Updater
           </h1>
-          <div className="mt-2 flex items-center gap-2 text-xs">
+          <button 
+            onClick={onRefresh}
+            className="mt-2 flex items-center gap-2 text-xs group hover:opacity-80 transition-opacity"
+          >
             <div className={`w-2 h-2 rounded-full ${isHealthy ? 'bg-brand-success' : 'bg-brand-danger animate-pulse'}`} />
-            <span className={isHealthy ? 'text-gray-400' : 'text-brand-danger'}>
+            <span className={isHealthy ? 'text-gray-400 group-hover:text-gray-300' : 'text-brand-danger group-hover:text-red-400'}>
               {isHealthy ? 'Backend Healthy' : 'Backend Offline'}
             </span>
-          </div>
+          </button>
         </div>
 
         <nav className="flex-1 px-4 py-4 space-y-1">
