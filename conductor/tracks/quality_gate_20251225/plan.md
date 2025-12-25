@@ -19,7 +19,7 @@
 - [x] Task: Conductor - User Manual Verification 'Safety Gates Finalization' (Protocol in workflow.md) (858c254)
 
 ## Phase 4: Full-System E2E Verification & Final Cleanup
-- [ ] Task: Create a new E2E test (`tests/test_e2e_full_workflow.py`) that simulates a complete user session.
-- [ ] Task: Run `npm run lint -- --fix` to automatically correct style issues.
-- [ ] Task: Perform a final review of all code for any remaining placeholders or comments.
+- [x] Task: Create a new E2E test (`tests/test_e2e_full_workflow.py`) that simulates a complete user session.
+- [x] Task: Run `npm run lint -- --fix` to automatically correct style issues.
+- [x] Task: Perform a final review of all code for any remaining placeholders or comments.
 - [ ] Task: Conductor - User Manual Verification 'Final Verification' (Protocol in workflow.md)

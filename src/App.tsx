@@ -4,9 +4,17 @@ import ScraperViewfinder, { MirrorResult } from './components/ScraperViewfinder'
 import DiagnosticConsole, { LogEntry } from './components/DiagnosticConsole';
 import CustomCursor from './components/CustomCursor';
 
+interface ProgressData {
+  status: string;
+  current?: number;
+  total?: number;
+  file?: string;
+  message?: string;
+}
+
 const App = () => {
   const [response, setResponse] = useState<string>('');
-  const [progress, setProgress] = useState<any>(null);
+  const [progress, setProgress] = useState<ProgressData | null>(null);
   const [isHealthy, setIsHealthy] = useState<boolean>(true);
   const [isProbing, setIsProbing] = useState<boolean>(false);
   const [discoveredMirrors, setDiscoveredMirrors] = useState<MirrorResult[]>([]);
@@ -21,7 +29,6 @@ const App = () => {
   // Health Polling Logic
   useEffect(() => {
     let pollInterval = 100; // Start fast
-    let timeoutId: NodeJS.Timeout;
     let pollId: NodeJS.Timeout;
     const startTime = Date.now();
 
