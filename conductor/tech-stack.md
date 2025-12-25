@@ -20,6 +20,9 @@
 
 ## Communication & Integration
 - **Process Communication:** Electron IPC (Inter-Process Communication) to bridge the TypeScript UI and the Python backend.
+- **Lifecycle Management:**
+    - **Lazy Loading:** Python backend dependencies are loaded on-demand to minimize startup time.
+    - **Ready Handshake:** Event-driven signal from backend to UI for near-instant connectivity.
 - **Packaging:** 
     - **PyInstaller:** To package the Python backend logic.
     - **Electron Builder:** To package the final integrated application as a single Windows executable.

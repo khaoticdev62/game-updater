@@ -17,5 +17,10 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [~] Track: Startup Latency Annihilation
+## [x] Track: Startup Latency Annihilation
 *Link: [./conductor/tracks/startup_latency_20251225/](./conductor/tracks/startup_latency_20251225/)*
+
+---
+
+## [~] Track: Project Maintenance & Cleanup
+*Link: [./conductor/tracks/maintenance_cleanup_20251225/](./conductor/tracks/maintenance_cleanup_20251225/)*
