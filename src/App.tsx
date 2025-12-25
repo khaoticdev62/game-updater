@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import DLCList, { DLC } from './components/DLCList';
 import ScraperViewfinder, { MirrorResult } from './components/ScraperViewfinder';
+import DiagnosticConsole, { LogEntry } from './components/DiagnosticConsole';
 
 const App = () => {
   const [response, setResponse] = useState<string>('');
@@ -8,6 +9,7 @@ const App = () => {
   const [isHealthy, setIsHealthy] = useState<boolean>(true);
   const [isProbing, setIsProbing] = useState<boolean>(false);
   const [discoveredMirrors, setDiscoveredMirrors] = useState<MirrorResult[]>([]);
+  const [logs, setLogs] = useState<LogEntry[]>([]);
   const [dlcs, setDlcs] = useState<DLC[]>([
     { name: 'Get to Work', folder: 'EP01', status: 'Installed', selected: true },
     { name: 'Get Together', folder: 'EP02', status: 'Missing', selected: false },
@@ -29,6 +31,14 @@ const App = () => {
 
     const interval = setInterval(poll, 5000);
     return () => clearInterval(interval);
+  }, []);
+
+  // Log Streaming Logic
+  useEffect(() => {
+    const removeListener = window.electron.onPythonLog((data: LogEntry) => {
+      setLogs(prev => [...prev.slice(-99), data]);
+    });
+    return () => removeListener();
   }, []);
 
   const mockManifestUrl = "https://jsonplaceholder.typicode.com/todos/1"; // Public static JSON endpoint
@@ -172,6 +182,11 @@ const App = () => {
       <section style={{ marginBottom: '20px' }}>
         <h3>Intelligence Hub</h3>
         <ScraperViewfinder mirrors={discoveredMirrors} isProbing={isProbing} />
+      </section>
+
+      <section style={{ marginBottom: '20px' }}>
+        <h3>Diagnostic Console</h3>
+        <DiagnosticConsole logs={logs} />
       </section>
 
       {progress && (

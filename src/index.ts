@@ -19,6 +19,10 @@ class HybridEventBus extends EventEmitter {
         if (!line.trim()) return;
         try {
           const message = JSON.parse(line);
+          if (message.timestamp && message.level) {
+            this.emit('python-log', message);
+            return;
+          }
           if (message.id) {
             if (message.type === 'progress') {
               this.emit(`progress-${message.id}`, message.data);
@@ -104,6 +108,12 @@ const createWindow = (): void => {
 app.on('ready', () => {
   eventBus.start();
   createWindow();
+
+  eventBus.on('python-log', (data) => {
+    BrowserWindow.getAllWindows().forEach(win => {
+      win.webContents.send('python-log', data);
+    });
+  });
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common

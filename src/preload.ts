@@ -10,8 +10,18 @@ contextBridge.exposeInMainWorld('electron', {
 
     ipcRenderer.on(`python-progress-${id}`, listener);
 
-    return () => ipcRenderer.removeListener(`python-progress-${id}`, listener);
+        return () => ipcRenderer.removeListener(`python-progress-${id}`, listener);
 
-  },
+      },
 
-});
+      onPythonLog: (callback: any) => {
+
+        const listener = (event: any, data: any) => callback(data);
+
+        ipcRenderer.on('python-log', listener);
+
+        return () => ipcRenderer.removeListener('python-log', listener);
+
+      },
+
+    });
