@@ -26,7 +26,7 @@
 - [x] Task: Conductor - User Manual Verification 'Safety & Mod Guardian' (Protocol in workflow.md) (8481837)
 
 ## Phase 5: Build Optimization & Distribution
-- [ ] Task: Refine Turbo Build System (Concurrent packaging & dependency hashing)
-- [ ] Task: Update Inno Setup Script (VC++ Redist checks & tool bundling)
+- [x] Task: Refine Turbo Build System (Concurrent packaging & dependency hashing) (442a656)
+- [~] Task: Update Inno Setup Script (VC++ Redist checks & tool bundling)
 - [ ] Task: Final Production E2E Verification (Full suite test pass)
 - [ ] Task: Conductor - User Manual Verification 'Deployment' (Protocol in workflow.md)
