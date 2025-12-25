@@ -95,6 +95,29 @@ def main():
                 set_selected_mirror(url)
                 response = {"id": req_id, "result": "success"}
 
+            elif command == "run_mod_guardian":
+                game_dir = request.get("game_dir")
+                policy = request.get("policy", "selective")
+                community_data = request.get("community_data_path")
+                
+                from mod_guardian import ModGuardian
+                from pathlib import Path
+                guardian = ModGuardian(Path(game_dir), policy=policy)
+                if community_data:
+                    guardian.load_community_data(Path(community_data))
+                
+                count = guardian.run_guardian()
+                response = {"id": req_id, "result": {"quarantined": count}}
+
+            elif command == "create_backup":
+                game_dir = request.get("game_dir")
+                files = request.get("files", [])
+                
+                from rollback_manager import RollbackManager
+                manager = RollbackManager(game_dir)
+                zip_name = manager.create_restore_point(files)
+                response = {"id": req_id, "result": {"zip_name": zip_name}}
+
             else:
                 response = {"id": req_id, "error": f"Unknown command: {command}"}
                 
