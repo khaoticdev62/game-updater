@@ -28,7 +28,7 @@ interface VisionCardProps {
  *   - Responsive design
  */
 
-export const VisionCard: React.FC<VisionCardProps> = ({
+const VisionCardComponent: React.FC<VisionCardProps> = ({
   children,
   variant = 'default',
   className = '',
@@ -37,7 +37,7 @@ export const VisionCard: React.FC<VisionCardProps> = ({
   const { transform, handleMouseMove, handleMouseLeave } = useParallax(8);
 
   // Determine variant-specific classes
-  const getVariantClasses = () => {
+  const getVariantClasses = React.useCallback(() => {
     switch (variant) {
       case 'elevated':
         return 'shadow-glass-lg hover:shadow-glass-glow';
@@ -46,7 +46,7 @@ export const VisionCard: React.FC<VisionCardProps> = ({
       default:
         return 'shadow-glass-md hover:shadow-glass-lg';
     }
-  };
+  }, [variant]);
 
   return (
     <motion.div
@@ -88,5 +88,7 @@ export const VisionCard: React.FC<VisionCardProps> = ({
     </motion.div>
   );
 };
+
+export const VisionCard = React.memo(VisionCardComponent);
 
 export default VisionCard;

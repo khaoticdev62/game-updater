@@ -36,7 +36,7 @@ interface ButtonProps {
  *   - Focus visible ring
  */
 
-export const Button: React.FC<ButtonProps> = ({
+const ButtonComponent: React.FC<ButtonProps> = ({
   children,
   variant = 'primary',
   onClick,
@@ -45,8 +45,8 @@ export const Button: React.FC<ButtonProps> = ({
   type = 'button',
   className = '',
 }) => {
-  // Determine variant-specific classes
-  const getVariantClasses = () => {
+  // Memoize variant-specific classes
+  const getVariantClasses = React.useCallback(() => {
     switch (variant) {
       case 'secondary':
         return 'glass-medium hover:glass-heavy text-white border border-white/10';
@@ -58,9 +58,20 @@ export const Button: React.FC<ButtonProps> = ({
       default:
         return 'bg-blue-600 hover:bg-blue-700 text-white';
     }
-  };
+  }, [variant]);
 
   const isDisabled = disabled || loading;
+
+  // Memoize animation configurations
+  const tapAnimation = React.useMemo(
+    () => (!isDisabled ? { scale: 0.95 } : {}),
+    [isDisabled]
+  );
+
+  const hoverAnimation = React.useMemo(
+    () => (!isDisabled ? { scale: 1.02 } : {}),
+    [isDisabled]
+  );
 
   return (
     <motion.button
@@ -83,8 +94,8 @@ export const Button: React.FC<ButtonProps> = ({
         disabled:cursor-not-allowed
         ${className}
       `}
-      whileTap={!isDisabled ? { scale: 0.95 } : {}}
-      whileHover={!isDisabled ? { scale: 1.02 } : {}}
+      whileTap={tapAnimation}
+      whileHover={hoverAnimation}
     >
       {loading ? (
         <div className="flex items-center gap-2">
@@ -97,5 +108,7 @@ export const Button: React.FC<ButtonProps> = ({
     </motion.button>
   );
 };
+
+export const Button = React.memo(ButtonComponent);
 
 export default Button;

@@ -38,7 +38,15 @@ const navItems: NavItem[] = [
   { id: 'diagnostics', label: 'Diagnostics', icon: Activity },
 ];
 
-export const TopShelf: React.FC<TopShelfProps> = ({ activeView, onViewChange }) => {
+const TopShelfComponent: React.FC<TopShelfProps> = ({ activeView, onViewChange }) => {
+  // Memoize click handler to prevent unnecessary function recreation
+  const handleItemClick = React.useCallback(
+    (itemId: string) => {
+      onViewChange(itemId);
+    },
+    [onViewChange]
+  );
+
   return (
     <nav className="flex gap-4 p-6 bg-slate-950/50 border-b border-white/5">
       {navItems.map((item) => {
@@ -48,7 +56,7 @@ export const TopShelf: React.FC<TopShelfProps> = ({ activeView, onViewChange }) 
         return (
           <motion.button
             key={item.id}
-            onClick={() => onViewChange(item.id)}
+            onClick={() => handleItemClick(item.id)}
             className={`
               glass-light
               px-6
@@ -76,5 +84,7 @@ export const TopShelf: React.FC<TopShelfProps> = ({ activeView, onViewChange }) 
     </nav>
   );
 };
+
+export const TopShelf = React.memo(TopShelfComponent);
 
 export default TopShelf;
