@@ -3,6 +3,7 @@
 ## Frontend (UI)
 - **Framework:** Electron with React (TypeScript).
 - **Styling:** CSS Modules or Tailwind CSS for modern, high-contrast styling.
+- **Testing:** Jest with `ts-jest` for TypeScript unit testing.
 - **State Management:** React Context API or Redux Toolkit for managing download progress and DLC selections.
 
 ## Backend (Logic & Reverse Engineering)

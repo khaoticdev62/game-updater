@@ -1,4 +1,4 @@
 ---
 
-## [ ] Track: Production Readiness - Unified Packaging & IPC Resilience
-*Link: [./conductor/tracks/production_readiness_v1_20251225/](./conductor/tracks/production_readiness_v1_20251225/)*
+## [ ] Track: Visual Identity & UI Refinement
+*Link: [./conductor/tracks/ui_ux_refinement_20251225/](./conductor/tracks/ui_ux_refinement_20251225/)*
