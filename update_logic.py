@@ -1,3 +1,11 @@
+"""
+Update Logic module for managing game updates and pack operations.
+
+Provides:
+- UpdateManager: Orchestrates manifest fetching, dependency resolution, and update application
+- DLCManager: Manages DLC status detection and filtering
+"""
+
 import os
 import json
 from pathlib import Path
@@ -8,8 +16,12 @@ from patch import Patcher
 from manifest import ManifestFetcher, URLResolver
 from janitor import OperationLogger, RecoveryOrchestrator
 from paths import get_app_data_path
+from logging_system import get_logger
 
 from content_db import EXPANSIONS, STUFF_PACKS, COMMUNITY_CONTENT
+
+# Setup logging
+logger = get_logger()
 
 class UpdateManager:
     def __init__(self, game_dir, manifest_url, aria2_manager, fetcher=None, resolver=None):
@@ -43,10 +55,36 @@ class UpdateManager:
                 progress_callback({'status': 'fetching_manifest'})
             manifest_json = self.fetcher.fetch_manifest_json(version=target_version)
             self.parser = ManifestParser(json.dumps(manifest_json))
-        except Exception as e:
+        except ValueError as e:
+            # JSON parsing error
+            logger.error(f"Failed to parse manifest JSON: {e}")
             if progress_callback:
-                progress_callback({'status': 'error', 'message': f"Failed to fetch or parse manifest: {e}"})
-            return []
+                progress_callback({'status': 'error', 'message': f"Manifest JSON parse error: {e}"})
+            raise
+        except TimeoutError as e:
+            # Network timeout
+            logger.error(f"Timeout fetching manifest from {self.fetcher.manifest_url}: {e}")
+            if progress_callback:
+                progress_callback({'status': 'error', 'message': "Manifest fetch timeout - network unreachable"})
+            raise
+        except ConnectionError as e:
+            # Network error
+            logger.error(f"Connection error fetching manifest: {e}")
+            if progress_callback:
+                progress_callback({'status': 'error', 'message': "Connection error - unable to reach manifest server"})
+            raise
+        except FileNotFoundError as e:
+            # 404 or file not found
+            logger.error(f"Manifest file not found at {self.fetcher.manifest_url}: {e}")
+            if progress_callback:
+                progress_callback({'status': 'error', 'message': "Manifest not found - invalid URL or version"})
+            raise
+        except Exception as e:
+            # Unexpected error
+            logger.exception(f"Unexpected error fetching/parsing manifest: {e}")
+            if progress_callback:
+                progress_callback({'status': 'error', 'message': f"Unexpected error: {e}"})
+            raise
         
         # 1. Resolve Dependencies
         # If no selection, assume 'Base' only for safety, or 'All' if logic dictates.

@@ -33,7 +33,7 @@ def test_parse_valid_manifest():
     assert patches[1]['type'] == "delta"
 
 def test_parse_malformed_json():
-    with pytest.raises(json.JSONDecodeError):
+    with pytest.raises(ValueError):
         ManifestParser("not json")
 
 def test_parse_missing_keys():

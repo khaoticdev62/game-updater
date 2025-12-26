@@ -100,10 +100,18 @@ export const UpdateCompletionStatus: React.FC<UpdateCompletionStatusProps> = ({
       borderColor: 'border-blue-500/50',
       title: 'Processing',
       subtitle: 'Update operation in progress...'
+    },
+    running: {
+      icon: <CheckCircle2 className="w-12 h-12" />,
+      color: 'text-blue-400',
+      bgColor: 'from-blue-500/10 to-blue-600/5',
+      borderColor: 'border-blue-500/50',
+      title: 'Running',
+      subtitle: 'Update operation in progress...'
     }
   };
 
-  const config = statusConfig[result.status];
+  const config = statusConfig[result.status as keyof typeof statusConfig];
 
   return (
     <AnimatePresence>

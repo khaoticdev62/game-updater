@@ -50,11 +50,11 @@ class TestDLCDependency(unittest.TestCase):
             "dependencies": {"GP01": ["Base"]},
             "patch": {
                 "files": [
-                    {"name": "base.dll", "pack_id": "Base", "MD5_to": "H1", "type": "full", "url": ".."},
-                    {"name": "ep01.pkg", "pack_id": "EP01", "MD5_to": "H2", "type": "full", "url": ".."},
-                    {"name": "gp01.pkg", "pack_id": "GP01", "MD5_to": "H3", "type": "full", "url": ".."},
-                    {"name": "en.pkg", "category": "Language", "language": "en_US", "MD5_to": "H4", "type": "full", "url": ".."},
-                    {"name": "fr.pkg", "category": "Language", "language": "fr_FR", "MD5_to": "H5", "type": "full", "url": ".."}
+                    {"name": "base.dll", "pack_id": "Base", "MD5_to": "H1", "type": "full", "url": "https://example.com/file.dll"},
+                    {"name": "ep01.pkg", "pack_id": "EP01", "MD5_to": "H2", "type": "full", "url": "https://example.com/file.dll"},
+                    {"name": "gp01.pkg", "pack_id": "GP01", "MD5_to": "H3", "type": "full", "url": "https://example.com/file.dll"},
+                    {"name": "en.pkg", "category": "Language", "language": "en_US", "MD5_to": "H4", "type": "full", "url": "https://example.com/file.dll"},
+                    {"name": "fr.pkg", "category": "Language", "language": "fr_FR", "MD5_to": "H5", "type": "full", "url": "https://example.com/file.dll"}
                 ]
             }
         }

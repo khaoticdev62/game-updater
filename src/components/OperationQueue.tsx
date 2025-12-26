@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle2, AlertCircle, Loader, Trash2, Pause2, Play } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Loader, Trash2, Pause, Play } from 'lucide-react';
 import { QueuedOperation, OperationStatus } from '../hooks/useOperationQueue';
 import { Button } from './Button';
 
@@ -250,7 +250,7 @@ export const OperationQueue: React.FC<OperationQueueProps> = ({
               variant="secondary"
               className="flex-1 py-2 text-xs"
             >
-              <Pause2 className="w-3 h-3 mr-1 inline" />
+              <Pause className="w-3 h-3 mr-1 inline" />
               Pause
             </Button>
           ) : (

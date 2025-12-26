@@ -579,16 +579,17 @@ const App = () => {
 
       // Parse update result
       const endTime = Date.now();
+      const resData = res as any; // Type assertion for response data
       const result: UpdateResult = {
         status: 'completed',
-        operationsProcessed: res?.result?.processed || res?.result?.operationsProcessed || 0,
-        operationsFailed: res?.result?.failed || res?.result?.operationsFailed || 0,
+        operationsProcessed: resData?.result?.processed || resData?.result?.operationsProcessed || 0,
+        operationsFailed: resData?.result?.failed || resData?.result?.operationsFailed || 0,
         startTime,
         endTime,
-        errors: res?.result?.errors || [],
-        summary: res?.result?.summary || 
-                  `Successfully updated ${res?.result?.processed || 0} operation(s). ` +
-                  `Failed: ${res?.result?.failed || 0}`
+        errors: resData?.result?.errors || [],
+        summary: resData?.result?.summary || 
+                  `Successfully updated ${resData?.result?.processed || 0} operation(s). ` +
+                  `Failed: ${resData?.result?.failed || 0}`
       };
 
       // Determine if partial or failed

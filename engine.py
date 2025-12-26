@@ -1,7 +1,22 @@
+"""
+Engine module for file verification, dependency resolution, and manifest parsing.
+
+Provides:
+- VerificationEngine: Calculates file hashes and verifies file integrity
+- DLCGraph: Manages pack dependencies and resolves transitive dependencies
+- ManifestParser: Parses and extracts information from manifest JSON
+- Version: Semantic version parsing and comparison
+"""
+
 import hashlib
 import os
 import json
+import logging
 from concurrent.futures import ThreadPoolExecutor
+from logging_system import get_logger
+
+# Setup logging
+logger = get_logger()
 
 class VerificationEngine:
     def __init__(self, max_workers=None):
@@ -9,12 +24,35 @@ class VerificationEngine:
 
     @staticmethod
     def hash_file(file_path):
-        """Calculates MD5 hash of a file using optimized file_digest."""
+        """
+        Calculates MD5 hash of a file using optimized file_digest.
+
+        Args:
+            file_path: Path to the file to hash
+
+        Returns:
+            str: Uppercase hexadecimal hash string, or None if file cannot be hashed
+
+        Raises:
+            FileNotFoundError: If the file does not exist
+            PermissionError: If the file cannot be read due to permissions
+            IOError: If there's an error reading the file
+        """
         try:
             with open(file_path, 'rb') as f:
                 return hashlib.file_digest(f, "md5").hexdigest().upper()
-        except Exception:
-            return None
+        except FileNotFoundError as e:
+            logger.error(f"File not found when hashing: {file_path}")
+            raise
+        except PermissionError as e:
+            logger.error(f"Permission denied reading file for hash: {file_path}")
+            raise
+        except IOError as e:
+            logger.error(f"IO error while hashing file {file_path}: {e}")
+            raise
+        except Exception as e:
+            logger.exception(f"Unexpected error hashing file {file_path}: {e}")
+            raise
 
     def verify_files(self, file_paths):
         """Verifies multiple files using multi-threading."""
@@ -57,7 +95,36 @@ class DLCGraph:
 
 class ManifestParser:
     def __init__(self, json_data):
-        self.data = json.loads(json_data)
+        """
+        Initialize manifest parser with JSON data.
+
+        Args:
+            json_data: JSON string or dict to parse
+
+        Raises:
+            ValueError: If JSON is invalid or missing required structure
+            TypeError: If json_data is neither string nor dict
+        """
+        try:
+            if isinstance(json_data, str):
+                self.data = json.loads(json_data)
+            elif isinstance(json_data, dict):
+                self.data = json_data
+            else:
+                raise TypeError(f"Expected str or dict, got {type(json_data).__name__}")
+
+            # Validate required fields
+            if not isinstance(self.data, dict):
+                raise ValueError("Manifest must be a JSON object (dict)")
+        except json.JSONDecodeError as e:
+            logger.error(f"Invalid JSON in manifest: {e}")
+            raise ValueError(f"Failed to parse manifest JSON: {e}")
+        except TypeError as e:
+            logger.error(f"Invalid manifest data type: {e}")
+            raise
+        except Exception as e:
+            logger.exception(f"Unexpected error parsing manifest: {e}")
+            raise ValueError(f"Error initializing manifest parser: {e}")
 
     def get_target_version(self):
         return self.data.get("version")

@@ -1,0 +1,231 @@
+================================================================================
+ERROR HANDLING AUDIT: EXECUTIVE SUMMARY
+feature/bugfix_plan_20251221 Branch
+================================================================================
+
+AUDIT CONCLUSION: DO NOT MERGE - CRITICAL DEFICIENCIES IDENTIFIED
+
+================================================================================
+OVERALL FINDINGS
+================================================================================
+
+MERGE RECOMMENDATION: BLOCK
+CURRENT SCORE: 40/100 (F)
+REGRESSION FROM MASTER: -15 points
+
+CRITICAL ISSUES IDENTIFIED: 7
+HIGH PRIORITY ISSUES: 5
+BLOCKING ISSUES: 7
+
+================================================================================
+CRITICAL ISSUES (MUST FIX BEFORE MERGE)
+================================================================================
+
+1. IPC HANDLER MISSING PROMISE REJECTION HANDLER
+   File: src/index.ts (lines 22-42)
+   Impact: Application hangs indefinitely when backend fails
+   User Experience: Unresponsive UI requires force quit
+   Status: CRITICAL - BLOCKING
+
+2. SIDECAR BROAD EXCEPTION CATCHING
+   File: sidecar.py (line 180)
+   Impact: All backend errors result in cryptic messages
+   User Experience: "list index out of range" instead of "manifest not found"
+   Status: CRITICAL - BLOCKING
+
+3. HASH FILE SILENT FAILURE
+   File: engine.py (lines 13-16)
+   Impact: Corrupted files treated as missing, causing 50GB+ re-downloads
+   User Experience: Unnecessary bandwidth/time waste, no error indication
+   Status: CRITICAL - BLOCKING
+
+4. UPDATE OPERATIONS SILENT EMPTY RETURN
+   File: update_logic.py (lines 46-70)
+   Impact: Failed manifest fetch appears to succeed
+   User Experience: Game not updated, user unaware of failure
+   Status: CRITICAL - BLOCKING
+
+5. HEALTH POLL EMPTY CATCH BLOCK
+   File: src/App.tsx (lines 63-88)
+   Impact: Backend issues invisible to user
+   User Experience: "Disconnected" message with no explanation
+   Status: CRITICAL - BLOCKING
+
+6. EVENTBUS SIDECAR SPAWN NOT VALIDATED
+   File: src/eventBus.ts (lines 12-70)
+   Impact: Python not found or sidecar missing causes silent failure
+   User Experience: App starts but completely non-functional
+   Status: CRITICAL - BLOCKING
+
+7. URL RESOLUTION SILENT FALLBACK
+   File: manifest.py (multiple methods)
+   Impact: Download fails with no indication resolution attempt failed
+   User Experience: "Download failed" without context
+   Status: CRITICAL - BLOCKING
+
+================================================================================
+SECONDARY ISSUES (MUST FIX)
+================================================================================
+
+8. NO LOGGING SYSTEM INTEGRATION
+   Impact: Impossible to debug production issues
+   Files: ALL TypeScript/Python files
+   Status: BLOCKING - Prevents Sentry tracking
+
+9. MISSING ERROR IDS
+   Impact: Cannot correlate errors across backend/frontend
+   Impact: Cannot track error frequency in Sentry
+   Status: BLOCKING - Required for production monitoring
+
+10. NO PROMISE REJECTION HANDLERS
+    Impact: Unhandled promise rejections crash renderer
+    Files: Multiple IPC operations in App.tsx
+    Status: HIGH - Can cause hangs/crashes
+
+================================================================================
+PRODUCTION IMPACT ASSESSMENT
+================================================================================
+
+If merged to production, this code will:
+
+1. CAUSE USER-FACING HANGS
+   Scenario: Backend crashes
+   Result: UI becomes unresponsive, user must force quit
+
+2. CAUSE DATA LOSS
+   Scenario: File corruption
+   Result: Unnecessary re-downloads of corrupted files
+
+3. CAUSE SILENT FAILURES
+   Scenario: Manifest fetch timeout
+   Result: Game not updated, user unaware
+
+4. PREVENT DEBUGGING
+   Scenario: User reports "App doesn't work"
+   Result: No logs, no error IDs, impossible to debug
+
+5. POOR USER EXPERIENCE
+   Error messages: "Communication Error: timeout"
+   User question: "What should I do?"
+   Answer: Nowhere in code
+
+================================================================================
+ROOT CAUSE
+================================================================================
+
+The branch introduces many new async/IPC operations but:
+
+- Does NOT integrate logging system
+- Does NOT use specific exception types
+- Does NOT handle promise rejections
+- Does NOT validate inputs/outputs
+- Does NOT implement proper timeouts
+- Does NOT log errors before returning to UI
+- Does NOT provide actionable error messages
+- Does NOT use error IDs for tracking
+
+This is a pattern of catching exceptions without investigating them,
+then returning generic error strings.
+
+================================================================================
+REQUIRED ACTIONS BEFORE MERGE
+================================================================================
+
+PHASE 1 (Must Complete Before Code Review):
+[ ] Add .catch() handler to IPC handler promise
+[ ] Implement error logging system integration
+[ ] Replace broad exception catches with specific types
+[ ] Add error IDs to all error responses
+[ ] Add user-facing error messages
+
+PHASE 2 (Must Complete Before Merge):
+[ ] Validate EventBus sidecar files before spawn
+[ ] Fix update_logic to not return silent empty list
+[ ] Implement timeout on all pending requests
+[ ] Add error logging to URL resolution functions
+[ ] Test failure scenarios (backend crash, timeout, etc.)
+
+PHASE 3 (Nice to Have Before Merge):
+[ ] Add error scenario unit tests
+[ ] Document error handling patterns
+[ ] Code review error handling implementations
+[ ] Update README with troubleshooting section
+
+================================================================================
+FILES REQUIRING CHANGES
+================================================================================
+
+TYPESCRIPT/REACT:
+- src/App.tsx (health poll, IPC error handling, 3+ places)
+- src/index.ts (IPC handler, window creation, 2 places)
+- src/eventBus.ts (sidecar startup, spawn error handling, 1 place)
+
+PYTHON:
+- sidecar.py (exception handling in main loop, 1 place)
+- engine.py (hash_file exception handling, 1 place)
+- update_logic.py (get_operations error propagation, 1 place)
+- manifest.py (URL resolution specific exceptions, 6+ methods)
+- discovery.py (mirror probe error context, 1 place)
+
+TOTAL: 15+ locations requiring error handling fixes
+
+================================================================================
+ESTIMATED FIX EFFORT
+================================================================================
+
+Phase 1 (Critical path): 2 hours
+Phase 2 (High priority): 2 hours
+Phase 3 (Polish):       2 hours
+Code review:            1 hour
+Testing:                2 hours
+---
+TOTAL:                  9 hours
+
+Merge Timeline: After above completion plus code review approval
+
+================================================================================
+TESTING SCENARIOS REQUIRED
+================================================================================
+
+Before merge, test these failure conditions:
+
+1. Backend process fails to start
+2. Backend crashes during operation
+3. Network timeout on manifest fetch
+4. Invalid/malformed manifest JSON
+5. File permission denied error
+6. Disk full during download
+7. IPC message serialization failure
+8. Concurrent request cancellation
+9. Rapid view switching with pending requests
+10. System resource exhaustion
+
+All scenarios should:
+- Display clear error message to user
+- Log detailed error with ID
+- Allow recovery or graceful shutdown
+- NOT hang/freeze UI
+- NOT silently continue
+
+================================================================================
+CONCLUSION
+================================================================================
+
+This branch adds valuable new features (animations, diagnostics console, etc.)
+but introduces significant error handling deficiencies that make it unsuitable
+for production without remediation.
+
+The errors identified are not minor edge cases - they represent common failure
+scenarios that WILL occur in production:
+- Backend crash
+- Network timeout
+- Manifest fetch failure
+- File access issues
+
+The branch MUST be fixed before merging to master.
+
+Grade: F (40/100)
+Merge Status: BLOCKED
+Estimated Fix Time: 9 hours
+
+================================================================================

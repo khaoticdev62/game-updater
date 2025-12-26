@@ -1,10 +1,38 @@
+"""
+Sidecar process for handling Python backend requests via stdin/stdout JSON-RPC.
+
+This module acts as an IPC bridge between the Electron main process and Python
+backend logic. All communication uses JSON-formatted messages over stdin/stdout.
+
+Message Format:
+- Request: {"command": "cmd_name", "id": "request_id", ...args}
+- Response: {"id": "request_id", "result": {...}} or {"id": "request_id", "error": {...}}
+- Progress: {"id": "request_id", "type": "progress", "data": {...}}
+
+All errors are logged and returned with error code, message, and timestamp.
+"""
+
 import sys
 import json
 import os
+import logging
+from logging_system import get_logger
+
+# Setup logging
+logger = get_logger()
 
 def main():
-    # Signal readiness immediately to the UI
-    print(json.dumps({"type": "ready"}), flush=True)
+    """
+    Main event loop for processing JSON-RPC requests from stdin.
+
+    Signals readiness on startup and processes commands with proper error handling.
+    Each request receives a unique ID for tracking and correlation.
+    """
+    try:
+        logger.info("Sidecar process started - signaling readiness")
+        print(json.dumps({"type": "ready"}), flush=True)
+    except Exception as e:
+        logger.error(f"Failed to send ready signal: {e}")
     
     aria2 = None
     
@@ -187,12 +215,65 @@ def main():
                 
             print(json.dumps(response), flush=True)
                 
-        except Exception as e:
+        except json.JSONDecodeError as e:
+            # Invalid JSON from renderer
+            logger.error(f"JSON decode error: {e}")
             error_response = {
-                "id": request.get("id", "unknown"), # Use request ID if available
-                "error": True,
-                "message": str(e),
-                "type": e.__class__.__name__
+                "id": "unknown",
+                "error": {
+                    "code": "JSON_ERROR",
+                    "message": "Invalid JSON request format",
+                    "details": str(e)
+                }
+            }
+            print(json.dumps(error_response), flush=True)
+        except KeyError as e:
+            # Missing required field in request
+            logger.error(f"Missing required field in request: {e}")
+            error_response = {
+                "id": request.get("id", "unknown"),
+                "error": {
+                    "code": "MISSING_FIELD",
+                    "message": f"Request missing required field: {e}",
+                    "field": str(e)
+                }
+            }
+            print(json.dumps(error_response), flush=True)
+        except FileNotFoundError as e:
+            # File or directory not found
+            logger.error(f"File not found: {e}")
+            error_response = {
+                "id": request.get("id", "unknown"),
+                "error": {
+                    "code": "FILE_NOT_FOUND",
+                    "message": "Required file or directory not found",
+                    "path": str(e)
+                }
+            }
+            print(json.dumps(error_response), flush=True)
+        except PermissionError as e:
+            # Permission denied
+            logger.error(f"Permission denied: {e}")
+            error_response = {
+                "id": request.get("id", "unknown"),
+                "error": {
+                    "code": "PERMISSION_DENIED",
+                    "message": "Permission denied accessing file or directory",
+                    "details": str(e)
+                }
+            }
+            print(json.dumps(error_response), flush=True)
+        except Exception as e:
+            # Unexpected error - log with traceback
+            logger.exception(f"Unexpected error processing command '{request.get('command', 'unknown')}': {e}")
+            error_response = {
+                "id": request.get("id", "unknown"),
+                "error": {
+                    "code": "INTERNAL_ERROR",
+                    "message": "Unexpected error in backend",
+                    "type": e.__class__.__name__,
+                    "details": str(e)
+                }
             }
             print(json.dumps(error_response), flush=True)
 
