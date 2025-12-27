@@ -513,6 +513,7 @@ const App = () => {
     const defaultMirrors = [
       { url: 'https://fitgirl-repacks.site', weight: 10 },
       { url: 'https://elamigos.site', weight: 8 },
+      { url: 'https://multiup.io/project/ca950164572c20c9b3b8decedb6e43f1', weight: 6 },
       { url: 'https://cs.rin.ru', weight: 5 }
     ];
     setDiscoveredMirrors(defaultMirrors);
@@ -726,7 +727,7 @@ const App = () => {
               <h2 className="text-2xl font-semibold text-white mb-4">Configuration</h2>
 
               <div className="space-y-4">
-                <div className="flex gap-4">
+                <div className="flex gap-2">
                   <input
                     type="text"
                     value={manifestUrl}
@@ -734,6 +735,13 @@ const App = () => {
                     placeholder="Enter Manifest URL"
                     className="flex-1 px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400"
                   />
+                  <Button
+                    onClick={() => setManifestUrl('https://multiup.io/project/ca950164572c20c9b3b8decedb6e43f1')}
+                    variant="secondary"
+                    title="Set Multiup.io as manifest source"
+                  >
+                    Multiup.io
+                  </Button>
                   <Button
                     onClick={handleDiscoverVersions}
                     variant="primary"

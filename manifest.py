@@ -151,6 +151,8 @@ class URLResolver:
                 resolved = self._resolve_elamigos_link(url)
             elif "rexagames.com" in url:
                 resolved = self._resolve_rexagames_link(url)
+            elif "multiup.io" in url:
+                resolved = self._resolve_multiup_link(url)
             elif "cs.rin.ru" in url:
                 resolved = self._resolve_cs_rin_link(url)
 
@@ -343,6 +345,66 @@ class URLResolver:
             raise
         except Exception as e:
             logger.error(f"Error parsing RexaGames page {url}: {e}")
+            return url
+
+    def _resolve_multiup_link(self, url: str) -> str:
+        """
+        Resolves Multiup aggregator project page to available download mirrors.
+
+        Extracts direct download links from the Multiup project page HTML.
+        Multiup provides multiple mirror options for files, prioritizing faster/more reliable hosts.
+
+        Args:
+            url: Multiup project URL (e.g., https://multiup.io/project/ca950164572c20c9b3b8decedb6e43f1)
+
+        Returns:
+            First available download mirror URL if found, otherwise original URL
+
+        Raises:
+            httpx.RequestError: If unable to fetch the page (caller handles fallback)
+        """
+        try:
+            response = self.client.get(url)
+            response.raise_for_status()
+            soup = BeautifulSoup(response.text, "html.parser")
+
+            # Multiup provides download buttons/links for various mirrors
+            # Look for download links in common patterns: class containing "download", button elements, etc.
+            download_links = []
+
+            # Search for links that look like download buttons or mirror links
+            for link in soup.find_all('a'):
+                link_href = link.get('href', '')
+                link_text = link.get_text(strip=True).lower()
+
+                # Match common patterns: direct download links or mirror names
+                if (link_href and
+                    (link_href.startswith('http') or link_href.startswith('/')) and
+                    any(term in link_text or term in link_href.lower() for term in
+                        ['download', 'mirror', 'uptobox', '1fichier', 'mega', 'mediafire', 'gofile'])):
+                    download_links.append((link_text, link_href))
+
+            if download_links:
+                # Prioritize certain mirrors if available
+                priority_mirrors = ['uptobox', '1fichier', 'mega', 'mediafire', 'gofile']
+                for mirror in priority_mirrors:
+                    for link_text, link_href in download_links:
+                        if mirror in link_text or mirror in link_href.lower():
+                            logger.info(f"Extracted Multiup {mirror} mirror from {url}")
+                            return link_href
+
+                # Fallback to first available link
+                logger.info(f"Extracted Multiup mirror from {url}")
+                return download_links[0][1]
+
+            logger.warning(f"Could not find download mirrors on Multiup page: {url}")
+            return url
+
+        except httpx.RequestError as e:
+            logger.error(f"Failed to fetch Multiup page {url}: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error parsing Multiup page {url}: {e}")
             return url
 
     def _resolve_cs_rin_link(self, url: str) -> str:
