@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Home, Library, Activity } from 'lucide-react';
+import { Home, Library, Activity, Settings } from 'lucide-react';
 
 interface TopShelfProps {
   activeView: string;
@@ -36,6 +36,7 @@ const navItems: NavItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: Home },
   { id: 'library', label: 'Library', icon: Library },
   { id: 'diagnostics', label: 'Diagnostics', icon: Activity },
+  { id: 'advanced', label: 'Advanced', icon: Settings },
 ];
 
 const TopShelfComponent: React.FC<TopShelfProps> = ({ activeView, onViewChange }) => {

@@ -210,6 +210,55 @@ def main():
                 status = manager.get_dlc_status()
                 response = {"id": req_id, "result": status}
 
+            # ============================================================
+            # DLC Unlocker Commands
+            # ============================================================
+
+            elif command == "dlc_unlocker_status":
+                from dlc_unlocker import get_status_summary
+                status = get_status_summary()
+                response = {"id": req_id, "result": status}
+
+            elif command == "dlc_unlocker_detect":
+                from dlc_unlocker import detect_client, is_client_running
+                client_info = detect_client()
+                response = {
+                    "id": req_id,
+                    "result": {
+                        "client_type": client_info.client_type.value if client_info.client_type.value != "unknown" else None,
+                        "client_path": str(client_info.path) if client_info.path else None,
+                        "is_running": is_client_running(client_info.client_type),
+                        "version": client_info.version
+                    }
+                }
+
+            elif command == "dlc_unlocker_install":
+                from dlc_unlocker import install_unlocker
+                success, message = install_unlocker()
+                response = {
+                    "id": req_id,
+                    "result": {
+                        "success": success,
+                        "message": message
+                    }
+                }
+
+            elif command == "dlc_unlocker_uninstall":
+                from dlc_unlocker import uninstall_unlocker
+                success, message = uninstall_unlocker()
+                response = {
+                    "id": req_id,
+                    "result": {
+                        "success": success,
+                        "message": message
+                    }
+                }
+
+            elif command == "dlc_unlocker_config":
+                from dlc_unlocker import get_unlocker_config
+                config = get_unlocker_config()
+                response = {"id": req_id, "result": config}
+
             else:
                 response = {"id": req_id, "error": f"Unknown command: {command}"}
                 

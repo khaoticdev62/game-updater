@@ -20,6 +20,7 @@ import { TopShelf } from './components/TopShelf';
 import { VisionCard } from './components/VisionCard';
 import { Button } from './components/Button';
 import { useLocalStorage, saveAppState, loadAppState, clearAppState } from './hooks/useLocalStorage';
+import AdvancedSettings from './views/AdvancedSettings';
 
 interface ProgressData {
   status: string;
@@ -719,8 +720,11 @@ const App = () => {
           </div>
         </div>
 
-        {/* Dashboard View */}
-        <div className="space-y-8">
+        {/* View Content */}
+        {activeView === 'advanced' ? (
+          <AdvancedSettings />
+        ) : (
+          <div className="space-y-8">
           {/* Configuration Section */}
           <VisionCard variant="elevated" className="border-white/20">
             <div className="mb-6">
@@ -860,6 +864,7 @@ const App = () => {
           {/* Response Output */}
           <ResponseDisplay response={response} isLoading={isProbing} />
         </div>
+        )}
         </motion.div>
       </AnimatePresence>
 

@@ -28,6 +28,39 @@ export interface IElectron {
   onPythonLog: (callback: (data: unknown) => void) => () => void;
   onBackendReady: (callback: () => void) => () => void;
   onBackendDisconnected: (callback: () => void) => () => void;
+  onBackendError?: (callback: () => void) => () => void;
+  splashComplete?: () => void;
+}
+
+export interface ClientInfo {
+  type: 'ea_app' | 'origin' | null;
+  path: string | null;
+  running: boolean;
+  version?: string | null;
+}
+
+export interface UnlockerPaths {
+  path: string;
+  config_exists: boolean;
+  version_dll_exists: boolean;
+  backup_available: boolean;
+}
+
+export interface DLCUnlockerStatus {
+  installed: boolean;
+  client: ClientInfo;
+  unlocker: UnlockerPaths;
+}
+
+export interface UnlockerOperationResult {
+  success: boolean;
+  message: string;
+}
+
+export interface UnlockerConfig {
+  [section: string]: {
+    [key: string]: string;
+  };
 }
 
 declare global {
