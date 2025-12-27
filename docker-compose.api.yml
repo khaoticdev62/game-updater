@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  # Sims 4 Updater REST API
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: sims4-updater-api
+    ports:
+      - "8000:8000"
+    environment:
+      # Server Configuration
+      ENVIRONMENT: production
+      API_HOST: 0.0.0.0
+      API_PORT: 8000
+      API_SECRET_KEY: ${API_SECRET_KEY:-change-me-in-production}
+
+      # Game Configuration
+      GAME_DIRECTORY: ${GAME_DIRECTORY:-C:\Program Files\EA Games\The Sims 4}
+      MANIFEST_URL: ${MANIFEST_URL:-}
+
+      # Logging
+      LOG_LEVEL: INFO
+
+      # Scraper Configuration
+      SCRAPER_ENABLE_GOOGLE: ${SCRAPER_ENABLE_GOOGLE:-false}
+      SCRAPER_ENABLE_BING: ${SCRAPER_ENABLE_BING:-false}
+      SCRAPER_ENABLE_KNOWN_SITES: ${SCRAPER_ENABLE_KNOWN_SITES:-true}
+      SCRAPER_ENABLE_RSS: ${SCRAPER_ENABLE_RSS:-true}
+      SCRAPER_CACHE_TTL_HOURS: 24
+
+      # Optional APIs
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+      GOOGLE_CSE_ID: ${GOOGLE_CSE_ID:-}
+      BING_API_KEY: ${BING_API_KEY:-}
+      VIRUSTOTAL_API_KEY: ${VIRUSTOTAL_API_KEY:-}
+
+    volumes:
+      # Store data persistently
+      - ./data:/app/data
+      # Optional: mount game directory
+      # - ${GAME_DIRECTORY}:/game_data:ro
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+    # Restart policy
+    restart: unless-stopped
+
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1G
+        reservations:
+          cpus: '1'
+          memory: 512M
+
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    # Network configuration
+    networks:
+      - sims4-network
+
+networks:
+  sims4-network:
+    driver: bridge
+
+volumes:
+  data:
+    driver: local
+
+# Quick reference:
+# docker-compose -f docker-compose.api.yml up        # Start services
+# docker-compose -f docker-compose.api.yml down       # Stop services
+# docker-compose -f docker-compose.api.yml logs -f    # View logs
+# docker-compose -f docker-compose.api.yml ps         # Show status
