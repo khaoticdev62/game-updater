@@ -1,4 +1,5 @@
 import os
+import sys
 import subprocess
 import hashlib
 import shutil
@@ -26,9 +27,9 @@ class BuildSystem:
         """Packages the sidecar using PyInstaller."""
         print("BuildSystem: Packaging backend sidecar...")
         dist_path = output_dir or self.dist_dir
-        # Use python -m PyInstaller for better cross-platform compatibility
+        # Use sys.executable to ensure we use the current Python environment
         args = [
-            "python",
+            sys.executable,
             "-m",
             "PyInstaller",
             "--onefile",

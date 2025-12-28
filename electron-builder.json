@@ -12,6 +12,24 @@
     "node_modules/**/*",
     "package.json"
   ],
+  "extraMetadata": {
+    "name": "sims4-updater"
+  },
+  "ignore": [
+    ".pytest_cache",
+    "__pycache__",
+    ".git",
+    ".gitignore",
+    "src",
+    "*.py",
+    "*.md",
+    "tests",
+    ".env*",
+    "*.spec",
+    ".claude",
+    "conductor",
+    "scripts"
+  ],
   "win": {
     "target": [
       {

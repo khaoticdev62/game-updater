@@ -15,7 +15,9 @@ import { execSync } from 'child_process';
 
 const config: ForgeConfig = {
   packagerConfig: {
-    asar: true,
+    asar: {
+      unpack: '**',  // Don't actually package into ASAR
+    },
     name: 'Sims 4 Updater',
     executableName: 'Sims4Updater',
     icon: './assets/branding/logo/exports/icon',
@@ -30,6 +32,16 @@ const config: ForgeConfig = {
       './dist/sidecar.exe',
       './assets/branding/logo/exports/icon.ico',
     ],
+    ignore: (file: string) => {
+      if (!file) return false;
+      const normalized = file.replace(/\\/g, '/').toLowerCase();
+      // Aggressively ignore problematic directories
+      return normalized.includes('.pytest_cache') ||
+             normalized.includes('__pycache__') ||
+             normalized.includes('/.git/') ||
+             normalized.includes('\\.git\\') ||
+             normalized.endsWith('.git');
+    },
   },
   rebuildConfig: {},
   hooks: {
@@ -46,13 +58,34 @@ const config: ForgeConfig = {
       // Using escaped double quotes for the inner strings to work reliably on Windows
       const cmd = 'python -c "from build_system import BuildSystem; from pathlib import Path; bs = BuildSystem(Path(\'.\'));bs.package_backend(Path(\'dist\'))"';
       execSync(cmd, { stdio: 'inherit' });
+
+      // Clean up problematic directories that can cause permission errors
+      console.log('Hooks: Cleaning up problematic directories...');
+      const fs = require('fs');
+      const childProcess = require('child_process');
+      const dirs = ['.pytest_cache', '__pycache__'];
+      for (const dir of dirs) {
+        if (fs.existsSync(dir)) {
+          try {
+            // Try PowerShell rmdir for better handling on Windows
+            if (process.platform === 'win32') {
+              childProcess.execSync(`powershell -Command "Remove-Item '${dir}' -Recurse -Force -ErrorAction SilentlyContinue"`, { stdio: 'ignore' });
+            } else {
+              fs.rmSync(dir, { recursive: true, force: true });
+            }
+            console.log(`Cleaned up ${dir}`);
+          } catch (err) {
+            console.warn(`Could not remove ${dir}: ${err.message}`);
+          }
+        }
+      }
     },
   },
   makers: [
-    new MakerSquirrel({}),
-    new MakerZIP({}, ['darwin']),
-    new MakerRpm({}),
-    new MakerDeb({}),
+    new MakerSquirrel({
+      certificateFile: null,
+      certificatePassword: null,
+    }),
   ],
   plugins: [
     new AutoUnpackNativesPlugin({}),
