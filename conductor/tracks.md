@@ -1,6 +1,10 @@
-This file tracks all major tracks for the project. Each track has its own detailed plan in its respective folder.
+---
+
+## [~] Track: Vision Pro - High-Fidelity UI/UX Reimplementation
+*Link: [./conductor/tracks/vision_pro_ui_20251225/](./conductor/tracks/vision_pro_ui_20251225/)*
 
 ---
 
-## [ ] Track: Live Manifest Integration & Full Workflow Orchestration
-*Link: [./conductor/tracks/live_manifest_20251221/](./conductor/tracks/live_manifest_20251221/)*
+## Archived Tracks
+
+**Note:** Visual Identity & UI Refinement track (ui_ux_refinement_20251225) was archived after full revert of implementation. User indicated dissatisfaction with UX direction. Vision Pro track represents alternative vision aligned with user preferences.

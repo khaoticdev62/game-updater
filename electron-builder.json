@@ -1,0 +1,45 @@
+{
+  "appId": "com.khaotickobedev.sims4updater",
+  "productName": "Sims 4 Updater",
+  "description": "Modern game content updater for The Sims 4 with Vision Pro-inspired UI",
+  "copyright": "Copyright © 2025 KhaoticKodeDev62",
+  "directories": {
+    "output": "dist-installer",
+    "buildResources": "assets/branding"
+  },
+  "files": [
+    "dist/**/*",
+    "node_modules/**/*",
+    "package.json"
+  ],
+  "win": {
+    "target": [
+      {
+        "target": "nsis",
+        "arch": ["x64"]
+      }
+    ],
+    "certificateFile": null,
+    "certificatePassword": null,
+    "signingHashAlgorithms": ["sha256"],
+    "sign": "./scripts/sign-windows.js",
+    "artifactName": "${productName} Setup ${version}.${ext}",
+    "icon": "assets/branding/logo/exports/icon.ico"
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": "always",
+    "createStartMenuShortcut": true,
+    "shortcutName": "Sims 4 Updater",
+    "installerIcon": "assets/branding/logo/exports/icon.ico",
+    "uninstallerIcon": "assets/branding/logo/exports/icon.ico",
+    "installerHeader": "assets/branding/installer/header.png",
+    "installerSidebar": "assets/branding/installer/sidebar.png",
+    "installerHeaderIcon": "assets/branding/logo/exports/icon.ico",
+    "license": "assets/branding/installer/license.rtf",
+    "include": "scripts/installer.nsh",
+    "script": "scripts/installer.nsh"
+  },
+  "publish": null
+}

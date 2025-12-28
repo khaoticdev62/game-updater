@@ -9,12 +9,12 @@
 
 
 
-## Phase 2: End-to-End Workflow & Error Handling
+## Phase 2: End-to-End Workflow & Error Handling [checkpoint: 43c86a5]
 - [x] Task: Integrate `ManifestFetcher` and URL resolver into `UpdateManager`. (c2ad35e)
 - [x] Task: Implement Feature: `Updater` orchestrator in `sidecar.py` that ties together manifest fetching, operation generation, and execution. (e8b23dc)
 - [x] Task: Write Tests: Full update workflow (fetch manifest, generate ops, execute, report status). (ffed825)
 - [x] Task: Implement Feature: Enhanced error reporting from Python to Electron. (f24b9bf)
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: End-to-End Workflow & Error Handling' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: End-to-End Workflow & Error Handling' (Protocol in workflow.md) (43c86a5)
 
 ## Phase 3: UI - Full Integration & User Feedback [checkpoint: a9e1588]
 - [x] Task: Update UI: Connect "Verify All" to live manifest fetching. (37c2dd9)

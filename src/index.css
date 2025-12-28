@@ -1,8 +1,39 @@
+:root {
+  --bg-color: #0f0f0f;
+  --text-color: #e0e0e0;
+  --accent-color: #3498db;
+  --success-color: #2ecc71;
+  --warning-color: #f1c40f;
+  --error-color: #e74c3c;
+  --surface-color: #1a1a1a;
+  --border-color: #333;
+}
+
 body {
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
-    sans-serif;
-  margin: auto;
-  max-width: 38rem;
-  padding: 2rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  cursor: none; /* Hide default cursor */
+}
+
+button {
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: none; /* Hide default cursor */
+}
+
+pre, .console {
+  background-color: #000;
+  border: 1px solid var(--border-color);
+  color: #00ff00;
+}
+
+* {
+  cursor: none !important; /* Force hide default cursor */
 }

@@ -91,9 +91,37 @@ typings/
 # Electron-Forge
 out/
 
+# PostCSS config
+postcss.config.js
+
+# Conductor archive
+/conductor/archive/
+
 # Large build artifacts and executables
 *.exe
 *.zip
 dist/
 dist_final/
 build/
+
+# Verification Artifacts
+verification_env/
+verification_recovery/
+tmp/
+
+# Code Signing Certificates (sensitive files)
+*.pfx
+*.p12
+*.pem
+*.key
+
+# Local environment variables (credentials)
+.env.local
+.env.*.local
+
+# Installer output
+dist-installer/
+
+# Claude Code artifacts
+.claude/
+.serena/
