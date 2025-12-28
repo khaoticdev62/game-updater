@@ -742,7 +742,6 @@ const App = () => {
                   <Button
                     onClick={() => setManifestUrl('https://multiup.io/project/ca950164572c20c9b3b8decedb6e43f1')}
                     variant="secondary"
-                    title="Set Multiup.io as manifest source"
                   >
                     Multiup.io
                   </Button>

@@ -120,7 +120,7 @@ const AdvancedSettingsComponent: React.FC<AdvancedSettingsProps> = ({
           <div className="pt-4 border-t border-white/10 text-white/60 text-xs">
             <p>For additional support, visit our documentation or community forums.</p>
           </div>
-        </VisionCard>
+        </div>
       </VisionCard>
     </motion.div>
   );

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { VisionCard } from './VisionCard';
 import { Button } from './Button';
-import { ErrorToast } from './ErrorToast';
 import { DLCUnlockerStatus, UnlockerOperationResult } from '../types';
 
 interface DLCUnlockerSettingsProps {
@@ -302,8 +301,12 @@ const DLCUnlockerSettingsComponent: React.FC<DLCUnlockerSettingsProps> = ({
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
+          className="p-4 rounded-lg bg-red-600/20 border border-red-600/50 text-red-300 text-sm"
         >
-          <ErrorToast message={error} onClose={() => setError(null)} />
+          <div className="flex items-center gap-2">
+            <span className="text-lg">⚠️</span>
+            <span>{error}</span>
+          </div>
         </motion.div>
       )}
 

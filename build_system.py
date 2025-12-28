@@ -26,8 +26,11 @@ class BuildSystem:
         """Packages the sidecar using PyInstaller."""
         print("BuildSystem: Packaging backend sidecar...")
         dist_path = output_dir or self.dist_dir
+        # Use python -m PyInstaller for better cross-platform compatibility
         args = [
-            "pyinstaller",
+            "python",
+            "-m",
+            "PyInstaller",
             "--onefile",
             "--name", "sidecar",
             "--distpath", str(dist_path),
