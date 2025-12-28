@@ -16,16 +16,35 @@ import { execSync } from 'child_process';
 const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
+    name: 'Sims 4 Updater',
+    executableName: 'Sims4Updater',
+    icon: './assets/branding/logo/exports/icon',
+    appBundleId: 'com.khaotickobedev.sims4updater',
+    win32metadata: {
+      CompanyName: 'KhaoticKodeDev62',
+      FileDescription: 'Sims 4 Updater - Game Content Manager',
+      ProductName: 'Sims 4 Updater',
+      OriginalFilename: 'Sims4Updater.exe',
+    },
     extraResource: [
       './dist/sidecar.exe',
+      './assets/branding/logo/exports/icon.ico',
     ],
   },
   rebuildConfig: {},
   hooks: {
     generateAssets: async () => {
+      console.log('Hooks: Generating branding assets...');
+      // Generate PNG icons from SVG
+      execSync('node scripts/generate-icons.js', { stdio: 'inherit' });
+      // Generate .ico file
+      execSync('node scripts/generate-ico.js', { stdio: 'inherit' });
+      // Generate NSIS installer assets
+      execSync('node scripts/generate-installer-assets.js', { stdio: 'inherit' });
+
       console.log('Hooks: Building Python sidecar...');
       // Using escaped double quotes for the inner strings to work reliably on Windows
-      const cmd = 'python -c "from build_system import BuildSystem; from pathlib import Path; bs = BuildSystem(Path(\'.\')); bs.package_backend(Path(\'dist\'))"';
+      const cmd = 'python -c "from build_system import BuildSystem; from pathlib import Path; bs = BuildSystem(Path(\'.\'));bs.package_backend(Path(\'dist\'))"';
       execSync(cmd, { stdio: 'inherit' });
     },
   },
@@ -46,6 +65,14 @@ const config: ForgeConfig = {
             html: './src/index.html',
             js: './src/renderer.tsx',
             name: 'main_window',
+            preload: {
+              js: './src/preload.ts',
+            },
+          },
+          {
+            html: './src/splash.html',
+            js: './src/splash-renderer.tsx',
+            name: 'splash_window',
             preload: {
               js: './src/preload.ts',
             },

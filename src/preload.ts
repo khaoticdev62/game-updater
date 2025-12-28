@@ -49,4 +49,8 @@ contextBridge.exposeInMainWorld('electron', {
             };
           },
 
+          splashComplete: () => {
+            ipcRenderer.send('splash-complete');
+          },
+
         });

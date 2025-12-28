@@ -9,4 +9,4 @@ aiofiles==23.2.1
 sqlalchemy==2.0.23
 alembic==1.12.1
 httpx==0.25.0
-aiosqlite==3.14.0
+aiosqlite==0.22.1

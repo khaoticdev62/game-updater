@@ -42,7 +42,25 @@
       "Bash(__NEW_LINE__ head -15 sidecar.py)",
       "Bash(__NEW_LINE__ echo \"=== Checking update_logic.py ===\")",
       "Bash(__NEW_LINE__ head -15 update_logic.py)",
-      "Bash(__NEW_LINE__ grep -n \"from logging_system\\\\|logger = \" engine.py manifest.py sidecar.py update_logic.py)"
+      "Bash(__NEW_LINE__ grep -n \"from logging_system\\\\|logger = \" engine.py manifest.py sidecar.py update_logic.py)",
+      "Bash(__NEW_LINE__ git commit -m \"$\\(cat <<''EOF''\ntest\\(integration\\): Run comprehensive integration tests - all passing\n\nBackend Tests \\(69 tests, 100% pass\\):\n- Fixed logger initialization in engine.py, manifest.py, sidecar.py, update_logic.py\n- Updated to use get_logger\\(\\) function instead of class method\n- Fixed test_parse_malformed_json to expect ValueError not JSONDecodeError\n- Fixed DLC dependency test to use valid URLs instead of \"..\"\n- Fixed URL resolver network error handling to gracefully fallback\n\nFrontend Tests \\(290 tests, 100% pass\\):\n- Fixed TypeScript type safety in App.tsx response handling\n- Added missing ''running'' status config in UpdateCompletionStatus\n- Fixed OperationQueue to use Pause icon instead of Pause2\n- Updated Dashboard test to use proper assertions\n\nIntegration Results:\n- Total test suites: 41 \\(28 backend + 13 frontend\\)\n- Total tests: 359\n- Pass rate: 100%\n- Execution time: ~15 seconds\n\nGenerated INTEGRATION_TEST_REPORT.md with comprehensive test coverage documentation.\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(node scripts/generate-icons.js:*)",
+      "Bash(node scripts/generate-ico.js:*)",
+      "Bash(node -e:*)",
+      "Bash(npm uninstall:*)",
+      "mcp__plugin_serena_serena__get_current_config",
+      "Bash(node scripts/generate-installer-assets.js:*)",
+      "Bash(python -m py_compile:*)",
+      "Bash(npm start)",
+      "Bash(timeout 15 powershell:*)",
+      "Bash(pip install:*)",
+      "Bash(python -m pip install:*)",
+      "Bash(python:*)",
+      "Bash(curl:*)",
+      "Bash(git push:*)",
+      "Bash(netstat:*)",
+      "Bash(taskkill:*)",
+      "Bash(powershell:*)"
     ]
   }
 }

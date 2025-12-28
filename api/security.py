@@ -11,7 +11,8 @@ from typing import Optional, Dict, Any
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthenticationCredentials
+from fastapi.security import HTTPBearer
+from starlette.authentication import AuthenticationError
 import logging
 
 logger = logging.getLogger(__name__)
@@ -144,7 +145,7 @@ def verify_token(token: str) -> Dict[str, Any]:
         raise
 
 
-def get_token_from_header(credentials: HTTPAuthenticationCredentials) -> str:
+def get_token_from_header(credentials: Any) -> str:
     """
     Extract token from HTTP Bearer authentication header.
 
@@ -162,7 +163,7 @@ def get_token_from_header(credentials: HTTPAuthenticationCredentials) -> str:
 # ============================================================================
 
 async def get_current_user(
-    credentials: HTTPAuthenticationCredentials = Depends(security)
+    credentials: Any = Depends(security)
 ) -> Dict[str, Any]:
     """
     Get current authenticated user from JWT token.
@@ -200,7 +201,7 @@ async def get_current_user(
 
 
 async def get_optional_user(
-    credentials: Optional[HTTPAuthenticationCredentials] = Depends(security)
+    credentials: Optional[Any] = Depends(security)
 ) -> Optional[Dict[str, Any]]:
     """
     Get current user if authenticated, None otherwise.
