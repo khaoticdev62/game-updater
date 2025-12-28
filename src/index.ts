@@ -71,7 +71,6 @@ const createSplashWindow = (): void => {
       nodeIntegration: false,
       contextIsolation: true,
       sandbox: true,
-      enableRemoteModule: false,
     },
   });
 
@@ -93,7 +92,6 @@ const createMainWindow = (): void => {
       nodeIntegration: false,
       contextIsolation: true,
       sandbox: true,
-      enableRemoteModule: false,
     },
   });
 
