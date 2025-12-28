@@ -16,7 +16,7 @@ import { execSync } from 'child_process';
 const config: ForgeConfig = {
   packagerConfig: {
     asar: {
-      unpack: '**',  // Don't actually package into ASAR
+      unpackDir: ['dist'],
     },
     name: 'Sims 4 Updater',
     executableName: 'Sims4Updater',
@@ -36,16 +36,38 @@ const config: ForgeConfig = {
       if (!file) return false;
       const normalized = file.replace(/\\/g, '/').toLowerCase();
       // Aggressively ignore problematic directories
-      return normalized.includes('.pytest_cache') ||
-             normalized.includes('__pycache__') ||
-             normalized.includes('/.git/') ||
-             normalized.includes('\\.git\\') ||
-             normalized.endsWith('.git');
+      if (normalized.includes('.pytest_cache')) return true;
+      if (normalized.includes('__pycache__')) return true;
+      if (normalized.includes('/.git/')) return true;
+      if (normalized.includes('\\.git\\')) return true;
+      if (normalized.endsWith('.git')) return true;
+      if (normalized.includes('.pytest')) return true;
+      if (normalized.includes('node_modules/.bin')) return true;
+      return false;
     },
   },
   rebuildConfig: {},
   hooks: {
     generateAssets: async () => {
+      const fs = require('fs');
+      const childProcess = require('child_process');
+
+      // Pre-build step: Handle .pytest_cache permissions
+      console.log('Hooks: Handling .pytest_cache permissions...');
+      try {
+        if (fs.existsSync('.pytest_cache')) {
+          // Try to change attributes to make it hidden/system
+          try {
+            childProcess.execSync('attrib +h +s .pytest_cache', { stdio: 'ignore' });
+            console.log('Applied hidden attributes to .pytest_cache');
+          } catch (e) {
+            // Ignore if attrib fails
+          }
+        }
+      } catch (e) {
+        // Ignore errors
+      }
+
       console.log('Hooks: Generating branding assets...');
       // Generate PNG icons from SVG
       execSync('node scripts/generate-icons.js', { stdio: 'inherit' });
@@ -61,9 +83,7 @@ const config: ForgeConfig = {
 
       // Clean up problematic directories that can cause permission errors
       console.log('Hooks: Cleaning up problematic directories...');
-      const fs = require('fs');
-      const childProcess = require('child_process');
-      const dirs = ['.pytest_cache', '__pycache__'];
+      const dirs = ['__pycache__'];
       for (const dir of dirs) {
         if (fs.existsSync(dir)) {
           try {

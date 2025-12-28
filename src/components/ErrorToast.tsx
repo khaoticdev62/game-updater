@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { AlertCircle, X, AlertTriangle, AlertOctagon } from 'lucide-react';
 
 export interface ErrorMessage {
@@ -104,46 +103,29 @@ export const ErrorToast: React.FC<ErrorToastProps> = ({ errors, onDismiss }) => 
   };
 
   return (
-    <AnimatePresence mode="popLayout">
-      <div className="fixed top-6 right-6 w-96 max-w-[calc(100vw-3rem)] z-[60] space-y-3 pointer-events-none">
-        {errors.map((error) => {
-          const severity = getErrorSeverity(error.code);
-          const styles = getSeverityStyles(severity);
+    <div className="fixed top-6 right-6 w-96 max-w-[calc(100vw-3rem)] z-[60] space-y-3 pointer-events-none">
+      {errors.map((error) => {
+        const severity = getErrorSeverity(error.code);
+        const styles = getSeverityStyles(severity);
 
-          return (
-            <motion.div
-              key={error.id}
-              layout
-              initial={{ opacity: 0, y: -20, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -20, scale: 0.95 }}
-              transition={{
-                type: 'spring',
-                damping: 20,
-                stiffness: 300,
-                mass: 1
-              }}
-              className="pointer-events-auto"
+        return (
+          <div
+            key={error.id}
+            className="pointer-events-auto"
+          >
+            <div
+              className={`relative glass-medium rounded-lg border ${styles.border} bg-gradient-to-br ${styles.bg} p-4 shadow-xl overflow-hidden`}
             >
-              <motion.div
-                className={`relative glass-medium rounded-lg border ${styles.border} bg-gradient-to-br ${styles.bg} p-4 shadow-xl overflow-hidden`}
-                layout
-              >
-                {/* Background blur effect */}
-                <motion.div
-                  className="absolute inset-0 -z-10 opacity-30 filter blur-xl"
-                  animate={{ scale: [1, 1.05, 1] }}
-                  transition={{ duration: 3, repeat: Infinity }}
-                />
+              {/* Background blur effect */}
+              <div
+                className="absolute inset-0 -z-10 opacity-30 filter blur-xl"
+              />
 
-                {/* Header with icon and title */}
-                <div className="flex items-start gap-3 mb-2">
-                  <motion.div
-                    animate={{ scale: [1, 1.1, 1] }}
-                    transition={{ duration: 1.5, repeat: Infinity }}
-                  >
-                    {styles.icon}
-                  </motion.div>
+              {/* Header with icon and title */}
+              <div className="flex items-start gap-3 mb-2">
+                <div>
+                  {styles.icon}
+                </div>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
@@ -166,47 +148,27 @@ export const ErrorToast: React.FC<ErrorToastProps> = ({ errors, onDismiss }) => 
 
                 {/* Details section - expandable */}
                 {error.details && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="mt-2 p-2 bg-white/5 rounded border border-white/10"
-                  >
+                  <div className="mt-2 p-2 bg-white/5 rounded border border-white/10">
                     <p className="text-white/60 text-xs font-mono break-all line-clamp-3">
                       {error.details}
                     </p>
-                  </motion.div>
+                  </div>
                 )}
 
                 {/* Auto-dismiss progress bar */}
                 {error.autoDismissIn && (
-                  <motion.div
-                    className={`absolute bottom-0 left-0 right-0 h-1 ${styles.progressBg}`}
-                  >
-                    <motion.div
-                      className={`h-full ${styles.progressFill}`}
-                      initial={{ width: '0%' }}
-                      animate={{ width: '100%' }}
-                      transition={{
-                        duration: (error.autoDismissIn / 1000),
-                        ease: 'linear'
-                      }}
-                      onAnimationComplete={() => onDismiss(error.id)}
-                    />
-                  </motion.div>
+                  <div className={`absolute bottom-0 left-0 right-0 h-1 ${styles.progressBg}`} />
                 )}
 
                 {/* Timestamp */}
                 <p className="text-white/40 text-xs mt-2 text-right">
                   {new Date(error.timestamp).toLocaleTimeString()}
                 </p>
-              </motion.div>
-            </motion.div>
+              </div>
+            </div>
           );
         })}
       </div>
-    </AnimatePresence>
   );
 };
 

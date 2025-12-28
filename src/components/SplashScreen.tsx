@@ -1,10 +1,9 @@
-import { motion, AnimatePresence } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
 
 /**
  * SplashScreen Component
  *
- * Animated loading screen displayed on application startup.
+ * Loading screen displayed on application startup.
  * Shows the Sims 4 Updater logo with glassmorphism design and backend connection status.
  *
  * Props:
@@ -14,11 +13,10 @@ import React, { useEffect, useState } from 'react';
  *   - progress: Optional loading progress (0-100) for future extensibility
  *
  * Features:
- *   - Animated crystal logo with pulse and glow effects
+ *   - Crystal logo display
  *   - Real-time backend connection status display
- *   - Smooth glassmorphism background with mesh gradient
- *   - Loading bar with smooth animation
- *   - Elegant fade-out transition
+ *   - Glassmorphism background design
+ *   - Loading bar
  */
 
 interface SplashScreenProps {
@@ -106,90 +104,51 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
     }
   };
 
+  if (!isVisible) {
+    return null;
+  }
+
   return (
-    <AnimatePresence>
-      {isVisible && (
-        <motion.div
-          initial={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.6, ease: 'easeInOut' }}
-          className="fixed inset-0 z-[9999] overflow-hidden"
-        >
-          {/* Background: Glassmorphic mesh gradient */}
-          <motion.div
-            className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950"
-            animate={{
-              opacity: backendStatus === 'error' ? 0.95 : 0.98,
-            }}
-            transition={{ duration: 0.3 }}
-          />
+    <div className="fixed inset-0 z-[9999] overflow-hidden">
+      {/* Background: Glassmorphic mesh gradient */}
+      <div
+        className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950"
+        style={{
+          opacity: backendStatus === 'error' ? 0.95 : 0.98,
+        }}
+      />
 
-          {/* Animated mesh gradient overlay */}
-          <motion.div
-            className="absolute inset-0 opacity-30"
-            style={{
-              background: `conic-gradient(
-                from 180deg at 50% 0%,
-                #0ea5e9 0deg,
-                #06b6d4 90deg,
-                #0891b2 180deg,
-                #06b6d4 270deg,
-                #0ea5e9 360deg
-              )`,
-            }}
-            animate={{
-              opacity: backendStatus === 'error' ? 0.1 : 0.2,
-            }}
-            transition={{ duration: 0.5 }}
-          />
+      {/* Mesh gradient overlay */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: `conic-gradient(
+            from 180deg at 50% 0%,
+            #0ea5e9 0deg,
+            #06b6d4 90deg,
+            #0891b2 180deg,
+            #06b6d4 270deg,
+            #0ea5e9 360deg
+          )`,
+          opacity: backendStatus === 'error' ? 0.1 : 0.2,
+        }}
+      />
 
-          {/* Glass effect overlay */}
-          <div className="absolute inset-0 backdrop-blur-3xl opacity-20" />
+      {/* Glass effect overlay */}
+      <div className="absolute inset-0 backdrop-blur-3xl opacity-20" />
 
-          {/* Content container */}
-          <div className="relative h-screen w-screen flex flex-col items-center justify-center">
-            {/* Logo container with glow effect */}
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{
-                duration: 0.8,
-                ease: 'easeOut',
-                delay: 0.2,
-              }}
-              className="relative mb-12"
-            >
-              {/* Outer glow halo */}
-              <motion.div
-                className="absolute inset-0 -m-8 rounded-full bg-gradient-to-r from-cyan-400/20 via-blue-400/10 to-cyan-500/20 blur-3xl"
-                animate={{
-                  scale: [1, 1.1, 1],
-                  opacity: [0.5, 0.8, 0.5],
-                }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  ease: 'easeInOut',
-                }}
-              />
+      {/* Content container */}
+      <div className="relative h-screen w-screen flex flex-col items-center justify-center">
+        {/* Logo container with glow effect */}
+        <div className="relative mb-12">
+          {/* Outer glow halo */}
+          <div className="absolute inset-0 -m-8 rounded-full bg-gradient-to-r from-cyan-400/20 via-blue-400/10 to-cyan-500/20 blur-3xl" />
 
-              {/* Crystal logo */}
-              <motion.svg
-                viewBox="0 0 512 512"
-                className="w-32 h-32 drop-shadow-2xl relative z-10"
-                animate={{
-                  filter: [
-                    'drop-shadow(0 0 20px rgba(6, 182, 212, 0.3))',
-                    'drop-shadow(0 0 40px rgba(6, 182, 212, 0.6))',
-                    'drop-shadow(0 0 20px rgba(6, 182, 212, 0.3))',
-                  ],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: 'easeInOut',
-                }}
-              >
+          {/* Crystal logo */}
+          <svg
+            viewBox="0 0 512 512"
+            className="w-32 h-32 drop-shadow-2xl relative z-10"
+          >
                 <defs>
                   {/* Crystal gradients */}
                   <linearGradient id="crystal-core" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -313,62 +272,21 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
                   fill="#ffffff"
                   opacity="0.15"
                 />
-              </motion.svg>
+          </svg>
+        </div>
 
-              {/* Subtle rotation animation for depth */}
-              <motion.div
-                className="absolute inset-0"
-                animate={{
-                  rotateY: [0, 360],
-                }}
-                transition={{
-                  duration: 20,
-                  repeat: Infinity,
-                  ease: 'linear',
-                }}
-                style={{ perspective: 1000 }}
-              />
-            </motion.div>
+        {/* Application title */}
+        <h1 className="text-4xl font-bold text-white mb-2 tracking-wider">
+          SIMS 4 UPDATER
+        </h1>
 
-            {/* Application title */}
-            <motion.h1
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                duration: 0.6,
-                ease: 'easeOut',
-                delay: 0.4,
-              }}
-              className="text-4xl font-bold text-white mb-2 tracking-wider"
-            >
-              SIMS 4 UPDATER
-            </motion.h1>
+        {/* Subtitle */}
+        <p className="text-cyan-400 text-sm font-light tracking-widest mb-8">
+          Game Content Manager
+        </p>
 
-            {/* Subtitle */}
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{
-                duration: 0.6,
-                ease: 'easeOut',
-                delay: 0.5,
-              }}
-              className="text-cyan-400 text-sm font-light tracking-widest mb-8"
-            >
-              Game Content Manager
-            </motion.p>
-
-            {/* Status section */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                duration: 0.6,
-                ease: 'easeOut',
-                delay: 0.6,
-              }}
-              className="flex flex-col items-center gap-4 mb-12"
-            >
+        {/* Status section */}
+        <div className="flex flex-col items-center gap-4 mb-12">
               {/* Status indicator dot and text */}
               <div className="flex items-center gap-3">
                 <div className={`w-3 h-3 rounded-full ${getStatusDot()}`} />
@@ -377,99 +295,47 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
                 </p>
               </div>
 
-              {/* Progress bar */}
-              <div className="relative w-64 h-1 rounded-full bg-glass-light backdrop-blur-md overflow-hidden">
-                <motion.div
-                  className="absolute inset-y-0 left-0 bg-gradient-to-r from-cyan-400 via-blue-400 to-cyan-500 rounded-full"
-                  animate={{
-                    width: `${displayProgress}%`,
-                  }}
-                  transition={{
-                    duration: 0.3,
-                    ease: 'easeOut',
-                  }}
-                />
-              </div>
-
-              {/* Progress percentage */}
-              <p className="text-xs text-slate-400 mt-2">
-                {Math.round(displayProgress)}%
-              </p>
-            </motion.div>
-
-            {/* Loading animation dots (only shown during connecting) */}
-            {backendStatus === 'connecting' && (
-              <motion.div
-                className="flex gap-2"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.8 }}
-              >
-                {[0, 1, 2].map((index) => (
-                  <motion.div
-                    key={index}
-                    className="w-2 h-2 rounded-full bg-cyan-400"
-                    animate={{
-                      scale: [1, 1.2, 1],
-                      opacity: [0.5, 1, 0.5],
-                    }}
-                    transition={{
-                      duration: 1.2,
-                      repeat: Infinity,
-                      delay: index * 0.2,
-                    }}
-                  />
-                ))}
-              </motion.div>
-            )}
-
-            {/* Error message (only shown on error) */}
-            <AnimatePresence>
-              {backendStatus === 'error' && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="mt-4 px-6 py-3 rounded-lg bg-red-500/10 border border-red-500/30"
-                >
-                  <p className="text-red-400 text-sm font-medium">
-                    Failed to connect to backend. Please check your network connection.
-                  </p>
-                </motion.div>
-              )}
-            </AnimatePresence>
+          {/* Progress bar */}
+          <div className="relative w-64 h-1 rounded-full bg-glass-light backdrop-blur-md overflow-hidden">
+            <div
+              className="absolute inset-y-0 left-0 bg-gradient-to-r from-cyan-400 via-blue-400 to-cyan-500 rounded-full transition-all duration-300"
+              style={{ width: `${displayProgress}%` }}
+            />
           </div>
 
-          {/* Decorative corner accents */}
-          <motion.div
-            className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-br from-cyan-400/10 to-transparent rounded-full blur-3xl"
-            animate={{
-              x: [0, 20, 0],
-              y: [0, -20, 0],
-            }}
-            transition={{
-              duration: 6,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-          />
+          {/* Progress percentage */}
+          <p className="text-xs text-slate-400 mt-2">
+            {Math.round(displayProgress)}%
+          </p>
+        </div>
 
-          <motion.div
-            className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-blue-400/10 to-transparent rounded-full blur-3xl"
-            animate={{
-              x: [0, -20, 0],
-              y: [0, 20, 0],
-            }}
-            transition={{
-              duration: 8,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-          />
-        </motion.div>
-      )}
-    </AnimatePresence>
+        {/* Loading indicator (only shown during connecting) */}
+        {backendStatus === 'connecting' && (
+          <div className="flex gap-2">
+            {[0, 1, 2].map((index) => (
+              <div
+                key={index}
+                className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"
+                style={{ animationDelay: `${index * 0.2}s` }}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Error message (only shown on error) */}
+        {backendStatus === 'error' && (
+          <div className="mt-4 px-6 py-3 rounded-lg bg-red-500/10 border border-red-500/30">
+            <p className="text-red-400 text-sm font-medium">
+              Failed to connect to backend. Please check your network connection.
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Decorative corner accents */}
+      <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-br from-cyan-400/10 to-transparent rounded-full blur-3xl" />
+      <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-blue-400/10 to-transparent rounded-full blur-3xl" />
+    </div>
   );
 };
 

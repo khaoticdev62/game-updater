@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 
 interface ButtonProps {
   children: React.ReactNode;
@@ -14,8 +13,7 @@ interface ButtonProps {
 /**
  * Button Component
  *
- * High-polish button component with multiple visual variants and states.
- * Features smooth animations, haptic feedback, and full accessibility support.
+ * Button component with multiple visual variants and states.
  *
  * Props:
  *   - children: Button content
@@ -30,8 +28,6 @@ interface ButtonProps {
  *   - Multiple color variants
  *   - Loading state with spinner
  *   - Disabled state styling
- *   - Haptic feedback animation (scale on click)
- *   - Smooth transitions
  *   - Full keyboard accessibility
  *   - Focus visible ring
  */
@@ -62,19 +58,8 @@ const ButtonComponent: React.FC<ButtonProps> = ({
 
   const isDisabled = disabled || loading;
 
-  // Memoize animation configurations
-  const tapAnimation = React.useMemo(
-    () => (!isDisabled ? { scale: 0.95 } : {}),
-    [isDisabled]
-  );
-
-  const hoverAnimation = React.useMemo(
-    () => (!isDisabled ? { scale: 1.02 } : {}),
-    [isDisabled]
-  );
-
   return (
-    <motion.button
+    <button
       type={type}
       onClick={onClick}
       disabled={isDisabled}
@@ -86,16 +71,13 @@ const ButtonComponent: React.FC<ButtonProps> = ({
         rounded-button
         font-semibold
         transition-all
-        duration-micro
-        transform-gpu
+        duration-200
         focus-visible:ring-2
         focus-visible:ring-blue-400
         disabled:opacity-50
         disabled:cursor-not-allowed
         ${className}
       `}
-      whileTap={tapAnimation}
-      whileHover={hoverAnimation}
     >
       {loading ? (
         <div className="flex items-center gap-2">
@@ -105,7 +87,7 @@ const ButtonComponent: React.FC<ButtonProps> = ({
       ) : (
         children
       )}
-    </motion.button>
+    </button>
   );
 };
 
