@@ -409,3 +409,198 @@ class URLResolver:
 
     def _resolve_cs_rin_link(self, url: str) -> str:
         return url
+
+
+class MirrorOptimizer:
+    """
+    Automatically tests and ranks mirrors for speed and reliability.
+    Selects the best performing mirror and can update manifests to use it.
+    """
+    def __init__(self, timeout: float = 5.0, max_workers: int = 5):
+        """
+        Initialize mirror optimizer.
+
+        Args:
+            timeout: Timeout for each mirror test in seconds
+            max_workers: Max concurrent mirror tests
+        """
+        self.timeout = timeout
+        self.max_workers = max_workers
+        self.client = httpx.Client(timeout=timeout, follow_redirects=False)
+
+    def test_mirror(self, url: str) -> dict:
+        """
+        Test a single mirror for availability and speed.
+
+        Args:
+            url: Mirror URL to test
+
+        Returns:
+            Dictionary with:
+            - url: The tested URL
+            - available: Boolean indicating if mirror is reachable
+            - response_time: Response time in milliseconds (or -1 if failed)
+            - status_code: HTTP status code (or -1 if failed)
+            - rank_score: Score for ranking (higher is better)
+        """
+        import time
+        result = {
+            'url': url,
+            'available': False,
+            'response_time': -1,
+            'status_code': -1,
+            'rank_score': 0
+        }
+
+        try:
+            start = time.time()
+            response = self.client.head(url, follow_redirects=True)
+            elapsed_ms = (time.time() - start) * 1000
+
+            result['response_time'] = elapsed_ms
+            result['status_code'] = response.status_code
+
+            # Consider 2xx and 3xx as available
+            if 200 <= response.status_code < 400:
+                result['available'] = True
+                # Score: lower response time = higher score (inverse)
+                # Range: 1000 (very fast) to 0 (very slow)
+                result['rank_score'] = max(0, 1000 - int(elapsed_ms))
+            else:
+                result['rank_score'] = -response.status_code
+
+            logger.debug(f"Mirror test: {url} - Status {response.status_code}, Time {elapsed_ms:.0f}ms")
+        except httpx.TimeoutException:
+            result['rank_score'] = -1
+            logger.debug(f"Mirror timeout: {url}")
+        except httpx.RequestError as e:
+            result['rank_score'] = -2
+            logger.debug(f"Mirror error: {url} - {e}")
+        except Exception as e:
+            result['rank_score'] = -3
+            logger.debug(f"Unexpected error testing mirror {url}: {e}")
+
+        return result
+
+    def rank_mirrors(self, urls: List[str]) -> List[dict]:
+        """
+        Test and rank multiple mirrors.
+
+        Args:
+            urls: List of mirror URLs to test
+
+        Returns:
+            List of results sorted by rank_score (best first)
+        """
+        import concurrent.futures
+
+        results = []
+        with concurrent.futures.ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+            futures = {executor.submit(self.test_mirror, url): url for url in urls}
+            for future in concurrent.futures.as_completed(futures):
+                try:
+                    result = future.result()
+                    results.append(result)
+                except Exception as e:
+                    logger.error(f"Error testing mirror: {e}")
+
+        # Sort by rank_score (descending)
+        sorted_results = sorted(results, key=lambda x: x['rank_score'], reverse=True)
+
+        logger.info(f"Ranked {len(urls)} mirrors:")
+        for i, result in enumerate(sorted_results[:5], 1):
+            status = "✓" if result['available'] else "✗"
+            print(f"  {i}. {status} {result['url']} ({result['response_time']:.0f}ms, score: {result['rank_score']})")
+
+        return sorted_results
+
+    def get_best_mirror(self, urls: List[str]) -> Optional[str]:
+        """
+        Find the best performing available mirror.
+
+        Args:
+            urls: List of mirror URLs to test
+
+        Returns:
+            Best available mirror URL, or None if all mirrors unavailable
+        """
+        results = self.rank_mirrors(urls)
+        for result in results:
+            if result['available']:
+                logger.info(f"Selected best mirror: {result['url']}")
+                return result['url']
+
+        logger.warning("No available mirrors found")
+        return None
+
+    def update_manifest_with_best_link(self, manifest_dict: dict, mirror_keys: List[str]) -> dict:
+        """
+        Automatically update manifest dictionary to use best available mirror.
+
+        Args:
+            manifest_dict: Manifest JSON as dictionary
+            mirror_keys: List of keys in manifest containing mirror URLs
+                        e.g., ['primary_link', 'secondary_link', 'mirrors.0', 'mirrors.1']
+
+        Returns:
+            Updated manifest dictionary with best link moved to primary position
+        """
+        urls_to_test = []
+        key_map = {}  # Map URL to its key path
+
+        # Collect all URLs from specified keys
+        for key in mirror_keys:
+            try:
+                value = self._get_nested_value(manifest_dict, key)
+                if value and isinstance(value, str) and value.startswith(('http://', 'https://')):
+                    urls_to_test.append(value)
+                    key_map[value] = key
+            except KeyError:
+                pass
+
+        if not urls_to_test:
+            logger.warning(f"No valid URLs found in manifest keys: {mirror_keys}")
+            return manifest_dict
+
+        # Find best mirror
+        best_url = self.get_best_mirror(urls_to_test)
+        if not best_url:
+            logger.warning("Could not determine best mirror, returning original manifest")
+            return manifest_dict
+
+        # Move best URL to primary position (first key)
+        if mirror_keys:
+            primary_key = mirror_keys[0]
+            logger.info(f"Updating manifest: setting {primary_key} to best mirror {best_url}")
+            self._set_nested_value(manifest_dict, primary_key, best_url)
+
+        return manifest_dict
+
+    def _get_nested_value(self, obj: dict, key_path: str):
+        """Get value from nested dictionary using dot notation or bracket notation."""
+        keys = key_path.replace('[', '.').replace(']', '').split('.')
+        value = obj
+        for key in keys:
+            if key.isdigit():
+                value = value[int(key)]
+            else:
+                value = value[key]
+        return value
+
+    def _set_nested_value(self, obj: dict, key_path: str, value):
+        """Set value in nested dictionary using dot notation or bracket notation."""
+        keys = key_path.replace('[', '.').replace(']', '').split('.')
+        current = obj
+        for key in keys[:-1]:
+            if key.isdigit():
+                current = current[int(key)]
+            else:
+                if key not in current:
+                    current[key] = {}
+                current = current[key]
+
+        last_key = keys[-1]
+        if last_key.isdigit():
+            current[int(last_key)] = value
+        else:
+            current[last_key] = value
