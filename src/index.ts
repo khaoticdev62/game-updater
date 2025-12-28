@@ -9,6 +9,8 @@ import { HybridEventBus } from './eventBus';
 // whether you're running in development or production).
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
+declare const SPLASH_WINDOW_WEBPACK_ENTRY: string;
+declare const SPLASH_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 
 const eventBus = new HybridEventBus();
 
@@ -16,6 +18,12 @@ const eventBus = new HybridEventBus();
 if (squirrelStartup) {
   app.quit();
 }
+
+// Handle splash screen completion
+ipcMain.on('splash-complete', () => {
+  console.log('[Main] Splash complete message received');
+  showMainWindowAndCloseSplash();
+});
 
 ipcMain.handle('python-request', async (event: IpcMainInvokeEvent, request: PythonRequest) => {
   const id = Math.random().toString(36).substring(7);
@@ -47,21 +55,72 @@ ipcMain.handle('python-request', async (event: IpcMainInvokeEvent, request: Pyth
   });
 });
 
-const createWindow = (): void => {
-  // Create the browser window.
-  const mainWindow = new BrowserWindow({
-    height: 600,
-    width: 800,
+let splashWindow: BrowserWindow | null = null;
+let mainWindow: BrowserWindow | null = null;
+let backendIsReady = false;
+
+const createSplashWindow = (): void => {
+  splashWindow = new BrowserWindow({
+    width: 1280,
+    height: 900,
+    show: true,
+    frame: false,
+    transparent: true,
     webPreferences: {
-      preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
+      preload: SPLASH_WINDOW_PRELOAD_WEBPACK_ENTRY,
+      nodeIntegration: false,
+      contextIsolation: true,
+      sandbox: true,
+      enableRemoteModule: false,
     },
   });
 
-  // and load the index.html of the app.
+  splashWindow.loadURL(SPLASH_WINDOW_WEBPACK_ENTRY);
+
+  // Handle splash window closed
+  splashWindow.on('closed', () => {
+    splashWindow = null;
+  });
+};
+
+const createMainWindow = (): void => {
+  mainWindow = new BrowserWindow({
+    height: 600,
+    width: 800,
+    show: false, // Don't show until splash closes
+    webPreferences: {
+      preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
+      nodeIntegration: false,
+      contextIsolation: true,
+      sandbox: true,
+      enableRemoteModule: false,
+    },
+  });
+
+  // Load the index.html of the app
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
-  // Open the DevTools.
+  // Open the DevTools
   mainWindow.webContents.openDevTools();
+
+  // Handle main window closed
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+  });
+};
+
+const showMainWindowAndCloseSplash = (): void => {
+  if (mainWindow) {
+    mainWindow.show();
+  }
+  if (splashWindow) {
+    splashWindow.close();
+  }
+};
+
+const createWindow = (): void => {
+  createSplashWindow();
+  createMainWindow();
 };
 
 // This method will be called when Electron has finished
@@ -78,9 +137,20 @@ app.on('ready', () => {
   });
 
   eventBus.on('backend-ready', () => {
+    backendIsReady = true;
+    
+    // Send backend-ready to all windows
     BrowserWindow.getAllWindows().forEach(win => {
       win.webContents.send('backend-ready');
     });
+
+    // If splash is still open, close it and show main window
+    if (splashWindow && !splashWindow.isDestroyed()) {
+      showMainWindowAndCloseSplash();
+    } else if (mainWindow && !mainWindow.isVisible()) {
+      // If splash already closed but main window not visible, show it
+      mainWindow.show();
+    }
   });
 
   eventBus.on('backend-disconnected', () => {
